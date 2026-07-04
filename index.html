@@ -85,6 +85,15 @@ label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:6
 .b-late{background:#FDE7EA;color:#E5484D}
 .b-todo{background:#E7F6EC;color:#1A7F37}
 .spin{width:36px;height:36px;border:4px solid #F7D6E3;border-top-color:#ED6885;border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite}
+.ldr{min-height:86vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.ldr img{width:112px;animation:bnc .5s ease-in-out infinite alternate}
+@keyframes bnc{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-18px) rotate(4deg)}}
+.ldrsh{width:64px;height:10px;border-radius:50%;background:rgba(232,119,155,.18);margin-top:-12px;animation:shd .5s ease-in-out infinite alternate}
+@keyframes shd{from{transform:scaleX(1);opacity:.9}to{transform:scaleX(.55);opacity:.4}}
+.ldrbar{width:200px;height:10px;background:#F7D6E3;border-radius:99px;overflow:hidden}
+.ldrbar i{display:block;height:100%;width:45%;background:linear-gradient(90deg,#F4A9C0,#ED6885);border-radius:99px;animation:runb 1.1s ease-in-out infinite}
+@keyframes runb{0%{margin-left:-45%}100%{margin-left:100%}}
+.ldrtx{font-size:13.5px;color:#B0889A}
 @keyframes sp{to{transform:rotate(360deg)}}
 /* ---------- 🔋 ห้องพักใจ (โลกอีกใบ: มืด สงบ — จงใจต่างจากธีมหลัก) ---------- */
 #healroom{position:fixed;inset:0;z-index:50;background:#0b1020;display:none;color:#eef2ff}
@@ -135,7 +144,7 @@ label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:6
 @keyframes hrup{to{transform:translate(var(--dx,0px),-540px) rotate(var(--r,0deg));opacity:0}}
 @keyframes hrsink{to{transform:translateY(130px);opacity:0;filter:blur(10px)}}
 </style></head><body>
-<div id="app"><div class="err"><div class="spin"></div>เลขากำลังเตรียมข้อมูลของคุณ...</div></div>
+<div id="app"><div class="ldr"><img src="img/p11-running.png" alt=""><div class="ldrsh"></div><div class="ldrbar"><i></i></div><div class="ldrtx">เลขากำลังวิ่งไปเตรียมข้อมูลของบอส...</div></div></div>
 <div id="healroom"><div id="hrscene"></div><div class="hwrap">
 <div><div class="hbrow"><span style="font-size:20px">🔋</span><div class="hbatt"><div id="hrfill"></div></div><span id="hrpct">8%</span></div><div id="hrblbl">พลังใจ</div></div>
 <div id="hrstage"></div>
