@@ -201,6 +201,7 @@ async function boot(){
     if(tokenExpired(IDT)){relogin();return}
     try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
       if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
+      if(tb==="story")tb="home"; // ปุ่มเรื่องราวของบอส (rich menu) -> เข้าหน้าหลักแดชบอร์ดรวม (บอสยืนยัน 2026-07-04); แท็บ 📖 ในแอปยังเปิดหน้าเรื่องราวได้
       if(tb&&["home","todo","money","story","heal","me","start"].indexOf(tb)>=0){TAB=tb}}catch(e){}
     DATA=await api("me.get");
     try{localStorage.removeItem("yb_rl_t")}catch(e){}
