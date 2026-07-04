@@ -204,7 +204,12 @@ async function boot(){
       if(tb&&["home","todo","money","story","heal","me","start"].indexOf(tb)>=0){TAB=tb}}catch(e){}
     DATA=await api("me.get");
     try{localStorage.removeItem("yb_rl_t")}catch(e){}
-    if(TAB==="start")wzRestore(); // โดนเด้ง login กลางทาง -> กลับมาต่อขั้นเดิม
+    if(TAB==="start"){
+      // 🔒 ลงทะเบียนแล้ว = ไม่ต้องเจอ wizard อีก (กันลูกค้าเก่า/ลิงก์ค้าง เด้งไปหน้าหลักเลย)
+      var prq=DATA&&DATA.profile;
+      if(prq&&prq.display_name&&prq.pdpa_accepted_at){TAB="home"}
+      else{wzRestore()} // โดนเด้ง login กลางทาง -> กลับมาต่อขั้นเดิม
+    }
     draw();
   }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
 }
@@ -580,12 +585,14 @@ function vStory(){
   var s=DATA.story||{facts:[],files:[],folders:[]};
   var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
   var h='<h1>📖 เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
+  /* ลิสต์เรื่องราวทั้งหมดที่เลขาเก็บให้: ความจำ / ไฟล์ / ปฏิทินนัด — กดกระโดดไปดูได้เลย */
   h+='<div class="grid">';
-  h+=card(num(facts.length),"🧠 ความจำ (เรื่อง)");
-  h+=card(num(files.length),"📁 ไฟล์ในคลัง");
+  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_mem\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(facts.length)+'</div><div class="l">🧠 ความจำ (เรื่อง)</div></div>';
+  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_files\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(files.length)+'</div><div class="l">📁 ไฟล์ในคลัง</div></div>';
+  h+='<div class="c" style="cursor:pointer;grid-column:1 / -1" onclick="go(\'home\')"><div class="v">'+num((DATA.reminders||[]).length)+'</div><div class="l">📅 นัด/เตือนที่รออยู่ — กดดูปฏิทินเต็มเดือน</div></div>';
   h+='</div>';
   /* ---- ความจำ: ดูอย่างเดียว + แจ้งแก้ไข (ไม่ให้พิมพ์แก้ตรง) ---- */
-  h+='<h2>🧠 ความจำของบอส</h2>';
+  h+='<h2 id="st_mem">🧠 ความจำของบอส</h2>';
   h+='<div class="l" style="margin:0 2px 11px">เลขาจำเองจากที่บอสคุยในแชต · ถ้าจำผิดกด ✏️ แจ้งแก้ไขได้เลย</div>';
   if(!facts.length){h+='<div class="empty">ยังไม่มีความจำ — เล่าเรื่องงาน/ลูกค้าให้เลขาฟังในแชต เดี๋ยวจำให้เอง เช่น "ลูกค้าสมชายชอบต่อราคา"</div>'}
   else{
@@ -600,7 +607,7 @@ function vStory(){
     }
   }
   /* ---- คลังไฟล์: จัดเป็นโฟลเดอร์ (มีทั้งไฟล์และภาพ) ---- */
-  h+='<h2>📁 คลังไฟล์</h2>';
+  h+='<h2 id="st_files">📁 คลังไฟล์</h2>';
   if(!files.length){h+='<div class="empty">ยังไม่มีไฟล์ — ส่งรูป/สลิป/เอกสารเข้าแชต เดี๋ยวเก็บเข้าคลังให้</div>'}
   else{
     var byF={};for(var k=0;k<files.length;k++){var fid=files[k].folder_id||"_none";(byF[fid]=byF[fid]||[]).push(files[k])}
