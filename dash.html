@@ -1,0 +1,76 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://eeascfxgfmzlqvirjdua.supabase.co">
+<meta name="robots" content="noindex, nofollow"><title>YES BOSS — Dashboard</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;background:#0d1117;color:#e6edf3;font-family:-apple-system,'Sukhumvit Set','Noto Sans Thai',sans-serif;padding:16px 14px 40px}
+h1{font-size:20px;margin:0 0 2px}
+.ts{color:#8b949e;font-size:12px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.c{background:#161b22;border:1px solid #21262d;border-radius:14px;padding:14px 12px}
+.v{font-size:26px;font-weight:700}
+.l{font-size:12px;color:#8b949e;margin-top:2px}
+.s{font-size:11px;color:#3fb950;margin-top:2px}
+h2{font-size:14px;color:#8b949e;margin:18px 0 8px;font-weight:600}
+.row{background:#161b22;border:1px solid #21262d;border-radius:14px;padding:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px}
+table{width:100%;border-collapse:collapse;background:#161b22;border:1px solid #21262d;border-radius:14px;overflow:hidden;font-size:13px}
+td,th{padding:8px 10px;text-align:left;border-top:1px solid #21262d}
+th{color:#8b949e;font-weight:600;border-top:none}
+td:nth-child(2),td:nth-child(3),th:nth-child(2),th:nth-child(3){text-align:right}
+.foot{color:#484f58;font-size:11px;margin-top:16px;text-align:center}
+.err{text-align:center;color:#f85149;padding:80px 20px}
+</style></head><body>
+<div id="app"><div class="err" style="color:#8b949e">กำลังโหลด...</div></div>
+<script>
+var KEY=(location.hash||"").slice(1);
+function n(x){return Number(x||0).toLocaleString("th-TH")}
+function baht(usd){return "฿"+(Number(usd||0)*36).toLocaleString("th-TH",{maximumFractionDigits:0})}
+function esc(x){return String(x==null?"":x).replace(/[<>&"]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]})}
+function ok(b){return b?"✅":"🔴"}
+function card(label,value,sub){return '<div class="c"><div class="v">'+value+'</div><div class="l">'+label+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')+'</div>'}
+function render(s){
+  var h='<h1>📊 YES BOSS</h1><div class="ts">อัปเดต '+esc(s.ts)+' น. · รีเฟรชเองทุก 5 นาที</div>';
+  if(s.campaign){var c=s.campaign;
+    h+='<h2>📣 แคมเปญค่ากำลังใจ (วันนี้)</h2><div class="grid">'
+      +card("แตะเริ่มคุย",n(c.engaged),"จาก broadcast ~1,015")+card("ถึงจอแพ็ก",n(c.reached_pkg))
+      +card("💰 จ่ายแล้ว",n(c.paid),"รายได้ ฿"+n(c.revenue))+card("🏢 Business lead",n(c.biz_lead))
+      +'</div><div class="grid">'
+      +card("⏳ รอจ่าย",n(c.pending_pay))+card("🤔 ขอคิดดูก่อน",n(c.think),"ไว้ก่อน "+n(c.later))
+      +card("⭐ รีวิววันนี้",n(c.reviews),"❤️ love "+n(c.love))+card("✍️ ไอเดีย/ติชม",n(c.ideas))+'</div>';}
+  h+='<h2>ภาพรวม</h2><div class="grid">'
+    +card("ผู้ใช้ทั้งหมด",n(s.users_total),"+"+n(s.new_7d)+" ใน 7 วัน")
+    +card("Active 7 วัน",n(s.active_7d),"30 วัน: "+n(s.active_30d))
+    +card("จ่ายเงิน",n(s.paying),"consent "+n(s.users_consented)+" คน")
+    +card("ค่า AI วันนี้",baht(s.cost_today_usd),"7 วัน: "+baht(s.cost_7d_usd))+'</div>'
+    +'<h2>การใช้งาน 7 วัน</h2><div class="grid">'
+    +card("ข้อความ",n(s.msgs_7d))
+    +card("เตือนส่งแล้ว",n(s.reminders_sent_7d),"ค้างคิว "+n(s.reminders_pending)+" · fail "+n(s.reminders_failed_7d))
+    +card("งานใหม่",n(s.tasks_7d))+card("รายการเงิน",n(s.expenses_7d))
+    +card("🧠 ความจำ (facts)",n(s.facts_active),n(s.facts_users)+" คนใช้")
+    +card("📎 ไฟล์ในคลัง",n(s.docs_total))+'</div>'
+    +'<h2>สุขภาพระบบ</h2>'
+    +'<div class="row"><span>OpenAI</span><span>'+ok(s.openai_status==="ok")+' '+esc(s.openai_status)+'</span></div>'
+    +'<div class="row"><span>ระบบเตือน (cron 10 นาทีล่าสุด)</span><span>'+ok(Number(s.cron_ok_10m)>=8)+' '+n(s.cron_ok_10m)+'/10</span></div>'
+    +'<h2>สวิตช์ธุรกิจ</h2>'
+    +'<div class="row"><span>Paywall</span><span>'+(s.paywall?"🟢 เปิด":"⚪ ปิด (โหมดฟรี)")+'</span></div>'
+    +'<div class="row"><span>โควต้าฟรี/วัน</span><span>'+(Number(s.free_limit)>=999999?"⚪ ไม่จำกัด":"🟢 "+n(s.free_limit)+"/วัน")+'</span></div>'
+    +'<div class="row"><span>โหมดกลุ่ม LINE</span><span>'+(s.group_enabled?"🟢 เปิด":"⚪ ปิด")+'</span></div>';
+  var rows="";(Array.isArray(s.cost_by_intent)?s.cost_by_intent:[]).forEach(function(r){
+    rows+='<tr><td>'+esc(r.intent)+'</td><td>'+n(r.calls)+'</td><td>$'+Number(r.usd||0).toFixed(3)+'</td></tr>'});
+  h+='<h2>ต้นทุน AI ราย intent (7 วัน)</h2><table><tr><th>intent</th><th>ครั้ง</th><th>USD</th></tr>'
+    +(rows||"<tr><td colspan=3>—</td></tr>")+'</table>'
+    +'<div class="foot">YES BOSS internal · ห้ามแชร์ลิงก์นี้</div>';
+  document.getElementById("app").innerHTML=h;
+}
+async function load(){
+  if(!KEY){document.getElementById("app").innerHTML='<div class="err">ต้องเปิดจากลิงก์ที่มี key เท่านั้น</div>';return}
+  try{
+    var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?dash="+encodeURIComponent(KEY)+"&json=1");
+    if(!r.ok)throw new Error(r.status===404?"key ไม่ถูกต้อง":"โหลดไม่ได้ ("+r.status+")");
+    render(await r.json());
+  }catch(e){document.getElementById("app").innerHTML='<div class="err">😅 '+esc(e.message||"ผิดพลาด")+'</div>'}
+}
+load();setInterval(load,300000);
+</script>
+</body></html>
