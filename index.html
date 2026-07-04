@@ -446,20 +446,22 @@ function vHome(){
   h+=stat("#EAF3FF","📁","#3B82F6",files.length,"ไฟล์","story");
   h+='</div>';
   if(lastMood&&lastMood.is_safety){h+=safetyCard()}
-  h+='<div class="card"><div class="ct">💰 การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">';
-  h+='<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>';
-  h+='<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>';
-  h+='<div style="border-top:1px solid #F5E3EB;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>';
-  h+='</div></div></div>';
-  var sel=SELISO||today;
-  h+='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">📅 นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
-  h+='<div class="card"><div class="ct">✅ งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
-  if(!openT.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  /* ลำดับตามบอสสั่ง 2026-07-04: งานที่ต้องทำ -> ปฏิทิน -> รายรับรายจ่าย */
+  var taskCard='<div class="card"><div class="ct">✅ งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
+  if(!openT.length){taskCard+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
   var lim=Math.min(openT.length,6);
   for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
-    h+='<div class="task"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
-  if(openT.length>lim){h+='<div class="gh" style="text-align:center;color:#C77;cursor:pointer;margin:8px 0 2px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</div>'}
-  h+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
+    taskCard+='<div class="task"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
+  if(openT.length>lim){taskCard+='<div class="gh" style="text-align:center;color:#C77;cursor:pointer;margin:8px 0 2px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</div>'}
+  taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
+  var sel=SELISO||today;
+  var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">📅 นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
+  var moneyCard='<div class="card"><div class="ct">💰 การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
+    +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
+    +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
+    +'<div style="border-top:1px solid #F5E3EB;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>'
+    +'</div></div></div>';
+  h+=taskCard+calCard+moneyCard;
   var me=lastMood?(MOOD_TH[lastMood.mood]||["🙂"])[0]:"🤍";
   h+='<div class="stats" style="margin:4px 0 0">';
   h+='<div class="st" onclick="fortune()" style="cursor:pointer"><div class="ico" style="background:#F3EAFF">🔮</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></div>';
