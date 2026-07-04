@@ -486,27 +486,84 @@ function delTask(id){act("task.delete",{id:id},"ลบแล้ว")}
 async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}await act("task.add",{text:v},"เพิ่มงานแล้ว")}
 
 /* ---------- เงิน ---------- */
+/* ---------- 💰 แท็บเงิน v2: เลือกเดือนย้อนหลัง + แยกกระเป๋า + หมวดหมู่ + Pro teaser ---------- */
+var MOFF=0,MSC="all",MCACHE={};
+var SCOPE_TABS=[["all","ทั้งหมด"],["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]];
+function mKey(){return MOFF+"|"+MSC}
+function mMonthStr(){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+MOFF);var y=d.getFullYear(),m=d.getMonth()+1;return y+"-"+(m<10?"0":"")+m}
+function mIsPro(){var pl=(DATA&&DATA.profile&&DATA.profile.plan)||"";return !!pl&&pl!=="free"}
+function mGo(off){MOFF=off;draw();window.scrollTo(0,0)}
+function mScope(s){MSC=s;draw()}
+async function mLoad(){
+  var k=mKey();
+  try{var r=await api("money.report",{month:mMonthStr(),scope:MSC==="all"?null:MSC});MCACHE[k]=r.rows||[]}
+  catch(e){MCACHE[k]=[];toast(e.message||"โหลดไม่สำเร็จ")}
+  if(TAB==="money")draw();
+}
+function mProCard(t,s){
+  return '<div class="wzcard" style="border:1.5px dashed #F4A9C0;background:linear-gradient(135deg,#FFF6FA,#FDE7EF);text-align:center;padding:22px 16px">'
+    +'<div style="font-size:30px">🔒</div><div style="font-weight:800;font-size:16px;color:#C4547E;margin:4px 0">'+t+'</div>'
+    +'<div style="font-size:13px;color:#6E6E73">'+s+'</div>'
+    +'<button class="btn" style="margin-top:12px" onclick="mProAsk()">สนใจ Pro — บอกเลขาเลย ✨</button></div>';
+}
+function mProAsk(){
+  try{
+    if(liff.isInClient&&liff.isInClient()){liff.sendMessages([{type:"text",text:"สนใจ YES BOSS Pro"}]).then(function(){try{liff.closeWindow()}catch(e){}}).catch(function(){toast("พิมพ์ \"สนใจ Pro\" ในแชตได้เลยนะ")})}
+    else toast("พิมพ์ \"สนใจ Pro\" ในแชตได้เลยนะ");
+  }catch(e){toast("พิมพ์ \"สนใจ Pro\" ในแชตได้เลยนะ")}
+}
 function vMoney(){
-  var m=DATA.money.month,d=DATA.money.day;
   var h='<h1>เงิน รับ–จ่าย</h1>';
-  h+='<h2>เดือนนี้</h2><div class="grid">';
-  h+=card('<span style="color:#3fb950">'+num(m.income)+'</span>',"💰 รายรับ (บาท)");
-  h+=card('<span style="color:#f85149">'+num(m.expense)+'</span>',"💸 รายจ่าย (บาท)");
-  h+=card(num(m.net)+" ฿","🧮 คงเหลือ");
-  h+=card("VAT "+num(m.vat)+" · WHT "+num(m.wht),"🧾 ภาษี (บาท)");
-  h+='</div>';
-  h+='<h2>วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · เหลือ '+num(d.net)+'</h2>';
-  h+='<h2>รายการล่าสุด</h2>';
-  var rec=DATA.money.recent;
-  if(!rec.length){h+='<div class="empty">ยังไม่มีรายการ — ส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
-  for(var i=0;i<rec.length;i++){var e=rec[i];var inc=e.kind==="income";
-    h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+esc(e.category||e.note||(inc?"รายรับ":"รายจ่าย"))+'</div><div class="m">'+fdate(e.created_at)+'</div></div>'+
-      '<div style="font-weight:700;color:'+(inc?"#3fb950":"#f85149")+'">'+(inc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">🗑️</button></div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 8px">'
+    +'<button class="ic" onclick="mGo('+(MOFF-1)+')">◀️</button><b style="font-size:16px">'+thMonth(MOFF)+'</b>'
+    +'<button class="ic" '+(MOFF>=0?'style="visibility:hidden">':'onclick="mGo('+(MOFF+1)+')">')+'▶️</button></div>';
+  // 🔒 free ดูย้อนหลังได้ 1 เดือน — เก่ากว่านั้นคือ business-depth (Pro)
+  if(MOFF<-1&&!mIsPro()){
+    return h+mProCard("ดูย้อนหลังได้ทุกเดือน","ประวัติการเงินครบทุกเดือน + สรุปรายปี + ส่งออกไฟล์ทำบัญชี — อยู่ในแพ็ก Pro")
+      +'<div class="foot">เดือนนี้กับเดือนที่แล้วดูฟรีได้เสมอ 💕</div>';
   }
-  h+='<div class="foot">แก้ยอดผิด: ลบรายการนี้แล้วพิมพ์ใหม่ในแชตได้เลย</div>';
+  h+='<div class="seg" style="margin-bottom:10px">';
+  for(var s=0;s<SCOPE_TABS.length;s++){h+='<button class="'+(MSC===SCOPE_TABS[s][0]?"on":"")+'" onclick="mScope(\''+SCOPE_TABS[s][0]+'\')">'+SCOPE_TABS[s][1]+'</button>'}
+  h+='</div>';
+  var k=mKey(),rows=MCACHE[k];
+  if(rows===undefined){MCACHE[k]="L";mLoad()}
+  if(rows===undefined||rows==="L"){return h+'<div class="ldr" style="min-height:38vh"><img src="img/p11-running.png" alt=""><div class="ldrbar"><i></i></div><div class="ldrtx">กำลังรวมยอดให้บอส...</div></div>'}
+  var inc=0,exp=0,vat=0,wht=0,cats={},scp={personal:0,family:0,company:0};
+  for(var i=0;i<rows.length;i++){var r=rows[i],a=Number(r.amount||0);
+    if(r.kind==="income")inc+=a;else{exp+=a;var c=r.category||r.note||"อื่นๆ";cats[c]=(cats[c]||0)+a}
+    if(r.scope&&scp[r.scope]!==undefined)scp[r.scope]+=a;
+    vat+=Number(r.vat||0);wht+=Number(r.wht||0)}
+  h+='<div class="grid">';
+  h+=card('<span style="color:#3fb950">'+num(inc)+'</span>',"💰 รายรับ (บาท)");
+  h+=card('<span style="color:#f85149">'+num(exp)+'</span>',"💸 รายจ่าย (บาท)");
+  h+=card(num(inc-exp)+" ฿","🧮 คงเหลือ");
+  h+=card("VAT "+num(vat)+" · WHT "+num(wht),"🧾 ภาษี (บาท)");
+  h+='</div>';
+  if(MOFF===0&&MSC==="all"){var d=DATA.money.day;h+='<div class="gh">วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · เหลือ '+num(d.net)+'</div>'}
+  if(rows.length&&inc+exp>0){h+='<div style="display:flex;justify-content:center;margin:6px 0">'+donutSvg(inc,exp)+'</div>'}
+  if(MSC==="all"&&(scp.personal||scp.family||scp.company)){
+    h+='<div class="gh">👛 ตามกระเป๋า: '+(scp.personal?"👤 "+num(scp.personal)+"  ":"")+(scp.family?"🏠 "+num(scp.family)+"  ":"")+(scp.company?"🏢 "+num(scp.company):"")+'</div>';
+  }
+  var ck=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]});
+  if(ck.length){
+    h+='<h2>จ่ายไปกับอะไรบ้าง</h2>';
+    var top=ck.slice(0,6),mx=cats[ck[0]]||1;
+    for(var t=0;t<top.length;t++){var nm2=top[t],v=cats[nm2],pc=Math.max(6,Math.round(v/mx*100));
+      h+='<div style="margin:7px 2px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(nm2)+'</span><b>'+num(v)+'</b></div>'
+        +'<div class="bar" style="height:9px;background:#F7D6E3;margin-top:3px"><span style="width:'+pc+'%;background:linear-gradient(90deg,#F4A9C0,#ED6885);border-radius:6px"></span></div></div>';
+    }
+  }
+  h+='<h2>รายการ ('+rows.length+')</h2>';
+  if(!rows.length){h+='<div class="empty">เดือนนี้ยังไม่มีรายการ'+(MSC!=="all"?"ในกระเป๋านี้":"")+' — ส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
+  for(var j=0;j<rows.length;j++){var e=rows[j];var isInc=e.kind==="income";
+    h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+esc(e.category||e.note||(isInc?"รายรับ":"รายจ่าย"))+'</div><div class="m">'+fdate(e.created_at)+'</div></div>'+
+      '<div style="font-weight:700;color:'+(isInc?"#3fb950":"#f85149")+'">'+(isInc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">🗑️</button></div>';
+  }
+  if(!mIsPro()){h+=mProCard("รีพอตธุรกิจแบบเต็ม","ย้อนหลังไม่จำกัด · สรุปรายปี · ส่งออกไฟล์ให้บัญชี · แยก VAT รายใบ")}
+  h+='<div class="foot">แก้ยอดผิด: ลบรายการนั้นแล้วพิมพ์ใหม่ในแชตได้เลย</div>';
   return h;
 }
-function delMoney(id){if(confirm("ลบรายการเงินนี้?"))act("money.delete",{id:id},"ลบแล้ว")}
+function delMoney(id){if(confirm("ลบรายการเงินนี้?")){MCACHE={};act("money.delete",{id:id},"ลบแล้ว")}}
 
 /* ---------- 📖 เรื่องราวของบอส (ความจำ + ไฟล์) ---------- */
 var FACT_TH={customer:["👥","ลูกค้า"],business:["🏢","ธุรกิจ"],preference:["❤️","ความชอบ"],profile:["🙂","เกี่ยวกับคุณ"],other:["📌","อื่นๆ"]};
