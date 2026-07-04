@@ -695,6 +695,8 @@ function vMe(){
   h+='</div>';
   h+='<label class="f">วันเกิด (สำหรับดูดวง)</label><input id="pf_birth" type="date" value="'+esc(pr.birth_date||"")+'">';
   h+='<label class="f">เบอร์โทร</label><input id="pf_phone" type="tel" inputmode="numeric" value="'+esc(pr.phone||"")+'" placeholder="0812345678">';
+  h+='<label class="f">☀️ เวลาส่งสรุปตอนเช้า</label>'+hourSel("pf_bh",pr.brief_hour==null?8:Number(pr.brief_hour));
+  h+='<label class="f">🌙 เวลาส่งสรุปตอนเย็น</label>'+hourSel("pf_rh",pr.report_hour==null?20:Number(pr.report_hour));
   h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
@@ -707,9 +709,11 @@ function vMe(){
   return h;
 }
 var PCHAR=null;
+function hourSel(id,cur){var h='<select id="'+id+'">';for(var i=0;i<24;i++){h+='<option value="'+i+'"'+(i===cur?" selected":"")+'>'+(i<10?"0":"")+i+':00 น.</option>'}return h+'</select>'}
 function pickChar(el,c){PCHAR=c;var bs=document.querySelectorAll("#pf_char button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
 async function saveProfile(){
-  var pl={display_name:$("#pf_name").value,birth_date:$("#pf_birth").value||"",phone:$("#pf_phone").value};
+  var pl={display_name:$("#pf_name").value,birth_date:$("#pf_birth").value||"",phone:$("#pf_phone").value,
+    brief_hour:Number($("#pf_bh").value),report_hour:Number($("#pf_rh").value)};
   if(PCHAR)pl.character=PCHAR;
   await act("profile.update",pl,"บันทึกแล้ว 🙌");
 }
