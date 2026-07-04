@@ -295,6 +295,7 @@ function wzSecretary(){
     +'<input id="wz_sn" maxlength="30" placeholder="เช่น บอสซี่ / มะลิ / พี่เลขา" value="'+esc(SNAME)+'" onchange="SNAME=this.value.trim()">'
     +'</div></div>'
     +wzNav("WZ=0;draw()","SNAME=$(\'#wz_sn\').value.trim();WZ=2;draw()","ไปต่อ ›",false);
+  return h;
 }
 function wzForm(){
   var pr=(DATA&&DATA.profile)||{};
