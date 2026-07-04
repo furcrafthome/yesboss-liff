@@ -1,0 +1,866 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net; style-src 'unsafe-inline'; img-src 'self' data: https://*.line-scdn.net; connect-src 'self' https://api.line.me https://access.line.me https://*.line.me">
+<meta name="robots" content="noindex, nofollow"><title>My YES BOSS</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#FFF6FA,#FFEDF4);background-attachment:fixed;color:#4A2E3B;font-family:-apple-system,'Sukhumvit Set','Noto Sans Thai',sans-serif;padding:16px 14px calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+h1{font-size:23px;margin:0;font-weight:800;color:#E0466E;letter-spacing:-.3px}
+.sub{color:#B98BA0;font-size:12.5px;margin-top:3px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+.c{background:#fff;border:1px solid #F7D6E3;border-radius:16px;padding:15px 14px;box-shadow:0 4px 14px rgba(237,104,133,.08)}
+.v{font-size:26px;font-weight:800;line-height:1.12;color:#ED6885}
+.l{font-size:11.5px;color:#A98194;margin-top:4px;font-weight:600}
+h2{font-size:16px;color:#4A2E3B;margin:24px 2px 11px;font-weight:800;display:flex;align-items:center;gap:9px}
+h2:before{content:"";width:5px;height:19px;background:linear-gradient(#ED6885,#E0466E);border-radius:3px;display:inline-block;flex:none}
+.card{background:#fff;border:1px solid #F3DBE5;border-radius:16px;padding:14px 13px;margin-bottom:10px;box-shadow:0 2px 10px rgba(237,104,133,.06)}
+.rowitem{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #F3DBE5;border-radius:14px;padding:12px 13px;margin-bottom:9px;font-size:14.5px;box-shadow:0 2px 8px rgba(237,104,133,.05)}
+.rowitem .grow{flex:1;min-width:0}
+.rowitem .t{overflow-wrap:anywhere;font-weight:600;color:#3E2833}
+.rowitem .m{font-size:11.5px;color:#B98BA0;margin-top:3px}
+.btn{background:#ED6885;color:#fff;border:none;border-radius:11px;padding:10px 15px;font-size:14.5px;font-weight:700;font-family:inherit;box-shadow:0 3px 9px rgba(237,104,133,.28)}
+.btn:active{opacity:.85}
+.btn.ghost{background:#FCE0EA;color:#C2185B;box-shadow:none}
+.btn.warn{background:#FDECEF;color:#C62828;border:1px solid #F5C6CB;box-shadow:none}
+.btn.sm{padding:7px 13px;font-size:13px;border-radius:10px}
+.ic{background:none;border:none;font-size:19px;padding:4px 6px;color:#D89BB0}
+.chk{width:24px;height:24px;border-radius:7px;border:2px solid #2ea043;background:none;flex:none;font-size:15px;color:#2ea043;display:flex;align-items:center;justify-content:center}
+input,select{width:100%;background:#FFF8FB;border:1px solid #F0C9D8;border-radius:11px;color:#4A2E3B;padding:11px 12px;font-size:15px;font-family:inherit;margin-top:5px}
+label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:600}
+.seg{display:flex;gap:8px;margin-top:6px}
+.seg button{flex:1;background:#FFF8FB;border:1px solid #F0C9D8;color:#4A2E3B;border-radius:11px;padding:11px 4px;font-size:14px;font-family:inherit}
+.seg button.on{background:#ED6885;border-color:#ED6885;color:#fff;font-weight:700}
+.moods{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.moods button{background:#FFF8FB;border:1px solid #F0C9D8;border-radius:13px;padding:10px 2px;font-family:inherit;color:#4A2E3B;font-size:12px}
+.moods button .e{font-size:24px;display:block}
+.moods button.on{border-color:#F0B429;background:#FFF6E2}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:8px 0;background:#F3DBE5}
+.bar span{display:block;height:100%}
+.pill{display:inline-block;font-size:11px;padding:2px 10px;border-radius:999px;background:#FCE0EA;color:#C2185B;margin-left:6px;vertical-align:middle;font-weight:600}
+.safety{background:#FFF1F4;border:1px solid #F3C0D0;border-radius:16px;padding:14px;margin-bottom:10px;font-size:13.5px;line-height:1.6;color:#7A3A50}
+.safety a{color:#E0466E;font-weight:700}
+.err{text-align:center;color:#A98194;padding:60px 20px;font-size:15px;line-height:1.9}
+.empty{color:#B98BA0;font-size:13px;padding:8px 2px}
+.gh{font-size:12.5px;color:#C77;margin:14px 4px 7px;font-weight:700}
+.add{background:#fff;border:1.5px dashed #F3B6CD;border-radius:16px;padding:14px;margin-bottom:12px}
+.add .at{font-weight:800;color:#E0466E;font-size:14.5px;margin-bottom:4px}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fffffff2;backdrop-filter:blur(8px);border-top:1px solid #F3DBE5;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(237,104,133,.06)}
+.nav button{flex:1;background:none;border:none;color:#C9A6B6;font-family:inherit;font-size:10.5px;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:600}
+.nav button .ne{font-size:20px}
+.nav button.on{color:#E0466E}
+#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#ED6885;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;box-shadow:0 4px 14px rgba(237,104,133,.35)}
+#toast.show{opacity:1}
+.foot{color:#CBAEBC;font-size:10.5px;text-align:center;margin:22px 0 4px}
+.plan{float:right;background:#FCE0EA;color:#C2185B;font-size:11px;font-weight:700;padding:4px 11px;border-radius:999px;margin-top:2px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:15px 0}
+.st{background:#fff;border-radius:18px;padding:13px;box-shadow:0 4px 15px rgba(237,104,133,.09);display:flex;align-items:center;gap:11px}
+.st .ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.st .big{font-size:21px;font-weight:800;line-height:1}
+.st .cap{font-size:11px;color:#A98194;margin-top:3px}
+.ct{font-size:15px;font-weight:800;color:#4A2E3B;display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.ct .more{margin-left:auto;font-size:11.5px;color:#C77;font-weight:600}
+.don{display:flex;align-items:center;gap:15px}
+.leg{font-size:12.5px;flex:1}
+.leg>div{display:flex;align-items:center;gap:7px;margin:7px 0}
+.leg b{margin-left:auto}
+.dot{width:11px;height:11px;border-radius:3px;flex:none}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calhead .mo{font-size:15px;font-weight:800}
+.nav2{width:31px;height:31px;border-radius:10px;background:#FCE0EA;color:#E0466E;border:none;font-family:inherit;font-size:17px;font-weight:700}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.cal .wd{font-size:11px;color:#B98BA0;font-weight:700;padding-bottom:3px}
+.cal .d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:13.5px;border-radius:11px;position:relative;color:#4A2E3B}
+.cal .d.today{background:linear-gradient(135deg,#ED6885,#E0466E);color:#fff;font-weight:800;box-shadow:0 3px 9px rgba(224,70,110,.38)}
+.cal .d .ev{width:5px;height:5px;border-radius:50%;background:#ED6885;position:absolute;bottom:5px;left:50%;transform:translateX(-50%)}
+.cal .d.today .ev{background:#fff}
+.cal .d.mut{color:transparent;pointer-events:none}
+.appt{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid #F5E3EB}
+.appt .tm{font-size:12px;font-weight:800;color:#E0466E;width:54px;flex:none}
+.appt .tt{font-size:14px;font-weight:600}
+.task{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #F5E3EB}
+.task .tx{font-size:14.5px;font-weight:600;flex:1;overflow-wrap:anywhere}
+.badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;flex:none}
+.b-late{background:#FDE7EA;color:#E5484D}
+.b-todo{background:#E7F6EC;color:#1A7F37}
+.spin{width:36px;height:36px;border:4px solid #F7D6E3;border-top-color:#ED6885;border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ---------- 🔋 ห้องพักใจ (โลกอีกใบ: มืด สงบ — จงใจต่างจากธีมหลัก) ---------- */
+#healroom{position:fixed;inset:0;z-index:50;background:#0b1020;display:none;color:#eef2ff}
+#healroom .hwrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
+#hrscene{position:absolute;inset:0;transition:background 1.4s ease;z-index:0}
+#healroom .hbrow{display:flex;align-items:center;gap:12px}
+#healroom .hbatt{flex:1;height:30px;border:3px solid rgba(255,255,255,.55);border-radius:10px;position:relative;padding:3px;background:rgba(0,0,0,.28)}
+#healroom .hbatt:after{content:"";position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:6px;height:14px;background:rgba(255,255,255,.55);border-radius:0 3px 3px 0}
+#hrfill{height:100%;border-radius:5px;width:8%;transition:width .9s cubic-bezier(.4,1.3,.5,1),background .9s ease,box-shadow .9s ease}
+#hrpct{font-size:18px;font-weight:800;min-width:52px;text-align:right}
+#hrblbl{font-size:12px;color:#cfd8f7;opacity:.85;margin-top:6px;height:16px}
+#healroom .bolt.on{display:inline-block;animation:hrflash 1s infinite}
+@keyframes hrflash{50%{opacity:.3}}
+#hrstage{flex:1;display:flex;flex-direction:column;margin-top:12px;min-height:0;overflow-y:auto}
+#healroom .hinner{display:flex;flex-direction:column;flex:1;min-height:0}
+#healroom .hfade{animation:hrfade .5s ease}
+@keyframes hrfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#healroom .htag{font-size:12px;letter-spacing:.6px;color:#c3cdf2;display:flex;align-items:center;gap:9px}
+#healroom .hback{background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:15px;flex:none;font-family:inherit}
+#healroom h1{font-size:21px;font-weight:800;line-height:1.35;margin-top:10px;color:#fff;letter-spacing:0}
+#healroom h1 .soft{display:block;font-weight:600;font-size:14.5px;opacity:.82;margin-top:9px;line-height:1.7}
+#healroom .hmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100px}
+#healroom .hero{font-size:62px;animation:hrbob 4.5s ease-in-out infinite}
+@keyframes hrbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#healroom .hbtn{background:#fff;color:#12183a;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;width:100%;transition:transform .15s;margin-top:9px;flex:none}
+#healroom .hbtn:active{transform:scale(.97)}
+#healroom .hbtn.ghost{background:rgba(255,255,255,.15);color:#fff}
+#healroom .hbtn:disabled{opacity:.45}
+#healroom .hmoods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
+#healroom .hmood{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:18px 12px;transition:transform .15s;text-align:center}
+#healroom .hmood:active{transform:scale(.95)}
+#healroom .hmood .e{font-size:36px;display:block}
+#healroom .hmood .n{margin-top:7px;font-size:15px;font-weight:600;color:#fff}
+#healroom .hchoices{display:flex;flex-direction:column;gap:11px;width:100%}
+#healroom .hchip{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:14px;font-size:15px;line-height:1.5;transition:transform .15s,background .2s;text-align:left;color:#fff}
+#healroom .hchip:active{transform:scale(.97)}
+#healroom .hchip.pick{background:#fff;color:#12183a;font-weight:700}
+#healroom textarea{width:100%;flex:1;min-height:100px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.16);border-radius:18px;color:#fff;font-size:17px;line-height:1.6;padding:15px;font-family:inherit;resize:none;margin:10px 0;transition:opacity 1.2s,transform 1.2s,filter 1.2s}
+#healroom input{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.16);border-radius:14px;color:#fff;font-size:17px;padding:13px;font-family:inherit;margin:10px 0}
+#healroom textarea::placeholder,#healroom input::placeholder{color:rgba(255,255,255,.5)}
+#healroom textarea.gone{opacity:0;transform:translateY(-90px) scale(.85);filter:blur(12px)}
+#healroom .horb{width:158px;height:158px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.55),rgba(150,220,235,.15) 60%,transparent);box-shadow:0 0 55px rgba(150,225,240,.4);transition:transform 4s ease;font-size:18px;font-weight:700;text-align:center;padding:12px}
+#healroom .hnote{background:rgba(255,255,255,.1);border-radius:14px;padding:13px 15px;font-size:14.5px;line-height:1.7;margin-top:12px;color:#fff}
+#healroom .hsafe{margin-top:12px;background:rgba(255,90,90,.15);border:1px solid rgba(255,120,120,.32);border-radius:14px;padding:11px 13px;font-size:12px;line-height:1.6;color:#ffdada}
+#healroom .hsafe a{color:#fff;font-weight:700}
+#healroom .hfoot{font-size:10.5px;color:rgba(255,255,255,.35);text-align:center;margin-top:10px;line-height:1.6}
+#healroom .hp{position:absolute;pointer-events:none;z-index:6;font-size:20px}
+@keyframes hrup{to{transform:translate(var(--dx,0px),-540px) rotate(var(--r,0deg));opacity:0}}
+@keyframes hrsink{to{transform:translateY(130px);opacity:0;filter:blur(10px)}}
+</style></head><body>
+<div id="app"><div class="err"><div class="spin"></div>เลขากำลังเตรียมข้อมูลของคุณ...</div></div>
+<div id="healroom"><div id="hrscene"></div><div class="hwrap">
+<div><div class="hbrow"><span style="font-size:20px">🔋</span><div class="hbatt"><div id="hrfill"></div></div><span id="hrpct">8%</span></div><div id="hrblbl">พลังใจ</div></div>
+<div id="hrstage"></div>
+</div></div>
+<div id="toast"></div>
+<script>
+var IDT=null,DATA=null,TAB="home",MSEL=null;
+var MOOD_TH={stressed:["😣","เครียด","#db6d28"],sad:["😢","เศร้า","#6e7bdb"],angry:["😠","โกรธ","#f85149"],anxious:["😰","กังวล","#d29922"],tired:["😮‍💨","เหนื่อยล้า","#8b949e"],lonely:["🥺","เหงา","#a371f7"],ok:["🙂","เฉยๆ","#3fb950"],happy:["😄","สดใส","#2ea043"]};
+var SCOPE_TH={company:"🏢",family:"🏠",personal:"👤"};
+var CHAR_LB={"ครับบอส":"สุภาพ (ครับ)","ค่ะบอส":"สุภาพ (ค่ะ)","ขาบอส":"สดใส (ขา)"};
+function $(s){return document.querySelector(s)}
+function esc(s){s=(s==null?"":""+s);return s.replace(/[<>&"]/g,function(c){return({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"})[c]})}
+function num(n){return Number(n||0).toLocaleString("th-TH")}
+function pt(){var c=(DATA&&DATA.profile&&DATA.profile.character)||"";return c==="ค่ะบอส"?"ค่ะ":c==="ขาบอส"?"จ้า":"ครับ"}
+function fdate(iso){try{return new Date(iso).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return ""}}
+function toast(m){var t=$("#toast");t.textContent=m;t.className="show";setTimeout(function(){t.className=""},1700)}
+function errBox(m){return '<div class="err">😅 '+esc(m)+'<br><br><button class="btn" onclick="location.reload()">ลองใหม่</button></div>'}
+
+/* 🔑 ID token ของ LIFF อายุแค่ ~1 ชม. — คนเปิดซ้ำหลังจากนั้นได้ token ตาย → API 401 ทั้งหน้า
+   (เจอจริง 2026-07-04 จาก function_edge_logs) ทางแก้: เช็ค exp ก่อนใช้ + 401 → login ใหม่อัตโนมัติ 1 ครั้ง */
+function tokenExpired(t){try{var b=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+  var p=JSON.parse(atob(b));return !p.exp||p.exp*1000<Date.now()+60000}catch(e){return false}}
+/* ⚠️ liff.login() ใช้ใน LIFF browser (ในแอป LINE) ไม่ได้ — throw ทันที (เจอจริง: หน้าโหลด 200 แต่ไม่มี POST เลย)
+   ในแอปต้อง logout (ล้าง token เก่า) แล้วเปิดตัวเองใหม่ผ่าน permalink → init รอบใหม่ auto-login ได้ token สด
+   guard ด้วย localStorage (sessionStorage ไม่รอดข้ามการเปิดใหม่) — ถ้าวนซ้ำใน 1 นาที = หยุด แจ้งผู้ใช้ */
+function relogin(){
+  try{var k=localStorage.getItem("yb_rl_t");
+    if(k&&Date.now()-Number(k)<60000){$("#app").innerHTML=errBox("เข้าสู่ระบบไม่สำเร็จ ปิดหน้านี้แล้วเปิดใหม่อีกทีนะ");return}
+    localStorage.setItem("yb_rl_t",String(Date.now()))}catch(e){}
+  try{liff.logout()}catch(e){}
+  var st="";
+  try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
+    if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
+    if(tb)st="?tab="+encodeURIComponent(tb)}catch(e){}
+  if(liff.isInClient&&liff.isInClient()){location.replace("https://liff.line.me/2010582556-jAUGKlnX"+st)}
+  else{try{liff.login()}catch(e){location.reload()}}
+}
+async function api(action,payload){
+  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{}})});
+  if(r.status===401){relogin();throw new Error("กำลังต่ออายุการเข้าสู่ระบบ รอแป๊บนึงนะ...")}
+  if(!r.ok){var er="";try{er=(await r.json()).error||""}catch(e){}throw new Error(er||("ผิดพลาด "+r.status))}
+  return r.json();
+}
+async function reload(){DATA=await api("me.get");draw()}
+async function act(action,payload,msg){try{var res=await api(action,payload);if(res&&res.ok===false){toast("ทำรายการไม่ได้");return false}if(msg)toast(msg);await reload();return true}catch(e){toast(e.message||"ผิดพลาด");return false}}
+
+async function boot(){
+  try{
+    await liff.init({liffId:"2010582556-jAUGKlnX"});
+    // ในแอป LINE ห้ามเรียก liff.login() — ใช้ relogin() (permalink relaunch) แทนทุกกรณี
+    if(!liff.isLoggedIn()){relogin();return}
+    IDT=liff.getIDToken();
+    if(!IDT){$("#app").innerHTML=errBox("ต้องเปิดสิทธิ์ openid ให้ LIFF ก่อนนะ");return}
+    if(tokenExpired(IDT)){relogin();return}
+    try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
+      if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
+      if(tb&&["home","todo","money","story","heal","me","start"].indexOf(tb)>=0){TAB=tb}}catch(e){}
+    DATA=await api("me.get");
+    try{localStorage.removeItem("yb_rl_t")}catch(e){}
+    draw();
+  }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
+}
+
+function draw(){
+  if(TAB==="start"){$("#app").innerHTML=vStart();window.scrollTo(0,0);return} // onboarding เต็มจอ ไม่มีแถบแท็บ
+  var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal():vMe();
+  $("#app").innerHTML=v+nav();
+}
+function nav(){
+  var it=[["home","🏠","หน้าหลัก"],["todo","✅","เตือน+งาน"],["money","💰","เงิน"],["story","📖","เรื่องราว"],["heal","💛","ฮีลใจ"],["me","⚙️","โปรไฟล์"]];
+  var h='<div class="nav">';
+  for(var i=0;i<it.length;i++){h+='<button class="'+(TAB===it[i][0]?"on":"")+'" onclick="go(\''+it[i][0]+'\')"><span class="ne">'+it[i][1]+'</span>'+it[i][2]+'</button>'}
+  return h+'</div>';
+}
+function go(t){TAB=t;MSEL=null;draw();window.scrollTo(0,0)}
+function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
+
+/* ---------- 📝 onboarding (?tab=start): ฟอร์มลงทะเบียน -> สไลด์สอนใช้แบบแชตเดโม่ ---------- */
+var OBS=0; /* 0=ฟอร์ม, 1..N=สไลด์ */
+var OB_SLIDES=[
+  {ic:"⏰",t:"ตั้งเตือนให้",s:"บอกเวลา เดี๋ยวเลขาเด้งเตือนตรงเป๊ะ",u:"พรุ่งนี้ 9 โมง ประชุมทีม",b:"รับทราบค่ะบอส 📌 พรุ่งนี้ 09:00<br>ถึงเวลาเลขาเด้งเตือนแน่นอน",x:"พรุ่งนี้ 9 โมง ประชุมทีม"},
+  {ic:"💸",t:"จดเงินให้",s:"พิมพ์สั้นๆ หรือส่งรูปสลิปก็ได้",u:"ค่าข้าว 60",b:"จดแล้ว! 🧾 วันนี้ใช้ไป 240.-<br>เดือนนี้รวม 3,120.-",x:"ค่าข้าว 60"},
+  {ic:"📁",t:"ไฟล์ไม่มีวันหาย",s:"ส่งไฟล์/รูป/เอกสารมาเก็บ เรียกคืนได้ทุกเมื่อ",u:"ขอใบเสนอราคาร้าน A หน่อย",b:"นี่เลยค่ะ 👇<br>📄 ใบเสนอราคา-ร้านA.pdf",x:"มีไฟล์อะไรบ้าง"},
+  {ic:"🔮",t:"ดูดวงได้จริง",s:"ราศี ไพ่ทาโรต์ เลขศาสตร์เบอร์มงคล",u:"ดูดวง",b:"วันนี้การงานเด่นมาก 💼✨<br>สีมงคล: ชมพู เลขนำโชค: 9",x:"ดูดวง"},
+  {ic:"💛",t:"ฮีลใจยามเหนื่อย",s:"เหนื่อยมาระบายได้ มีห้องพักใจให้ด้วย",u:"วันนี้เหนื่อยมากเลย",b:"เหนื่อยมากเลยเนอะ 🤍 เล่าให้เลขาฟังได้นะ<br>อยู่ตรงนี้แล้ว",x:"ขอกำลังใจหน่อย"},
+  {ic:"🌙",t:"สรุปให้เช้า-เย็น",s:"งาน+นัด+เงินของวัน ครบในข้อความเดียว",u:"สรุปวันนี้",b:"วันนี้: นัด 2 รายการ งานค้าง 3<br>ใช้ไป 240.- 💪 เคลียร์ต่อพรุ่งนี้",x:"สรุปวันนี้"}
+];
+var OB_CSS='<style>.ob{max-width:430px;margin:0 auto;padding:18px 16px 28px;min-height:100vh;box-sizing:border-box}.obh{text-align:center;margin:6px 0 14px}.obh .k{color:#C4547E;font-size:13px;font-weight:700}.obh h1{margin:4px 0 2px;font-size:22px;color:#3A3A3C}.obh p{margin:0;font-size:13px;color:#6E6E73}.obf{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(232,119,155,.12)}.obf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.obf input,.obf select{width:100%;box-sizing:border-box;border:1.5px solid #F1D3DE;border-radius:12px;padding:11px 12px;font-size:15px;background:#FFF9FB;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.obf input:focus,.obf select:focus{border-color:#E8779B}.obbtn{display:block;width:100%;border:0;border-radius:14px;background:#E8779B;color:#fff;font-size:16px;font-weight:800;padding:14px;margin-top:16px;box-shadow:0 4px 12px rgba(232,119,155,.35)}.obskip{display:block;text-align:center;margin:12px auto 0;background:none;border:0;color:#B0889A;font-size:13px;text-decoration:underline}.obdots{display:flex;gap:5px;justify-content:center;margin:4px 0 12px}.obdots i{width:7px;height:7px;border-radius:99px;background:#F1D3DE;transition:.2s}.obdots i.on{width:22px;background:#E8779B}.obchat{background:#fff;border-radius:18px;padding:22px 14px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center;box-shadow:0 4px 18px rgba(232,119,155,.12)}.obu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.obb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.obb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.obb .m{background:#FFF3F7;border:1px solid #F8DCE7;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.obtry{display:block;width:100%;border:0;border-radius:14px;background:#E8779B;color:#fff;font-size:16px;font-weight:800;padding:14px;margin-top:14px;box-shadow:0 4px 12px rgba(232,119,155,.35)}.obnav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.obnav button{width:42px;height:42px;border-radius:99px;border:1.5px solid #F1D3DE;background:#fff;font-size:16px;color:#C4547E}.obnav .pg{font-size:13px;color:#6E6E73}.obgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}.obgrid .g{background:#fff;border-radius:14px;padding:12px;box-shadow:0 3px 12px rgba(232,119,155,.10)}.obgrid .g b{display:block;font-size:13px;color:#3A3A3C;margin-top:3px}.obgrid .g span{font-size:11px;color:#6E6E73;line-height:1.35;display:block;margin-top:2px}</style>';
+function vStart(){
+  if(OBS===0)return OB_CSS+obForm();
+  if(OBS<=OB_SLIDES.length)return OB_CSS+obSlide(OBS-1);
+  return OB_CSS+obMore();
+}
+function obForm(){
+  var pr=(DATA&&DATA.profile)||{};
+  var sel=function(id,label,opts){var h='<label>'+label+'</label><select id="'+id+'">';for(var i=0;i<opts.length;i++){h+='<option value="'+opts[i][0]+'">'+opts[i][1]+'</option>'}return h+'</select>'};
+  return '<div class="ob"><div class="obh"><div class="k">เริ่มต้นกับ YES BOSS</div><h1>เลขาขอทำความรู้จักหน่อย 💕</h1><p>30 วินาที เลขาจะได้ดูแลบอสได้ถูกใจ</p></div>'
+    +'<div class="obf">'
+    +'<label>ชื่อที่ให้เลขาเรียก</label><input id="ob_nm" maxlength="30" placeholder="อยากให้เลขาเรียกว่าอะไรดี" value="'+esc(pr.display_name||"")+'">'
+    +'<label>เบอร์มือถือ <span style="font-weight:400;color:#B0889A">(ไม่บังคับ)</span></label><input id="ob_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(pr.phone||"")+'">'
+    +sel("ob_ag","ช่วงอายุ",[["","เลือกช่วงอายุ"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
+    +sel("ob_wf","ฟีเจอร์ที่อยากลองมากที่สุด",[["","เลือกฟีเจอร์ที่อยากลอง"],["reminder","⏰ เตือนงาน/นัดหมาย"],["money","💸 จดรายรับรายจ่าย + สลิป"],["files","📁 เก็บไฟล์เอกสาร"],["fortune","🔮 ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛 ฮีลใจ / ที่พักใจ"],["brief","🌙 สรุปงานรายวัน"]])
+    +sel("ob_ac","รู้จัก YES BOSS จากช่องทางไหน",[["","เลือกช่องทาง"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
+    +'<button class="obbtn" onclick="obSave()">เริ่มใช้งานกับเลขา ✨</button>'
+    +'</div><button class="obskip" onclick="OBS=1;draw()">ข้ามไปดูวิธีใช้ก่อน</button></div>';
+}
+async function obSave(){
+  var nm=$("#ob_nm").value.trim();
+  if(!nm){toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
+  var pl={display_name:nm,phone:$("#ob_ph").value.trim(),age_range:$("#ob_ag").value,wanted_feature:$("#ob_wf").value,acq_channel:$("#ob_ac").value};
+  try{await api("onboard.save",pl);if(DATA&&DATA.profile){DATA.profile.display_name=nm}OBS=1;draw();toast("ยินดีที่ได้รู้จัก คุณ"+nm+" 💕")}
+  catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที")}
+}
+function obSlide(i){
+  var f=OB_SLIDES[i],n=OB_SLIDES.length+2,dots='<div class="obdots">';
+  for(var d=0;d<n;d++){dots+='<i class="'+(d===i+1?"on":"")+'"></i>'}dots+='</div>';
+  return '<div class="ob">'+dots
+    +'<div class="obh" style="text-align:left;display:flex;gap:10px;align-items:center"><div style="font-size:34px">'+f.ic+'</div><div><h1 style="font-size:19px;margin:0">'+f.t+'</h1><p>'+f.s+'</p></div></div>'
+    +'<div class="obchat"><div class="obu">'+esc(f.u)+'</div><div class="obb"><div class="av">🤍</div><div class="m">'+f.b+'</div></div></div>'
+    +'<button class="obtry" onclick="obTry(\''+f.x.replace(/'/g,"\\'")+'\')">ลองเลย →</button>'
+    +'<div class="obnav"><button onclick="OBS='+(i===0?0:i)+';draw()">‹</button><div class="pg">'+(i+2)+' / '+n+'</div><button onclick="OBS='+(i+2)+';draw()">›</button></div></div>';
+}
+function obMore(){
+  var n=OB_SLIDES.length+2,dots='<div class="obdots">';
+  for(var d=0;d<n;d++){dots+='<i class="'+(d===n-1?"on":"")+'"></i>'}dots+='</div>';
+  var g=function(ic,t,s){return '<div class="g"><div style="font-size:20px">'+ic+'</div><b>'+t+'</b><span>'+s+'</span></div>'};
+  return '<div class="ob">'+dots
+    +'<div class="obh" style="text-align:left;display:flex;gap:10px;align-items:center"><div style="font-size:34px">✨</div><div><h1 style="font-size:19px;margin:0">ทำได้อีกเยอะ</h1><p>นี่แค่ส่วนหนึ่งที่เลขาช่วยบอสได้</p></div></div>'
+    +'<div class="obgrid">'
+    +g("🃏","ไพ่ทาโรต์ + เบอร์มงคล","เปิดไพ่ เช็คเบอร์ ตามวันเกิดบอส")
+    +g("👛","แยกกระเป๋า 3 ใบ","ส่วนตัว / ครอบครัว / บริษัท")
+    +g("🧾","สรุปภาษีให้","VAT / หัก ณ ที่จ่าย / ประมาณภาษี")
+    +g("🎙️","สั่งงานด้วยเสียง","ขี้เกียจพิมพ์ พูดใส่วอยซ์ได้เลย")
+    +g("📊","แดชบอร์ด My YES BOSS","นัด เงิน ใจ ครบในหน้าเดียว")
+    +g("💬","ตั้งชื่อ-เลือกสไตล์เลขา","ครับบอส / ค่ะบอส / ขาบอส")
+    +'</div>'
+    +'<button class="obtry" onclick="obFinish()">เริ่มคุยกับเลขาเลย 💬</button>'
+    +'<div class="obnav"><button onclick="OBS='+(n-2)+';draw()">‹</button><div class="pg">'+n+' / '+n+'</div><button onclick="go(\'home\')">🏠</button></div></div>';
+}
+function obTry(t){
+  try{
+    if(liff.isInClient&&liff.isInClient()){
+      liff.sendMessages([{type:"text",text:t}]).then(function(){try{liff.closeWindow()}catch(e){}}).catch(function(){obTryFb(t)});
+    }else obTryFb(t);
+  }catch(e){obTryFb(t)}
+}
+function obTryFb(t){try{navigator.clipboard.writeText(t)}catch(e){}toast('ก๊อปคำสั่ง "'+t+'" ให้แล้ว วางในแชตได้เลย');setTimeout(function(){try{liff.closeWindow()}catch(e){}},900)}
+function obFinish(){try{liff.closeWindow()}catch(e){go("home")}}
+
+/* ---------- หน้าหลัก ---------- */
+var CALM=0,SELISO=null;
+var THMON=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+function todayBKK(){try{return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Bangkok"})}catch(e){return new Date().toISOString().slice(0,10)}}
+function bkkYMD(iso){try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:"Asia/Bangkok"})}catch(e){return (""+iso).slice(0,10)}}
+function thToday(){try{return new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",timeZone:"Asia/Bangkok"})}catch(e){return ""}}
+function thDate(iso){try{return new Date(iso+"T00:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}catch(e){return iso}}
+function thMonth(off){var d=new Date();d.setMonth(d.getMonth()+off);return THMON[d.getMonth()]+" "+d.getFullYear()}
+function stat(bg,ic,col,val,cap,tab){return '<div class="st" onclick="go(\''+tab+'\')" style="cursor:pointer"><div class="ico" style="background:'+bg+'">'+ic+'</div><div><div class="big" style="color:'+col+'">'+num(val)+'</div><div class="cap">'+cap+'</div></div></div>'}
+function donutSvg(income,expense){
+  var tot=(income||0)+(expense||0),c=327,inc=tot>0?income/tot*c:0,exp=tot>0?expense/tot*c:0;
+  var s='<svg width="122" height="122" viewBox="0 0 126 126" style="flex:none">';
+  s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#F3E3EB" stroke-width="16"/>';
+  if(tot>0){
+    s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#22C55E" stroke-width="16" stroke-dasharray="'+inc+' '+(c-inc)+'" transform="rotate(-90 63 63)"/>';
+    s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#FB7185" stroke-width="16" stroke-dasharray="'+exp+' '+(c-exp)+'" stroke-dashoffset="'+(-inc)+'" transform="rotate(-90 63 63)"/>';
+  }
+  s+='<text x="63" y="58" text-anchor="middle" font-size="11" fill="#A98194">คงเหลือ</text>';
+  s+='<text x="63" y="81" text-anchor="middle" font-size="18" font-weight="800" fill="#E0466E">'+num((income||0)-(expense||0))+'</text></svg>';
+  return s;
+}
+function calMonth(){
+  var now=new Date(),base=new Date(now.getFullYear(),now.getMonth()+CALM,1);
+  var y=base.getFullYear(),mo=base.getMonth(),first=new Date(y,mo,1).getDay(),days=new Date(y,mo+1,0).getDate();
+  var ev={},rem=(DATA.reminders||[]);
+  for(var i=0;i<rem.length;i++){var ds=bkkYMD(rem[i].remind_at).split("-");if(+ds[0]===y&&+ds[1]===mo+1){ev[+ds[2]]=1}}
+  var tp=todayBKK().split("-"),isCurM=(+tp[0]===y&&+tp[1]===mo+1),td=+tp[2];
+  var h='<div class="calhead"><button class="nav2" onclick="calShift(-1)">‹</button><div class="mo">'+THMON[mo]+' '+y+'</div><button class="nav2" onclick="calShift(1)">›</button></div><div class="cal">';
+  var wd=["อา","จ","อ","พ","พฤ","ศ","ส"];for(var w=0;w<7;w++){h+='<div class="wd">'+wd[w]+'</div>'}
+  for(var b=0;b<first;b++){h+='<div class="d mut"></div>'}
+  for(var dd=1;dd<=days;dd++){h+='<div class="d'+(isCurM&&dd===td?" today":"")+'" onclick="pickDay('+y+','+mo+','+dd+')">'+dd+(ev[dd]?'<span class="ev"></span>':'')+'</div>'}
+  return h+'</div>';
+}
+function calShift(n){CALM+=n;if(CALM===0){SELISO=null}else{var b=new Date();b.setDate(1);b.setMonth(b.getMonth()+CALM);SELISO=b.getFullYear()+"-"+("0"+(b.getMonth()+1)).slice(-2)+"-01"}draw()}
+function pickDay(y,mo,dd){SELISO=y+"-"+("0"+(mo+1)).slice(-2)+"-"+("0"+dd).slice(-2);draw()}
+function apptsList(iso){
+  var rem=(DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===iso});
+  rem.sort(function(a,b){return (""+a.remind_at)<(""+b.remind_at)?-1:1});
+  if(!rem.length){return '<div class="empty" style="padding:10px 2px">ไม่มีนัดวันนี้ 🎉</div>'}
+  var h='';for(var i=0;i<rem.length;i++){var r=rem[i];var tm=r.all_day?"ทั้งวัน":new Date(r.remind_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Bangkok"});
+    h+='<div class="appt"><div class="tm">'+tm+'</div><div class="tt">'+esc(r.reminder_text)+'</div></div>';}
+  return h;
+}
+function addTaskH(){var el=$("#htask");if(!el){return}var v=el.value.trim();if(!v){return}act("task.add",{text:v},"เพิ่มงานแล้ว")}
+async function fortune(){
+  try{
+    if(liff.isInClient()){await liff.sendMessages([{type:"text",text:"ดูดวงวันนี้"}]);liff.closeWindow()}
+    else{toast("เปิดในแอป LINE เพื่อดูดวงนะ")}
+  }catch(e){try{liff.closeWindow()}catch(_e){toast("พิมพ์ \"ดูดวงวันนี้\" ในแชตได้เลย")}}
+}
+function apptAdd(iso){
+  var h='<button class="btn ghost sm" style="width:100%;margin-top:10px" onclick="toggleAppt()">➕ เพิ่มนัด '+thDate(iso)+'</button>';
+  h+='<div id="apform" style="display:none;margin-top:9px"><input id="ap_txt" placeholder="นัดอะไร เช่น เจอลูกค้าสมชาย" style="margin:0 0 8px" maxlength="200">';
+  h+='<div style="display:flex;gap:8px;align-items:center"><input id="ap_time" type="time" value="09:00" style="margin:0;flex:1"><button class="btn sm" onclick="saveAppt(\''+iso+'\')">บันทึก</button></div></div>';
+  return h;
+}
+function toggleAppt(){var f=$("#apform");if(f){f.style.display=f.style.display==="none"?"block":"none";var t=$("#ap_txt");if(t&&f.style.display==="block"){t.focus()}}}
+async function saveAppt(iso){
+  var t=$("#ap_txt")?$("#ap_txt").value.trim():"";
+  if(!t){toast("บอกก่อนว่านัดอะไรนะ");return}
+  var tm=$("#ap_time")&&$("#ap_time").value?$("#ap_time").value:"09:00";
+  var d=new Date(iso+"T"+tm+":00+07:00");
+  if(d.getTime()<Date.now()-60000){toast("เวลานี้ผ่านมาแล้ว เลือกใหม่นะ");return}
+  await act("reminder.add",{text:t,remind_at:d.toISOString()},"เพิ่มนัดแล้ว จะเตือนตรงเวลาเลย ⏰");
+}
+async function refreshAll(){try{DATA=await api("me.get");draw();toast("อัปเดตล่าสุดแล้ว ✨")}catch(e){toast("โหลดไม่สำเร็จ ลองใหม่นะ")}}
+function vHome(){
+  var pr=DATA.profile||{},nm=pr.display_name?"คุณ"+esc(pr.display_name):"บอส";
+  var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
+  var today=todayBKK(),mth=DATA.money.month||{};
+  var todayN=(DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===today}).length;
+  var openT=(DATA.tasks&&DATA.tasks.open)||[];
+  var facts=(DATA.story&&DATA.story.facts)||[],files=(DATA.story&&DATA.story.files)||[];
+  var lastMood=DATA.mood&&DATA.mood[0];
+  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">↻ รีเฟรช</span><span class="plan">'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div></div>';
+  h+='<div class="stats">';
+  h+=stat("#FDECEF","⏰","#E0466E",todayN,"นัดวันนี้","todo");
+  h+=stat("#E7F6EC","✅","#1A7F37",openT.length,"งานค้าง","todo");
+  h+=stat("#FEF3E2","🧠","#D98324",facts.length,"ความจำ","story");
+  h+=stat("#EAF3FF","📁","#3B82F6",files.length,"ไฟล์","story");
+  h+='</div>';
+  if(lastMood&&lastMood.is_safety){h+=safetyCard()}
+  h+='<div class="card"><div class="ct">💰 การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">';
+  h+='<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>';
+  h+='<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>';
+  h+='<div style="border-top:1px solid #F5E3EB;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>';
+  h+='</div></div></div>';
+  var sel=SELISO||today;
+  h+='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">📅 นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
+  h+='<div class="card"><div class="ct">✅ งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
+  if(!openT.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  var lim=Math.min(openT.length,6);
+  for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
+    h+='<div class="task"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
+  if(openT.length>lim){h+='<div class="gh" style="text-align:center;color:#C77;cursor:pointer;margin:8px 0 2px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</div>'}
+  h+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
+  var me=lastMood?(MOOD_TH[lastMood.mood]||["🙂"])[0]:"🤍";
+  h+='<div class="stats" style="margin:4px 0 0">';
+  h+='<div class="st" onclick="fortune()" style="cursor:pointer"><div class="ico" style="background:#F3EAFF">🔮</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></div>';
+  h+='<div class="st" onclick="vent()" style="cursor:pointer"><div class="ico" style="background:#FFF6E2">'+me+'</div><div><div style="font-size:14.5px;font-weight:800">ระบายกับเลขา</div><div class="cap">อยู่เป็นเพื่อนเสมอ</div></div></div>';
+  h+='</div>';
+  h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
+  return h;
+}
+function safetyCard(){
+  return '<div class="safety">🤍 ถ้าตอนนี้รู้สึกหนักมากจนแบกไม่ไหว คุณไม่ได้อยู่คนเดียวนะ ลองโทรคุยกับ <a href="tel:1323">สายด่วนสุขภาพจิต 1323</a> (กรมสุขภาพจิต ฟรี 24 ชม.) เราอยู่ตรงนี้ด้วยเสมอ</div>';
+}
+
+/* ---------- เตือน + งาน ---------- */
+function vTodo(){
+  var h='<h1>เตือน + งาน</h1>';
+  h+='<h2>⏰ การแจ้งเตือนที่รออยู่ ('+DATA.reminders.length+')</h2>';
+  if(!DATA.reminders.length){h+='<div class="empty">ยังไม่มีการแจ้งเตือน — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 9 โมงเตือนโทรหาลูกค้า"</div>'}
+  for(var i=0;i<DATA.reminders.length;i++){var r=DATA.reminders[i];
+    h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(r.reminder_text)+(r.repeat&&r.repeat!=="none"?'<span class="pill">🔁 '+esc(r.repeat)+'</span>':'')+'</div><div class="m">'+(r.all_day?"ทั้งวัน · ":"")+fdate(r.remind_at)+'</div><div id="rs'+i+'"></div></div>'+
+      '<button class="ic" onclick="rsched('+i+')">🕑</button><button class="ic" onclick="delRem(\''+r.id+'\')">🗑️</button></div>';
+  }
+  h+='<h2>✅ งานที่ต้องทำ ('+DATA.tasks.open.length+')</h2>';
+  h+='<div class="rowitem"><input id="ntask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTask()">เพิ่ม</button></div>';
+  if(!DATA.tasks.open.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  for(var j=0;j<DATA.tasks.open.length;j++){var t=DATA.tasks.open[j];
+    h+='<div class="rowitem"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div><button class="ic" onclick="delTask(\''+t.id+'\')">🗑️</button></div>';
+  }
+  if(DATA.tasks.done.length){h+='<h2>เสร็จแล้วล่าสุด</h2>';
+    for(var k=0;k<DATA.tasks.done.length;k++){var d=DATA.tasks.done[k];
+      h+='<div class="rowitem"><button class="chk" style="opacity:.5" onclick="tgTask(\''+d.id+'\',false)">✓</button><div class="grow"><div class="t" style="text-decoration:line-through;color:#8b949e">'+esc(d.task_text)+'</div></div></div>';
+    }
+  }
+  return h;
+}
+function rsched(i){
+  var r=DATA.reminders[i],el=$("#rs"+i);
+  if(el.innerHTML){el.innerHTML="";return}
+  el.innerHTML='<div style="margin-top:8px;display:flex;gap:8px"><input type="datetime-local" id="rd'+i+'" style="margin:0"><button class="btn sm" onclick="saveSched('+i+',\''+r.id+'\')">บันทึก</button></div>';
+}
+async function saveSched(i,id){
+  var val=$("#rd"+i).value;if(!val){toast("เลือกเวลาก่อนนะ");return}
+  await act("reminder.reschedule",{id:id,remind_at:new Date(val).toISOString()},"เลื่อนเวลาแล้ว");
+}
+function delRem(id){if(confirm("ลบการแจ้งเตือนนี้?"))act("reminder.delete",{id:id},"ลบแล้ว")}
+function tgTask(id,done){act("task.toggle",{id:id,done:done},done?"เยี่ยม เสร็จอีกงาน! 🎉":"")}
+function delTask(id){act("task.delete",{id:id},"ลบแล้ว")}
+async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}await act("task.add",{text:v},"เพิ่มงานแล้ว")}
+
+/* ---------- เงิน ---------- */
+function vMoney(){
+  var m=DATA.money.month,d=DATA.money.day;
+  var h='<h1>เงิน รับ–จ่าย</h1>';
+  h+='<h2>เดือนนี้</h2><div class="grid">';
+  h+=card('<span style="color:#3fb950">'+num(m.income)+'</span>',"💰 รายรับ (บาท)");
+  h+=card('<span style="color:#f85149">'+num(m.expense)+'</span>',"💸 รายจ่าย (บาท)");
+  h+=card(num(m.net)+" ฿","🧮 คงเหลือ");
+  h+=card("VAT "+num(m.vat)+" · WHT "+num(m.wht),"🧾 ภาษี (บาท)");
+  h+='</div>';
+  h+='<h2>วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · เหลือ '+num(d.net)+'</h2>';
+  h+='<h2>รายการล่าสุด</h2>';
+  var rec=DATA.money.recent;
+  if(!rec.length){h+='<div class="empty">ยังไม่มีรายการ — ส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
+  for(var i=0;i<rec.length;i++){var e=rec[i];var inc=e.kind==="income";
+    h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+esc(e.category||e.note||(inc?"รายรับ":"รายจ่าย"))+'</div><div class="m">'+fdate(e.created_at)+'</div></div>'+
+      '<div style="font-weight:700;color:'+(inc?"#3fb950":"#f85149")+'">'+(inc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">🗑️</button></div>';
+  }
+  h+='<div class="foot">แก้ยอดผิด: ลบรายการนี้แล้วพิมพ์ใหม่ในแชตได้เลย</div>';
+  return h;
+}
+function delMoney(id){if(confirm("ลบรายการเงินนี้?"))act("money.delete",{id:id},"ลบแล้ว")}
+
+/* ---------- 📖 เรื่องราวของบอส (ความจำ + ไฟล์) ---------- */
+var FACT_TH={customer:["👥","ลูกค้า"],business:["🏢","ธุรกิจ"],preference:["❤️","ความชอบ"],profile:["🙂","เกี่ยวกับคุณ"],other:["📌","อื่นๆ"]};
+var DOC_TH={slip:"🧾",receipt:"🧾",bill:"🧾",invoice:"📄",contract:"📑",namecard:"💳",id_card:"🪪",image:"🖼️",doc:"📄",other:"📎"};
+function docIcon(t){return DOC_TH[t]||"📎"}
+function vStory(){
+  var s=DATA.story||{facts:[],files:[],folders:[]};
+  var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
+  var h='<h1>📖 เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
+  h+='<div class="grid">';
+  h+=card(num(facts.length),"🧠 ความจำ (เรื่อง)");
+  h+=card(num(files.length),"📁 ไฟล์ในคลัง");
+  h+='</div>';
+  /* ---- ความจำ: ดูอย่างเดียว + แจ้งแก้ไข (ไม่ให้พิมพ์แก้ตรง) ---- */
+  h+='<h2>🧠 ความจำของบอส</h2>';
+  h+='<div class="l" style="margin:0 2px 11px">เลขาจำเองจากที่บอสคุยในแชต · ถ้าจำผิดกด ✏️ แจ้งแก้ไขได้เลย</div>';
+  if(!facts.length){h+='<div class="empty">ยังไม่มีความจำ — เล่าเรื่องงาน/ลูกค้าให้เลขาฟังในแชต เดี๋ยวจำให้เอง เช่น "ลูกค้าสมชายชอบต่อราคา"</div>'}
+  else{
+    var order=["customer","business","preference","profile","other"],grp={};
+    for(var i=0;i<facts.length;i++){var ft=facts[i].fact_type||"other";if(!FACT_TH[ft])ft="other";(grp[ft]=grp[ft]||[]).push(facts[i])}
+    for(var g=0;g<order.length;g++){var key=order[g],arr=grp[key];if(!arr||!arr.length){continue}
+      h+='<div class="gh">'+FACT_TH[key][0]+' '+FACT_TH[key][1]+' ('+arr.length+')</div>';
+      for(var j=0;j<arr.length;j++){var f=arr[j];
+        h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(f.fact_text)+(f.subject?'<span class="pill">'+esc(f.subject)+'</span>':'')+'</div><div class="m">จำเมื่อ '+fdate(f.last_seen_at||f.created_at)+'</div></div>'+
+          '<button class="ic" title="แจ้งแก้ไข" onclick="reportFact(\''+f.id+'\')">✏️</button><button class="ic" title="ลบ" onclick="delFact(\''+f.id+'\')">🗑️</button></div>';
+      }
+    }
+  }
+  /* ---- คลังไฟล์: จัดเป็นโฟลเดอร์ (มีทั้งไฟล์และภาพ) ---- */
+  h+='<h2>📁 คลังไฟล์</h2>';
+  if(!files.length){h+='<div class="empty">ยังไม่มีไฟล์ — ส่งรูป/สลิป/เอกสารเข้าแชต เดี๋ยวเก็บเข้าคลังให้</div>'}
+  else{
+    var byF={};for(var k=0;k<files.length;k++){var fid=files[k].folder_id||"_none";(byF[fid]=byF[fid]||[]).push(files[k])}
+    for(var gf=0;gf<folders.length;gf++){var fo=folders[gf],items=byF[fo.id]||[];
+      h+='<div class="rowitem" onclick="toggleFolder(\''+fo.id+'\')" style="cursor:pointer"><div style="font-size:20px">📁</div><div class="grow"><div class="t">'+esc(fo.name)+'</div><div class="m">'+items.length+' รายการ</div></div><span id="fa_'+fo.id+'" style="color:#D89BB0;font-size:15px">▸</span></div>';
+      h+='<div id="fld_'+fo.id+'" style="display:none;padding-left:10px;margin-bottom:4px">';
+      if(!items.length){h+='<div class="empty" style="padding-left:2px">โฟลเดอร์นี้ยังว่างอยู่</div>'}
+      for(var m=0;m<items.length;m++){h+=fileRow(items[m])}
+      h+='</div>';
+    }
+    var none=byF["_none"]||[];
+    if(none.length){h+='<div class="gh">📎 ยังไม่เข้าโฟลเดอร์</div>';for(var n=0;n<none.length;n++){h+=fileRow(none[n])}}
+  }
+  h+='<div class="foot">🔒 เรื่องราวทั้งหมดนี้เห็นได้เฉพาะคุณเท่านั้น · จัดโฟลเดอร์เพิ่มได้ในแชต</div>';
+  return h;
+}
+function fileRow(d){var nm=d.title||d.file_name||"ไฟล์";
+  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" onclick="delFile(\''+d.id+'\')">🗑️</button></div>';
+}
+function toggleFolder(id){var e=$("#fld_"+id),a=$("#fa_"+id);if(!e){return}var op=e.style.display==="none";e.style.display=op?"block":"none";if(a){a.textContent=op?"▾":"▸"}}
+function reportFact(id){
+  var arr=(DATA.story&&DATA.story.facts)||[],f=null;
+  for(var i=0;i<arr.length;i++){if(String(arr[i].id)===String(id)){f=arr[i];break}}
+  if(!f){return}
+  if(!confirm("แจ้งเลขาว่าความจำนี้ไม่ถูก? เดี๋ยวเปิดแชตให้บอกที่ถูกต้อง"))return;
+  try{
+    if(liff.isInClient()){liff.sendMessages([{type:"text",text:"ขอแก้ความจำ: «"+f.fact_text+"»"}]);liff.closeWindow()}
+    else{toast("เปิดในแอป LINE เพื่อแจ้งแก้ไขนะ")}
+  }catch(e){try{liff.closeWindow()}catch(_e){toast("พิมพ์บอกเลขาในแชตได้เลยว่าตรงไหนไม่ถูก")}}
+}
+function delFact(id){if(confirm("ลบความจำนี้ทิ้ง? เลขาจะลืมเรื่องนี้ไปเลยนะ"))act("fact.delete",{id:id},"ลบความจำแล้ว")}
+function delFile(id){if(confirm("ลบไฟล์นี้ออกจากคลัง? กู้คืนไม่ได้นะ"))act("file.delete",{id:id},"ลบไฟล์แล้ว")}
+async function openFile(id){
+  try{var res=await api("file.url",{id:id});
+    if(res&&res.url){if(liff.isInClient()){liff.openWindow({url:res.url,external:true})}else{window.open(res.url,"_blank")}}
+    else{toast("เปิดไฟล์ไม่ได้")}
+  }catch(e){toast(e.message||"ผิดพลาด")}
+}
+
+/* ---------- ฮีลใจ ---------- */
+function vHeal(){
+  var h='<h1>💛 ฮีลใจ</h1><div class="sub">พื้นที่ปลอดภัยของคุณ · ข้อมูลนี้เป็นความลับเฉพาะคุณ</div>';
+  var recentSafety=(DATA.mood||[]).slice(0,10).some(function(m){return m.is_safety});
+  if(recentSafety){h+='<div style="height:10px"></div>'+safetyCard()}
+  h+='<div class="card" style="background:linear-gradient(135deg,#182042,#0b1020);border:none;margin-top:12px"><div style="font-weight:800;font-size:16px;color:#fff">🔋 ห้องพักใจ</div><div style="font-size:12.5px;color:#cfd8f7;margin-top:3px;line-height:1.6">โมโห เครียด เหนื่อยใจ? เข้าไปชาร์จพลังใจ 2-3 นาที แล้วค่อยกลับไปลุยต่อ</div><button class="btn" style="width:100%;margin-top:11px;background:#fff;color:#12183a;box-shadow:none" onclick="openHealRoom()">เข้าห้องพักใจ</button></div>';
+  h+='<h2>วันนี้รู้สึกยังไง?</h2><div class="card"><div class="moods" id="moodpick">';
+  for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+MOOD_TH[key][0]+'</span>'+MOOD_TH[key][1]+'</button>'}
+  h+='</div><input id="mnote" placeholder="อยากบันทึกอะไรไหม (ไม่ใส่ก็ได้)"><button class="btn" style="width:100%;margin-top:10px" onclick="saveMood()">บันทึกความรู้สึก</button></div>';
+  h+='<div class="card"><button class="btn" style="width:100%" onclick="vent()">💬 ระบายกับเลขา</button></div>';
+  h+=moodTrend();
+  h+='<h2>บันทึกอารมณ์ล่าสุด</h2>';
+  var ms=DATA.mood||[];
+  if(!ms.length){h+='<div class="empty">ยังไม่มีบันทึก — เริ่มเช็คอินความรู้สึกวันนี้ได้เลย 🤍</div>'}
+  for(var i=0;i<Math.min(ms.length,25);i++){var m=ms[i];var mt=MOOD_TH[m.mood]||["🙂","—"];
+    h+='<div class="rowitem"><div style="font-size:22px">'+mt[0]+'</div><div class="grow"><div class="t">'+esc(mt[1])+(m.source==="comfort"?'<span class="pill">จากแชต</span>':m.source==="heal"?'<span class="pill">🔋 ห้องพักใจ</span>':'')+'</div><div class="m">'+esc(m.note||"")+' · '+fdate(m.created_at)+'</div></div></div>';
+  }
+  h+='<div class="foot">🔒 อยากลบบันทึกฮีลใจทั้งหมด ทำได้ที่แท็บโปรไฟล์ (ลบข้อมูล)</div>';
+  return h;
+}
+function moodTrend(){
+  var ms=(DATA.mood||[]).filter(function(m){var t=new Date(m.created_at).getTime();return Date.now()-t<14*864e5});
+  if(!ms.length){return ""}
+  var cnt={},tot=0;
+  for(var i=0;i<ms.length;i++){cnt[ms[i].mood]=(cnt[ms[i].mood]||0)+1;tot++}
+  var bar='<div class="bar">',leg="";
+  for(var key in MOOD_TH){if(cnt[key]){var pct=Math.round(cnt[key]/tot*100);bar+='<span style="width:'+pct+'%;background:'+MOOD_TH[key][2]+'"></span>';leg+='<span class="pill">'+MOOD_TH[key][0]+' '+cnt[key]+'</span>'}}
+  bar+='</div>';
+  return '<h2>อารมณ์ 14 วันล่าสุด ('+tot+' ครั้ง)</h2><div class="card">'+bar+'<div style="margin-top:6px">'+leg+'</div></div>';
+}
+function pickMood(el,key){MSEL=key;var bs=document.querySelectorAll("#moodpick button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
+async function saveMood(){
+  if(!MSEL){toast("เลือกอารมณ์ก่อนนะ");return}
+  var note=$("#mnote")?$("#mnote").value:"";
+  var ok=await act("mood.checkin",{mood:MSEL,note:note},"บันทึกแล้ว ดูแลใจตัวเองด้วยนะ 🤍");
+  if(ok)MSEL=null;
+}
+async function vent(){
+  try{
+    if(liff.isInClient()){await liff.sendMessages([{type:"text",text:"ฮีลใจ ปรับทุกข์กับเลขา"}]);liff.closeWindow()}
+    else{toast("เปิดในแอป LINE เพื่อคุยกับเลขานะ")}
+  }catch(e){try{liff.closeWindow()}catch(_e){toast("พิมพ์ \"ระบายหน่อย\" ในแชตได้เลย")}}
+}
+
+/* ---------- โปรไฟล์ ---------- */
+function vMe(){
+  var pr=DATA.profile||{};
+  var h='<h1>โปรไฟล์ & เลขา</h1>';
+  h+='<div class="card">';
+  h+='<label class="f">ชื่อที่ให้เลขาเรียก</label><input id="pf_name" value="'+esc(pr.display_name||"")+'" placeholder="เช่น บอส, พี่หนึ่ง">';
+  h+='<label class="f">สไตล์เลขา</label><div class="seg" id="pf_char">';
+  for(var i=0;i<3;i++){var c=["ครับบอส","ค่ะบอส","ขาบอส"][i];h+='<button data-c="'+c+'" class="'+(pr.character===c?"on":"")+'" onclick="pickChar(this,\''+c+'\')">'+esc(CHAR_LB[c])+'</button>'}
+  h+='</div>';
+  h+='<label class="f">วันเกิด (สำหรับดูดวง)</label><input id="pf_birth" type="date" value="'+esc(pr.birth_date||"")+'">';
+  h+='<label class="f">เบอร์โทร</label><input id="pf_phone" type="tel" inputmode="numeric" value="'+esc(pr.phone||"")+'" placeholder="0812345678">';
+  h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
+  h+='</div>';
+  var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
+  h+='<h2>บัญชี</h2><div class="rowitem"><div class="grow"><div class="t">แพลนปัจจุบัน</div>'+(pr.plan_expires_at?'<div class="m">ถึง '+fdate(pr.plan_expires_at)+'</div>':'')+'</div><div class="pill">'+esc(plan)+'</div></div>';
+  h+='<h2>ข้อมูลส่วนตัว (PDPA)</h2>';
+  h+='<div class="card"><button class="btn ghost" style="width:100%;margin-bottom:9px" onclick="doExport()">⬇️ ดาวน์โหลดข้อมูลของฉัน</button>';
+  h+='<button class="btn warn" style="width:100%" onclick="doErase()">🗑️ ลบข้อมูลของฉันทั้งหมด</button>';
+  h+='<div class="l" style="margin-top:8px">การลบจะลบงาน/นัด/เงิน/ประวัติแชต/ความจำ/บันทึกอารมณ์ทั้งหมด กู้คืนไม่ได้</div></div>';
+  h+='<div class="foot">My YES BOSS</div>';
+  return h;
+}
+var PCHAR=null;
+function pickChar(el,c){PCHAR=c;var bs=document.querySelectorAll("#pf_char button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
+async function saveProfile(){
+  var pl={display_name:$("#pf_name").value,birth_date:$("#pf_birth").value||"",phone:$("#pf_phone").value};
+  if(PCHAR)pl.character=PCHAR;
+  await act("profile.update",pl,"บันทึกแล้ว 🙌");
+}
+async function doExport(){
+  try{var res=await api("pdpa.export");var blob=new Blob([JSON.stringify(res.data,null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my-yesboss-data.json";a.click();toast("ดาวน์โหลดแล้ว")}catch(e){toast(e.message||"ผิดพลาด")}
+}
+async function doErase(){
+  if(!confirm("ลบข้อมูลทั้งหมดของคุณออกจากระบบ? กู้คืนไม่ได้นะ"))return;
+  if(!confirm("ยืนยันอีกครั้ง — ลบจริงๆ ใช่ไหม?"))return;
+  try{await api("pdpa.erase");$("#app").innerHTML='<div class="err">🔒 ลบข้อมูลของคุณเรียบร้อยแล้ว<br>ขอบคุณที่เคยใช้บริการนะ 🤍<br><br>หากอยากเริ่มใหม่ ทักหาเลขาในแชตได้เสมอ</div>'}catch(e){toast(e.message||"ผิดพลาด")}
+}
+
+/* ---------- 🔋 ห้องพักใจ: เกมชาร์จพลังใจ (หลอดแดง→เขียว จบด้วยก้าวจริง + เช็คเอาต์ตามจริง) ----------
+   หลักการ: สิ่งที่พิมพ์ระบายไม่ถูกส่งขึ้นระบบเลย (อยู่ในเครื่องแล้วทิ้ง) — บันทึกเฉพาะผลเช็คเอาต์ผ่าน heal.log
+   น้ำเสียงตาม character จริงของผู้ใช้ (pt()) ; ปุ่ม "ตั้งเตือน" ยิง reminder.add = เข้าระบบเตือนจริงของเลขา */
+(function(){
+var timers=[],P="ครับ",BATT=8,chargeTok=0,curSteps=[],si=0,journeyKey="",HS={};
+var STOPS=[[0,[229,72,77]],[33,[240,136,62]],[66,[245,215,10]],[100,[48,209,88]]];
+var GREEN=[48,209,88],EMO=[90,120,180];
+function delay(fn,ms){var id=setTimeout(fn,ms);timers.push(id);return id}
+function every(fn,ms){var id=setInterval(fn,ms);timers.push(id);return id}
+function clearTimers(){for(var i=0;i<timers.length;i++){clearTimeout(timers[i]);clearInterval(timers[i])}timers=[]}
+function $h(x){return document.getElementById(x)}
+function kb(){return P}
+function kbNa(){return P==="ครับ"?"นะครับ":P==="ค่ะ"?"นะคะ":"นะ"}
+function lerp(a,b,t){return[Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)]}
+function bcol(p){var a=STOPS[0];for(var i=1;i<STOPS.length;i++){var b=STOPS[i];if(p<=b[0])return lerp(a[1],b[1],(p-a[0])/(b[0]-a[0]));a=b}return GREEN}
+function rgbs(c){return"rgb("+c[0]+","+c[1]+","+c[2]+")"}
+function setBatt(p){BATT=Math.max(0,Math.min(100,p));var fc=bcol(BATT);
+  $h("hrfill").style.width=BATT+"%";$h("hrfill").style.background=rgbs(fc);$h("hrfill").style.boxShadow="0 0 18px "+rgbs(fc);
+  $h("hrpct").textContent=Math.round(BATT)+"%";$h("hrpct").style.color=rgbs(fc);
+  var sc=lerp(EMO,GREEN,BATT/100);
+  $h("hrscene").style.background="radial-gradient(95% 65% at 50% 6%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.5),transparent),radial-gradient(80% 60% at 72% 100%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.25),transparent),#0b1020"}
+function chargeTo(target,lbl,cb){var tk=++chargeTok;
+  $h("hrblbl").innerHTML='<span class="bolt on">⚡</span> '+(lbl||"กำลังชาร์จ...");
+  var start=BATT,t0=null;
+  function s(ts){if(tk!==chargeTok)return;if(!t0)t0=ts;var k=Math.min(1,(ts-t0)/900);
+    setBatt(start+(target-start)*k);
+    if(k<1)requestAnimationFrame(s);else{$h("hrblbl").innerHTML="พลังใจ "+Math.round(target)+"% 🔋";if(cb)cb()}}
+  requestAnimationFrame(s)}
+function burst(list,anim,n){var ph=$h("healroom");
+  for(var i=0;i<n;i++){(function(i){delay(function(){
+    var e=document.createElement("div");e.className="hp";e.textContent=list[Math.floor(Math.random()*list.length)];
+    e.style.left=(12+Math.random()*76)+"%";e.style.top=(anim==="hrsink"?"44%":"66%");
+    e.style.setProperty("--dx",(Math.random()*120-60)+"px");e.style.setProperty("--r",(Math.random()*180-90)+"deg");
+    e.style.animation=anim+" "+(1.6+Math.random()*1.2)+"s ease-out forwards";ph.appendChild(e);
+    setTimeout(function(){e.remove()},3200)},i*45)})(i)}}
+function render(h){clearTimers();chargeTok++;
+  $h("hrstage").innerHTML='<div class="hinner hfade">'+h+'</div>';
+  var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
+function inner(){return document.querySelector("#hrstage .hinner")}
+function head(t){return '<div class="htag"><button class="hback" id="hrbk">‹</button><span>'+steptag()+' · '+t+'</span></div>'}
+function addBtn(txt,ghost){var b=document.createElement("button");b.className="hbtn"+(ghost?" ghost":"");b.textContent=txt;inner().appendChild(b);return b}
+function once(b,fn){b.onclick=function(){if(b.dataset.x)return;b.dataset.x=1;fn()}}
+function hval(s){var e=document.querySelector(s);return e?e.value:""}
+function risky(s){return /ทำร้ายตัวเอง|ไม่อยากมีชีวิต|ไม่อยากอยู่|ฆ่าตัวตาย|อยากตาย|จบชีวิต|สิ้นหวัง|อยู่ไปทำไม/.test(s||"")}
+function proceed(t,lbl,txt){chargeTo(t,lbl,function(){var b=addBtn(txt||"ไปต่อ →");b.classList.add("hfade");once(b,step)})}
+function chipf(t){return '<div class="hchip">'+t+'</div>'}
+function note(msg){var m=document.createElement("div");m.className="hnote hfade";m.textContent=msg;inner().appendChild(m);return m}
+function wireChoices(t,notes,handlers){var cs=document.querySelectorAll("#hrstage .hchip");
+  cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
+    if(handlers&&handlers[idx]){handlers[idx]();return}
+    var msg=notes&&notes[idx];if(msg)note(msg);
+    delay(function(){proceed(t,"รับทราบ"+kb())},msg?450:260)}})}
+function steptag(){return "ก้าวที่ "+si+" / "+curSteps.length}
+function starget(){return Math.round(8+si/curSteps.length*77)}
+function runJourney(k){var j=JOURNEYS[k];journeyKey=k;HS={};EMO=j.color;curSteps=j.steps;si=0;setBatt(8);
+  $h("hrblbl").textContent="พลังใจเหลือน้อย 🪫";step()}
+function step(){if(si>=curSteps.length)return checkout();si++;curSteps[si-1](starget())}
+function tomorrow9(){var d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);return d.toISOString()}
+function logHeal(outcome){try{api("heal.log",{journey:journeyKey,outcome:outcome}).catch(function(){})}catch(e){}}
+/* ตั้งเตือนจริงผ่านเลขา — พังก็ไปต่อได้ (ห้ามขวางทางเดินใจ) */
+function setRem(t,text,okMsg){
+  api("reminder.add",{text:text,remind_at:tomorrow9()})
+    .then(function(){note(okMsg||("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 เลขาจะทวงให้"+kb()));delay(function(){proceed(t,"อยู่ในมือเลขาแล้ว")},400)})
+    .catch(function(){note("ตั้งเตือนไม่สำเร็จ — ไว้พิมพ์บอกเลขาในแชตได้"+kb());delay(function(){proceed(t,"ไปต่อกันก่อน")},400)})}
+
+function hrHome(){EMO=[90,120,180];render(
+  '<div class="htag"><button class="hback" id="hrbk">‹</button><span>ห้องพักใจ · YES BOSS</span></div>'+
+  '<h1>ตอนนี้ใจเป็นยังไง'+kb()+'บอส<span class="soft">เลือกตามจริงได้เลย ไม่ต้องฝืน — ใช้เวลาแค่ 2-3 นาที แล้วค่อยกลับไปลุยต่อ</span></h1>'+
+  '<div class="hmid"><div class="hero">💛</div></div>'+
+  '<div class="hmoods">'+
+    '<div class="hmood" data-k="anger"><span class="e">😤</span><span class="n">โมโห / หัวร้อน</span></div>'+
+    '<div class="hmood" data-k="stress"><span class="e">😵‍💫</span><span class="n">เครียด / คิดวนไม่หยุด</span></div>'+
+    '<div class="hmood" data-k="sad"><span class="e">😞</span><span class="n">เหนื่อยใจ / ท้อ</span></div>'+
+    '<div class="hmood" data-k="rest"><span class="e">☕</span><span class="n">ขอพักแป๊บ</span></div>'+
+  '</div>'+
+  '<div class="hfoot">สิ่งที่พิมพ์ระบายในห้องนี้ไม่ถูกบันทึก · เก็บเฉพาะผลว่ารอบนี้ช่วยได้ไหม</div>');
+  setBatt(8);$h("hrblbl").textContent="พลังใจ";
+  var bk=$h("hrbk");if(bk)bk.onclick=closeHealRoom;
+  document.querySelectorAll("#hrstage .hmood").forEach(function(m){m.onclick=function(){runJourney(m.getAttribute("data-k"))}})}
+
+function stepBreathe(t){render(head("คุมลมหายใจก่อน")+
+  '<h1 style="font-size:19px">ร่างกายนำใจเสมอ — คุมลมหายใจได้ ก็ดึงเกมกลับมาได้<span class="soft">1 เฮือกยาว ๆ ตามวงกลม (เข้า 4 · ค้าง 2 · ออก 6 วินาที) ปล่อยให้ไหล่ตกลงตอนหายใจออก</span></h1>'+
+  '<div class="hmid"><div class="horb" id="hrorb">พร้อมเมื่อไหร่<br>แตะปุ่มเลย</div></div>');
+  var extra=0;
+  function breatheOnce(done){
+    function phase(txt,scale,secs,next){var o=$h("hrorb");if(!o)return;
+      o.style.transitionDuration=secs+"s";o.style.transform="scale("+scale+")";
+      var left=secs;o.innerHTML=txt+"<br>"+left;
+      var iv=every(function(){left--;var el=$h("hrorb");if(!el||left<=0){clearInterval(iv);return}el.innerHTML=txt+"<br>"+left},1000);
+      delay(function(){clearInterval(iv);if(next)next()},secs*1000)}
+    phase("สูดเข้า...",1.5,4,function(){phase("ค้างไว้...",1.5,2,function(){phase("ผ่อนออก... ไหล่ตก",1,6,done)})})}
+  var b=addBtn("เริ่มหายใจ");
+  once(b,function(){b.disabled=true;chargeTo(t,"หายใจอยู่...");
+    breatheOnce(function(){var o=$h("hrorb");if(o)o.innerHTML="ดีมาก"+kb()+" 🔋";b.remove();
+      var n=addBtn("ไปต่อ →");n.classList.add("hfade");once(n,step);
+      var g=addBtn("ขออีกเฮือก (ไม่รีบ)",true);g.classList.add("hfade");
+      once(g,function(){g.disabled=true;extra++;chargeTo(Math.min(t+4*extra,90),"หายใจอยู่...");
+        breatheOnce(function(){var o2=$h("hrorb");if(o2)o2.innerHTML="ดีมาก"+kb()+" 🔋";g.disabled=false;delete g.dataset.x})})})})}
+
+function stepVent(t){render(head("เทออกมาให้หมด")+
+  '<h1 style="font-size:19px">พิมพ์ทุกอย่างที่อัดอั้น ด่าได้เต็มที่<span class="soft">ไม่มีใครเห็น ไม่ถูกบันทึก — พอกดปล่อย มันหายไปเลย ไม่เหลือหลักฐาน</span></h1>'+
+  '<textarea id="hrvent" placeholder="พิมพ์เลย ไม่ต้องเรียบเรียง..."></textarea>'+
+  '<div class="hsafe">ถ้าหนักเกินจะไหว โทร <a href="tel:1323">1323</a> ฟรี 24 ชม.</div>');
+  var b=addBtn("🔥 ปล่อยทิ้งไป");
+  once(b,function(){if(risky(hval("#hrvent")))return safety();
+    var x=document.querySelector("#hrvent");if(x)x.classList.add("gone");
+    burst(["🔥","💨","✦"],"hrup",26);b.remove();
+    proceed(t,"ทิ้งไปแล้ว ไม่เหลืออะไร")})}
+
+function stepControl(t){render(head("แยกให้ขาด")+
+  '<h1 style="font-size:19px">เรื่องที่โมโหอยู่ — มันอยู่ในมือบอสแค่ไหน<span class="soft">แรงใจมีจำกัด อย่าเผาไปกับส่วนที่เราคุมไม่ได้</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("คุมได้บางส่วน")+chipf("คุมไม่ได้เลย เป็นเรื่องของคนอื่น/ดวง")+chipf("คุมได้ แต่ยังไม่พร้อมจัดการตอนนี้")+
+  '</div></div>');
+  wireChoices(t,[
+    "งั้นเก็บแรงไว้เฉพาะส่วนที่คุมได้"+kb()+" ที่เหลือปล่อยให้เป็นเรื่องของโลก — ไม่ใช่หน้าที่บอสต้องแบกทั้งหมด",
+    "เรื่องที่คุมไม่ได้ ไม่คุ้มให้เผาพลังใจต่อ"+kb()+" โกรธได้ แต่ไม่ต้องแบกกลับบ้าน",
+    "ไม่พร้อมวันนี้ไม่ใช่ความผิด — เลือกจัดการตอนที่เราได้เปรียบ ดีกว่าตอนหัวร้อน"+kb()])}
+
+function stepNextMove(t){render(head("ก้าวถัดไป")+
+  '<h1 style="font-size:19px">ก่อนกลับไป เลือกไว้ 1 อย่าง<span class="soft">ไม่ต้องแก้ทั้งเรื่องวันนี้ เอาแค่ก้าวเดียวที่ทำได้จริง</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("ยังไม่ตอบโต้อะไรตอนนี้ (ตอนหัวร้อน นี่คือเกมที่ฉลาดสุด)")+
+    chipf("ร่างสิ่งที่จะพูด ไว้พูดตอนใจเย็น")+
+    chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง ค่อยจัดการ")+
+  '</div></div>');
+  wireChoices(t,[
+    "เยี่ยม"+kb()+" การไม่ตอบโต้ตอนนี้ = เราคุมเกม ไม่ใช่อารมณ์คุมเรา",
+    "ดี"+kb()+" คำพูดตอนใจเย็นมักได้ผลกว่าตอนเดือดเสมอ",null],
+  [null,null,function(){
+    note("จะให้เตือนว่าอะไรดี"+kbNa()+" (สั้น ๆ)");
+    var inp=document.createElement("input");inp.id="hrrem";inp.placeholder="เช่น โทรเคลียร์เรื่องเมื่อวาน";inner().appendChild(inp);
+    var b=addBtn("⏰ ตั้งเตือนพรุ่งนี้ 9:00");
+    once(b,function(){b.disabled=true;var v=(hval("#hrrem")||"").trim()||"จัดการเรื่องที่ค้างใจเมื่อวาน";
+      b.remove();setRem(t,v)})}])}
+
+function stepDump(t){render(head("เทออกจากหัว")+
+  '<h1 style="font-size:19px">เรื่องที่วนอยู่ในหัว — เทออกมาเป็นข้อ ๆ<span class="soft">ไม่ต้องเรียงสวย แค่ให้มันออกจากหัวไปอยู่บนจอ สมองจะเลิกวนเอง (ไม่ถูกบันทึก)</span></h1>'+
+  '<textarea id="hrdump" placeholder="- งานส่งพรุ่งนี้&#10;- ยังไม่ตอบลูกค้า&#10;- เงินเดือนลูกน้อง..."></textarea>');
+  var b=addBtn("เทหมดแล้ว");
+  once(b,function(){if(risky(hval("#hrdump")))return safety();b.remove();proceed(t,"ออกจากหัวแล้ว")})}
+
+function stepOneThing(t){render(head("เลือกสนามรบ")+
+  '<h1 style="font-size:19px">ในทั้งหมดนั้น มีแค่เรื่องเดียวที่สำคัญจริงพรุ่งนี้<span class="soft">พิมพ์ชื่อมันสั้น ๆ — ที่เหลือรอได้ และการปล่อยให้มันรอ ไม่ใช่ความขี้เกียจ มันคือการจัดลำดับ</span></h1>'+
+  '<input id="hrone" placeholder="เช่น ตอบใบเสนอราคาเจ้าใหญ่">'+
+  '<div class="hmid"></div>');
+  var b=addBtn("เอาเรื่องนี้แหละ");
+  var g=addBtn("นึกไม่ออก ขอข้าม",true);
+  once(b,function(){b.remove();g.remove();
+    var v=(hval("#hrone")||"").trim();HS.one=v;
+    if(v){note("“"+v+"” — พรุ่งนี้เอาแค่เรื่องนี้เรื่องเดียวให้ขยับ ก็ถือว่าชนะแล้ว"+kb())}
+    proceed(t,"เลือกสนามรบแล้ว")});
+  once(g,function(){b.remove();g.remove();proceed(t,"ไม่เป็นไร ค่อย ๆ มา")})}
+
+function stepFirstMove(t){render(head("ก้าวแรก 5 นาที")+
+  '<h1 style="font-size:19px">ก้าวแรกที่เล็กที่สุดของเรื่องนั้นคืออะไร<span class="soft">เอาแบบที่ทำเสร็จใน 5 นาที — งานใหญ่แพ้ก้าวเล็กที่เริ่มจริงเสมอ</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("เขียนลิสต์ 3 ข้อไว้ทำพรุ่งนี้เช้า")+
+    chipf("ส่งข้อความถามคนที่เกี่ยวข้อง 1 ข้อความ")+
+    chipf("เปิดไฟล์/เอกสารที่ต้องใช้ เตรียมไว้เฉย ๆ")+
+    chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง")+
+  '</div></div>');
+  wireChoices(t,[
+    "พรุ่งนี้เช้าตื่นมามีแผนรออยู่แล้ว สมองไม่ต้องวนคืนนี้"+kb(),
+    "ส่งแล้วเรื่องขยับเอง — บอลไปอยู่ฝั่งเขาแล้ว"+kb(),
+    "แค่เปิดเตรียมไว้ พรุ่งนี้แรงเสียดทานหายไปครึ่งนึง"+kb(),null],
+  [null,null,null,function(){
+    var v=(HS.one||"").trim();
+    setRem(t,v?("ลุยก้าวแรก: "+v):"ลุยก้าวแรกของเรื่องสำคัญที่เลือกไว้",
+      v?("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 — “"+v+"”"):null)}])}
+
+function stepName(t){render(head("เรียกชื่อมันให้ถูก")+
+  '<h1 style="font-size:19px">ที่หนักอยู่ตอนนี้ ใกล้เคียงอันไหนสุด<span class="soft">ความรู้สึกที่ถูกเรียกชื่อถูก จะเบาลงกว่าความรู้สึกที่ตีกันมั่ว ๆ ในหัว</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("เหนื่อยสะสม แบกมานาน")+chipf("ผิดหวัง — ทุ่มไปแล้วไม่ได้อย่างที่หวัง")+
+    chipf("เสียใจกับสิ่งที่เกิดไปแล้ว")+chipf("ว่างเปล่า ไม่รู้ทำไปเพื่ออะไร")+
+  '</div></div>');
+  wireChoices(t,[
+    "เหนื่อยสะสมไม่ใช่ความอ่อนแอ — มันคือหลักฐานว่าบอสแบกมานานแค่ไหน"+kb(),
+    "ผิดหวังแปลว่าบอสกล้าหวังและกล้าลงมือ — คนไม่ทำอะไรเลยไม่มีวันผิดหวัง"+kb(),
+    "เรื่องที่เกิดไปแล้วแก้ไม่ได้ แต่มันไม่ได้ตัดสินว่าบอสเป็นใครต่อจากนี้"+kb(),
+    "ช่วงว่างเปล่าเกิดกับคนที่วิ่งมานานทุกคน — มันคือสัญญาณให้พัก ไม่ใช่สัญญาณให้เลิก"+kb()])}
+
+function stepFriendVoice(t){render(head("พูดกับตัวเองแบบเพื่อน")+
+  '<h1 style="font-size:19px">ถ้าเพื่อนสนิทเจอแบบบอสเป๊ะ ๆ บอสจะพูดกับเขายังไง<span class="soft">เลือกประโยคที่บอสจะพูดกับเพื่อน — แล้วให้ตัวเองได้ยินบ้าง มาตรฐานเดียวกัน</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("“ที่ผ่านมามันหนักจริง ไม่ได้คิดไปเอง”")+
+    chipf("“พักก่อนได้ ไม่ใช่การยอมแพ้”")+
+    chipf("“ทำมาขนาดนี้ ถือว่าไม่ธรรมดาแล้ว”")+
+  '</div></div>');
+  wireChoices(t,null)}
+
+function stepTinyCare(t){render(head("ก้าวเล็กที่สุด")+
+  '<h1 style="font-size:19px">เลือกดูแลตัวเอง 1 อย่างหลังปิดหน้านี้<span class="soft">วันแย่ ๆ ไม่ต้องการแผนใหญ่ ต้องการแค่ก้าวเดียวที่ทำจริง</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("ดื่มน้ำ ลุกยืดตัว 1 นาที")+
+    chipf("ทักหาเพื่อน/คนที่ไว้ใจ 1 ข้อความ")+
+    chipf("คืนนี้นอนเร็วขึ้นครึ่งชั่วโมง")+
+    chipf("ยังไม่ทำอะไร ขอพักเฉย ๆ (ก็เป็นคำตอบที่ใช้ได้)")+
+  '</div></div>');
+  wireChoices(t,null)}
+
+function stepRestPick(t){render(head("พักแบบพักจริง")+
+  '<h1 style="font-size:19px">10 นาทีต่อจากนี้ พักแบบไหนดี<span class="soft">พักแบบตั้งใจ 10 นาที ได้ผลกว่าไถมือถือครึ่งชั่วโมงแบบไม่ได้พักจริง</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("เดินสั้น ๆ ไม่จับมือถือ")+chipf("ชงอะไรอุ่น ๆ ดื่ม ไม่เปิดงาน")+
+    chipf("เปิดเพลง 2 เพลง หลับตาฟังให้จบ")+chipf("งีบ 15 นาที ตั้งปลุกไว้")+
+  '</div></div>');
+  wireChoices(t,null)}
+
+function checkout(){render('<div class="htag"><button class="hback" id="hrbk">‹</button><span>ก่อนกลับไป</span></div>'+
+  '<h1 style="font-size:20px">เอาจริง ๆ — ตอนนี้ใจเป็นไง'+kb()+'<span class="soft">ตอบตามจริง ไม่ต้องเกรงใจ'+kbNa()+'</span></h1>'+
+  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
+    chipf("เบาขึ้น")+chipf("พอ ๆ เดิม")+chipf("ยังหนักอยู่")+'</div></div>');
+  var cs=document.querySelectorAll("#hrstage .hchip");
+  cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
+    delay(function(){[finBetter,finSame,finHeavy][idx]()},300)}})}
+
+function finBetter(){logHeal("better");chargeTo(100,"ชาร์จครบรอบ",function(){burst(["💚","⚡","✨"],"hrup",26);
+  render('<div class="htag">🔋 100%</div>'+
+    '<h1>กลับไปลุยต่อได้'+kb()+'บอส<span class="soft">ปัญหาอาจยังอยู่ที่เดิม แต่บอสพร้อมกว่าเมื่อ 3 นาทีที่แล้ว — และก้าวถัดไปก็เลือกไว้แล้ว เท่านี้พอสำหรับตอนนี้</span></h1>'+
+    '<div class="hmid"><div class="hero">🎉</div></div>');
+  var a=addBtn("เสร็จแล้ว กลับไปลุยต่อ");once(a,closeHealRoom);
+  var b=addBtn("💬 แชตกับเลขาต่อ",true);once(b,vent)})}
+function finSame(){logHeal("same");chargeTo(72,"ก็ยังดีกว่าตอนเข้ามา",function(){
+  render('<div class="htag">🔋 72%</div>'+
+    '<h1>พอ ๆ เดิมก็ไม่แปลก'+kb()+'<span class="soft">บางเรื่องมันหนักจริง รอบเดียวไม่พอ — ไม่ได้แปลว่าบอสทำผิดวิธี แปลว่าเรื่องมันใหญ่ ลองอีกรอบสั้น ๆ หรือเล่าให้เลขาฟังต่อก็ได้</span></h1>'+
+    '<div class="hmid"><div class="hero">🛋️</div></div>');
+  var a=addBtn("อีกรอบสั้น ๆ");once(a,function(){runJourney(journeyKey)});
+  var b=addBtn("💬 เล่าให้เลขาฟังต่อ",true);once(b,vent);
+  var c=addBtn("กลับหน้าฮีลใจ",true);once(c,closeHealRoom)})}
+function finHeavy(){logHeal("heavy");render('<div class="htag">เราอยู่ตรงนี้</div>'+
+    '<div class="hmid"><div class="hero">🤍</div>'+
+    '<h1 style="font-size:20px;margin-top:14px">งั้นอย่าเพิ่งอยู่คนเดียวตอนนี้'+kb()+'<span class="soft">บางเรื่องต้องการคนฟังจริง ๆ ไม่ใช่หน้าจอ — คุยกับเลขาต่อได้เลย หรือถ้าหนักมากจริง ๆ สาย 1323 มีคนรับฟังตลอด 24 ชม.</span></h1></div>');
+  $h("hrblbl").innerHTML="เราอยู่ตรงนี้กับบอส";
+  var a=addBtn("💬 คุยกับเลขาตอนนี้");once(a,vent);
+  var tl=document.createElement("a");tl.className="hbtn ghost";tl.href="tel:1323";tl.textContent="📞 สายด่วนใจ 1323 (ฟรี 24 ชม.)";
+  tl.style.textAlign="center";tl.style.textDecoration="none";tl.style.display="block";inner().appendChild(tl);
+  var b=addBtn("กลับหน้าฮีลใจ",true);once(b,closeHealRoom)}
+function safety(){logHeal("safety");render('<div class="htag"><button class="hback" id="hrbk">‹</button><span>เราห่วงบอสนะ</span></div>'+
+    '<div class="hmid"><div class="hero">🤍</div>'+
+    '<h1 style="font-size:20px;margin-top:14px">บอสไม่ได้อยู่คนเดียว'+kb()+'<span class="soft">ที่พิมพ์มาแปลว่าข้างในหนักมากจริง ๆ — เรื่องแบบนี้ควรมีคนฟังเป็นคน ๆ จริง ไม่ใช่ให้บอสแบกเอง</span></h1></div>');
+  $h("hrblbl").innerHTML="เราอยู่ตรงนี้กับบอส";
+  var a=document.createElement("a");a.className="hbtn";a.href="tel:1323";a.textContent="📞 โทรสายด่วนใจ 1323 (ฟรี 24 ชม.)";
+  a.style.textAlign="center";a.style.textDecoration="none";a.style.display="block";inner().appendChild(a);
+  var b=addBtn("คุยกับเลขาตอนนี้ 💬",true);once(b,vent);
+  var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
+
+var JOURNEYS={
+  anger: {color:[210,70,70],  steps:[stepVent,stepBreathe,stepControl,stepNextMove]},
+  stress:{color:[225,140,70], steps:[stepBreathe,stepDump,stepOneThing,stepFirstMove]},
+  sad:   {color:[95,120,190], steps:[stepName,stepBreathe,stepFriendVoice,stepTinyCare]},
+  rest:  {color:[60,150,160], steps:[stepBreathe,stepRestPick]}
+};
+window.openHealRoom=function(){P=pt();$h("healroom").style.display="block";document.body.style.overflow="hidden";hrHome()};
+function closeHealRoom(){clearTimers();chargeTok++;$h("healroom").style.display="none";document.body.style.overflow="";try{reload().catch(function(){})}catch(e){}}
+})();
+
+boot();
+</script>
+</body></html>
