@@ -599,6 +599,11 @@ function vStory(){
   var s=DATA.story||{facts:[],files:[],folders:[]};
   var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
   var h='<h1>📖 เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
+  /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
+  var pf=DATA.profile||{};
+  h+='<div class="card" style="margin-bottom:12px"><div class="ct">🪪 ข้อมูลของบอส<span class="more" onclick="go(\'me\')">แก้ไข ›</span></div>';
+  h+='<div class="rowitem"><div style="font-size:20px">🙋</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">📱 '+(pf.phone?esc(pf.phone):'ยังไม่บันทึกเบอร์')+' · 🎂 '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
+  h+='</div>';
   /* ลิสต์เรื่องราวทั้งหมดที่เลขาเก็บให้: ความจำ / ไฟล์ / ปฏิทินนัด — กดกระโดดไปดูได้เลย */
   h+='<div class="grid">';
   h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_mem\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(facts.length)+'</div><div class="l">🧠 ความจำ (เรื่อง)</div></div>';
