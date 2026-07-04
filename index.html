@@ -598,7 +598,7 @@ function vMoney(){
   if(MOFF===0&&MSC==="all"){var d=DATA.money.day;h+='<div class="gh">วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · เหลือ '+num(d.net)+'</div>'}
   if(rows.length&&inc+exp>0){h+='<div style="display:flex;justify-content:center;margin:6px 0">'+donutSvg(inc,exp)+'</div>'}
   if(MSC==="all"&&(scp.personal||scp.family||scp.company)){
-    h+='<div class="gh">'+icn("banknote",13)+' ตามกระเป๋า: '+(scp.personal?"👤 "+num(scp.personal)+"  ":"")+(scp.family?"🏠 "+num(scp.family)+"  ":"")+(scp.company?"🏢 "+num(scp.company):"")+'</div>';
+    h+='<div class="gh">'+icn("banknote",13)+' ตามกระเป๋า: '+(scp.personal?SCOPE_TH.personal+" "+num(scp.personal)+"  ":"")+(scp.family?SCOPE_TH.family+" "+num(scp.family)+"  ":"")+(scp.company?SCOPE_TH.company+" "+num(scp.company):"")+'</div>';
   }
   var ck=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]});
   if(ck.length){
