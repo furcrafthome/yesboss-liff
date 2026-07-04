@@ -95,6 +95,15 @@ label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:6
 @keyframes runb{0%{margin-left:-45%}100%{margin-left:100%}}
 .ldrtx{font-size:13.5px;color:#B0889A}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* 🔋 การ์ดฮีโร่ทางเข้าห้องพักใจ — ใหญ่ เด่น ชวนกด */
+.hlhero{position:relative;overflow:hidden;background:linear-gradient(150deg,#1b2450,#0b1020 70%);border-radius:22px;padding:24px 18px 20px;margin-top:12px;text-align:center;cursor:pointer;box-shadow:0 10px 30px rgba(18,24,58,.35)}
+.hlhero:before{content:"";position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:280px;height:280px;background:radial-gradient(circle,rgba(122,162,255,.38),transparent 65%);pointer-events:none}
+.hlhero img{width:104px;position:relative;animation:hlfloat 2.6s ease-in-out infinite}
+@keyframes hlfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hlhero .hlt{font-size:24px;font-weight:800;color:#fff;margin-top:4px;position:relative}
+.hlhero .hls{font-size:13.5px;color:#cfd8f7;line-height:1.65;margin-top:6px;position:relative}
+.hlhero .hlbtn{position:relative;display:block;width:100%;border:0;border-radius:99px;margin-top:16px;padding:16px;font-size:17px;font-weight:800;color:#12183a;background:#fff;animation:hlpulse 1.8s ease-in-out infinite;cursor:pointer}
+@keyframes hlpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(255,255,255,0);transform:scale(1.02)}}
 /* ---------- 🔋 ห้องพักใจ (โลกอีกใบ: มืด สงบ — จงใจต่างจากธีมหลัก) ---------- */
 #healroom{position:fixed;inset:0;z-index:50;background:#0b1020;display:none;color:#eef2ff}
 #healroom .hwrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
@@ -654,7 +663,12 @@ function vHeal(){
   var h='<h1>💛 ฮีลใจ</h1><div class="sub">พื้นที่ปลอดภัยของคุณ · ข้อมูลนี้เป็นความลับเฉพาะคุณ</div>';
   var recentSafety=(DATA.mood||[]).slice(0,10).some(function(m){return m.is_safety});
   if(recentSafety){h+='<div style="height:10px"></div>'+safetyCard()}
-  h+='<div class="card" style="background:linear-gradient(135deg,#182042,#0b1020);border:none;margin-top:12px"><div style="font-weight:800;font-size:16px;color:#fff">🔋 ห้องพักใจ</div><div style="font-size:12.5px;color:#cfd8f7;margin-top:3px;line-height:1.6">โมโห เครียด เหนื่อยใจ? เข้าไปชาร์จพลังใจ 2-3 นาที แล้วค่อยกลับไปลุยต่อ</div><button class="btn" style="width:100%;margin-top:11px;background:#fff;color:#12183a;box-shadow:none" onclick="openHealRoom()">เข้าห้องพักใจ</button></div>';
+  h+='<div class="hlhero" onclick="openHealRoom()">'
+    +'<img src="img/p10-heart.png" alt="">'
+    +'<div class="hlt">🔋 ห้องพักใจ</div>'
+    +'<div class="hls">โมโห เครียด เหนื่อยใจ?<br>แวะชาร์จพลังใจแค่ 2–3 นาที แล้วค่อยกลับไปลุยต่อ</div>'
+    +'<button class="hlbtn" onclick="event.stopPropagation();openHealRoom()">🔋 เข้าห้องพักใจ →</button>'
+    +'</div>';
   h+='<h2>วันนี้รู้สึกยังไง?</h2><div class="card"><div class="moods" id="moodpick">';
   for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+MOOD_TH[key][0]+'</span>'+MOOD_TH[key][1]+'</button>'}
   h+='</div><input id="mnote" placeholder="อยากบันทึกอะไรไหม (ไม่ใส่ก็ได้)"><button class="btn" style="width:100%;margin-top:10px" onclick="saveMood()">บันทึกความรู้สึก</button></div>';
