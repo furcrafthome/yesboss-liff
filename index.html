@@ -94,6 +94,8 @@ label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:6
 .ldrbar i{display:block;height:100%;width:45%;background:linear-gradient(90deg,#F4A9C0,#ED6885);border-radius:99px;animation:runb 1.1s ease-in-out infinite}
 @keyframes runb{0%{margin-left:-45%}100%{margin-left:100%}}
 .ldrtx{font-size:13.5px;color:#B0889A}
+.ik{vertical-align:-3px}
+.ne .ik{display:block;margin:2px auto 3px}
 @keyframes sp{to{transform:rotate(360deg)}}
 /* 🔋 การ์ดฮีโร่ทางเข้าห้องพักใจ — ใหญ่ เด่น ชวนกด */
 .hlhero{position:relative;overflow:hidden;background:linear-gradient(150deg,#1b2450,#0b1020 70%);border-radius:22px;padding:24px 18px 20px;margin-top:12px;text-align:center;cursor:pointer;box-shadow:0 10px 30px rgba(18,24,58,.35)}
@@ -162,8 +164,36 @@ label.f{display:block;font-size:12px;color:#A98194;margin-top:13px;font-weight:6
 <div id="toast"></div>
 <script>
 var IDT=null,DATA=null,TAB="home",MSEL=null;
+var ICONS={
+home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+check:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+banknote:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+heart:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+bulb:'<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/>',
+folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/>',
+gift:'<path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+sparkles:'<path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/>',
+message:'<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>',
+battery:'<path d="M5 18H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.19"/><path d="M15 6h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3.19"/><path d="M23 13v-2"/><path d="M11 6L7 12h6l-4 6"/>',
+sun:'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>',
+moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+trash:'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/>',
+pencil:'<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
+receipt:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/>',
+briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>',
+refresh:'<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+up:'<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>',
+down:'<path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>'};
+function icn(n,s){return '<svg class="ik" width="'+(s||18)+'" height="'+(s||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||"")+'</svg>'}
+
 var MOOD_TH={stressed:["😣","เครียด","#db6d28"],sad:["😢","เศร้า","#6e7bdb"],angry:["😠","โกรธ","#f85149"],anxious:["😰","กังวล","#d29922"],tired:["😮‍💨","เหนื่อยล้า","#8b949e"],lonely:["🥺","เหงา","#a371f7"],ok:["🙂","เฉยๆ","#3fb950"],happy:["😄","สดใส","#2ea043"]};
-var SCOPE_TH={company:"🏢",family:"🏠",personal:"👤"};
+var SCOPE_TH={company:icn("briefcase",13),family:icn("home",13),personal:icn("user",13)};
 var CHAR_LB={"ครับบอส":"สุภาพ (ครับ)","ค่ะบอส":"สุภาพ (ค่ะ)","ขาบอส":"สดใส (ขา)"};
 function $(s){return document.querySelector(s)}
 function esc(s){s=(s==null?"":""+s);return s.replace(/[<>&"]/g,function(c){return({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"})[c]})}
@@ -231,7 +261,7 @@ function draw(){
   $("#app").innerHTML=v+nav();
 }
 function nav(){
-  var it=[["home","🏠","หน้าหลัก"],["todo","✅","เตือน+งาน"],["money","💰","เงิน"],["story","📖","เรื่องราว"],["heal","💛","ฮีลใจ"],["me","⚙️","โปรไฟล์"]];
+  var it=[["home",icn("home",21),"หน้าหลัก"],["todo",icn("check",21),"เตือน+งาน"],["money",icn("banknote",21),"เงิน"],["story",icn("book",21),"เรื่องราว"],["heal",icn("heart",21),"ฮีลใจ"],["me",icn("user",21),"โปรไฟล์"]];
   var h='<div class="nav">';
   for(var i=0;i<it.length;i++){h+='<button class="'+(TAB===it[i][0]?"on":"")+'" onclick="go(\''+it[i][0]+'\')"><span class="ne">'+it[i][1]+'</span>'+it[i][2]+'</button>'}
   return h+'</div>';
@@ -373,7 +403,7 @@ function bkkYMD(iso){try{return new Date(iso).toLocaleDateString("en-CA",{timeZo
 function thToday(){try{return new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",timeZone:"Asia/Bangkok"})}catch(e){return ""}}
 function thDate(iso){try{return new Date(iso+"T00:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}catch(e){return iso}}
 function thMonth(off){var d=new Date();d.setMonth(d.getMonth()+off);return THMON[d.getMonth()]+" "+d.getFullYear()}
-function stat(bg,ic,col,val,cap,tab){return '<div class="st" onclick="go(\''+tab+'\')" style="cursor:pointer"><div class="ico" style="background:'+bg+'">'+ic+'</div><div><div class="big" style="color:'+col+'">'+num(val)+'</div><div class="cap">'+cap+'</div></div></div>'}
+function stat(bg,ic,col,val,cap,tab){return '<div class="st" onclick="go(\''+tab+'\')" style="cursor:pointer"><div class="ico" style="background:'+bg+';color:'+col+'">'+ic+'</div><div><div class="big" style="color:'+col+'">'+num(val)+'</div><div class="cap">'+cap+'</div></div></div>'}
 function donutSvg(income,expense){
   var tot=(income||0)+(expense||0),c=327,inc=tot>0?income/tot*c:0,exp=tot>0?expense/tot*c:0;
   var s='<svg width="122" height="122" viewBox="0 0 126 126" style="flex:none">';
@@ -439,16 +469,16 @@ function vHome(){
   var openT=(DATA.tasks&&DATA.tasks.open)||[];
   var facts=(DATA.story&&DATA.story.facts)||[],files=(DATA.story&&DATA.story.files)||[];
   var lastMood=DATA.mood&&DATA.mood[0];
-  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">↻ รีเฟรช</span><span class="plan">'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div></div>';
+  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</span><span class="plan">'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div></div>';
   h+='<div class="stats">';
-  h+=stat("#FDECEF","⏰","#E0466E",todayN,"นัดวันนี้","todo");
-  h+=stat("#E7F6EC","✅","#1A7F37",openT.length,"งานค้าง","todo");
-  h+=stat("#FEF3E2","🧠","#D98324",facts.length,"ความจำ","story");
-  h+=stat("#EAF3FF","📁","#3B82F6",files.length,"ไฟล์","story");
+  h+=stat("#FDECEF",icn("clock",22),"#E0466E",todayN,"นัดวันนี้","todo");
+  h+=stat("#E7F6EC",icn("check",22),"#1A7F37",openT.length,"งานค้าง","todo");
+  h+=stat("#FEF3E2",icn("bulb",22),"#D98324",facts.length,"ความจำ","story");
+  h+=stat("#EAF3FF",icn("folder",22),"#3B82F6",files.length,"ไฟล์","story");
   h+='</div>';
   if(lastMood&&lastMood.is_safety){h+=safetyCard()}
   /* ลำดับตามบอสสั่ง 2026-07-04: งานที่ต้องทำ -> ปฏิทิน -> รายรับรายจ่าย */
-  var taskCard='<div class="card"><div class="ct">✅ งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
+  var taskCard='<div class="card"><div class="ct">'+icn("check",16)+' งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
   if(!openT.length){taskCard+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
   var lim=Math.min(openT.length,6);
   for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
@@ -456,8 +486,8 @@ function vHome(){
   if(openT.length>lim){taskCard+='<div class="gh" style="text-align:center;color:#C77;cursor:pointer;margin:8px 0 2px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</div>'}
   taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
   var sel=SELISO||today;
-  var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">📅 นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
-  var moneyCard='<div class="card"><div class="ct">💰 การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
+  var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
+  var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
     +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
     +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
     +'<div style="border-top:1px solid #F5E3EB;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>'
@@ -465,7 +495,7 @@ function vHome(){
   h+=taskCard+calCard+moneyCard;
   var me=lastMood?(MOOD_TH[lastMood.mood]||["🙂"])[0]:"🤍";
   h+='<div class="stats" style="margin:4px 0 0">';
-  h+='<div class="st" onclick="fortune()" style="cursor:pointer"><div class="ico" style="background:#F3EAFF">🔮</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></div>';
+  h+='<div class="st" onclick="fortune()" style="cursor:pointer"><div class="ico" style="background:#F3EAFF;color:#8957e5">'+icn("sparkles",22)+'</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></div>';
   h+='<div class="st" onclick="vent()" style="cursor:pointer"><div class="ico" style="background:#FFF6E2">'+me+'</div><div><div style="font-size:14.5px;font-weight:800">ระบายกับเลขา</div><div class="cap">อยู่เป็นเพื่อนเสมอ</div></div></div>';
   h+='</div>';
   h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
@@ -478,17 +508,17 @@ function safetyCard(){
 /* ---------- เตือน + งาน ---------- */
 function vTodo(){
   var h='<h1>เตือน + งาน</h1>';
-  h+='<h2>⏰ การแจ้งเตือนที่รออยู่ ('+DATA.reminders.length+')</h2>';
+  h+='<h2>'+icn("clock",17)+' การแจ้งเตือนที่รออยู่ ('+DATA.reminders.length+')</h2>';
   if(!DATA.reminders.length){h+='<div class="empty">ยังไม่มีการแจ้งเตือน — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 9 โมงเตือนโทรหาลูกค้า"</div>'}
   for(var i=0;i<DATA.reminders.length;i++){var r=DATA.reminders[i];
     h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(r.reminder_text)+(r.repeat&&r.repeat!=="none"?'<span class="pill">🔁 '+esc(r.repeat)+'</span>':'')+'</div><div class="m">'+(r.all_day?"ทั้งวัน · ":"")+fdate(r.remind_at)+'</div><div id="rs'+i+'"></div></div>'+
-      '<button class="ic" onclick="rsched('+i+')">🕑</button><button class="ic" onclick="delRem(\''+r.id+'\')">🗑️</button></div>';
+      '<button class="ic" onclick="rsched('+i+')">'+icn("clock",15)+'</button><button class="ic" onclick="delRem(\''+r.id+'\')">'+icn("trash",15)+'</button></div>';
   }
   h+='<h2>✅ งานที่ต้องทำ ('+DATA.tasks.open.length+')</h2>';
   h+='<div class="rowitem"><input id="ntask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTask()">เพิ่ม</button></div>';
   if(!DATA.tasks.open.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
   for(var j=0;j<DATA.tasks.open.length;j++){var t=DATA.tasks.open[j];
-    h+='<div class="rowitem"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div><button class="ic" onclick="delTask(\''+t.id+'\')">🗑️</button></div>';
+    h+='<div class="rowitem"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div><button class="ic" onclick="delTask(\''+t.id+'\')">'+icn("trash",15)+'</button></div>';
   }
   if(DATA.tasks.done.length){h+='<h2>เสร็จแล้วล่าสุด</h2>';
     for(var k=0;k<DATA.tasks.done.length;k++){var d=DATA.tasks.done[k];
@@ -514,7 +544,7 @@ async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}awai
 /* ---------- เงิน ---------- */
 /* ---------- 💰 แท็บเงิน v2: เลือกเดือนย้อนหลัง + แยกกระเป๋า + หมวดหมู่ + Pro teaser ---------- */
 var MOFF=0,MSC="all",MCACHE={};
-var SCOPE_TABS=[["all","ทั้งหมด"],["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]];
+var SCOPE_TABS=[["all","ทั้งหมด"],["personal",icn("user",13)+" ส่วนตัว"],["family",icn("home",13)+" ครอบครัว"],["company",icn("briefcase",13)+" บริษัท"]];
 function mKey(){return MOFF+"|"+MSC}
 function mMonthStr(){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+MOFF);var y=d.getFullYear(),m=d.getMonth()+1;return y+"-"+(m<10?"0":"")+m}
 function mIsPro(){var pl=(DATA&&DATA.profile&&DATA.profile.plan)||"";return !!pl&&pl!=="free"}
@@ -560,15 +590,15 @@ function vMoney(){
     if(r.scope&&scp[r.scope]!==undefined)scp[r.scope]+=a;
     vat+=Number(r.vat||0);wht+=Number(r.wht||0)}
   h+='<div class="grid">';
-  h+=card('<span style="color:#3fb950">'+num(inc)+'</span>',"💰 รายรับ (บาท)");
-  h+=card('<span style="color:#f85149">'+num(exp)+'</span>',"💸 รายจ่าย (บาท)");
-  h+=card(num(inc-exp)+" ฿","🧮 คงเหลือ");
-  h+=card("VAT "+num(vat)+" · WHT "+num(wht),"🧾 ภาษี (บาท)");
+  h+=card('<span style="color:#3fb950">'+num(inc)+'</span>',icn("up",13)+" รายรับ (บาท)");
+  h+=card('<span style="color:#f85149">'+num(exp)+'</span>',icn("down",13)+" รายจ่าย (บาท)");
+  h+=card(num(inc-exp)+" ฿",icn("banknote",13)+" คงเหลือ");
+  h+=card("VAT "+num(vat)+" · WHT "+num(wht),icn("receipt",13)+" ภาษี (บาท)");
   h+='</div>';
   if(MOFF===0&&MSC==="all"){var d=DATA.money.day;h+='<div class="gh">วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · เหลือ '+num(d.net)+'</div>'}
   if(rows.length&&inc+exp>0){h+='<div style="display:flex;justify-content:center;margin:6px 0">'+donutSvg(inc,exp)+'</div>'}
   if(MSC==="all"&&(scp.personal||scp.family||scp.company)){
-    h+='<div class="gh">👛 ตามกระเป๋า: '+(scp.personal?"👤 "+num(scp.personal)+"  ":"")+(scp.family?"🏠 "+num(scp.family)+"  ":"")+(scp.company?"🏢 "+num(scp.company):"")+'</div>';
+    h+='<div class="gh">'+icn("banknote",13)+' ตามกระเป๋า: '+(scp.personal?"👤 "+num(scp.personal)+"  ":"")+(scp.family?"🏠 "+num(scp.family)+"  ":"")+(scp.company?"🏢 "+num(scp.company):"")+'</div>';
   }
   var ck=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]});
   if(ck.length){
@@ -583,7 +613,7 @@ function vMoney(){
   if(!rows.length){h+='<div class="empty">เดือนนี้ยังไม่มีรายการ'+(MSC!=="all"?"ในกระเป๋านี้":"")+' — ส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
   for(var j=0;j<rows.length;j++){var e=rows[j];var isInc=e.kind==="income";
     h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+esc(e.category||e.note||(isInc?"รายรับ":"รายจ่าย"))+'</div><div class="m">'+fdate(e.created_at)+'</div></div>'+
-      '<div style="font-weight:700;color:'+(isInc?"#3fb950":"#f85149")+'">'+(isInc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">🗑️</button></div>';
+      '<div style="font-weight:700;color:'+(isInc?"#3fb950":"#f85149")+'">'+(isInc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">'+icn("trash",15)+'</button></div>';
   }
   if(!mIsPro()){h+=mProCard("รีพอตธุรกิจแบบเต็ม","ย้อนหลังไม่จำกัด · สรุปรายปี · ส่งออกไฟล์ให้บัญชี · แยก VAT รายใบ")}
   h+='<div class="foot">แก้ยอดผิด: ลบรายการนั้นแล้วพิมพ์ใหม่ในแชตได้เลย</div>';
@@ -598,20 +628,20 @@ function docIcon(t){return DOC_TH[t]||"📎"}
 function vStory(){
   var s=DATA.story||{facts:[],files:[],folders:[]};
   var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
-  var h='<h1>📖 เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
+  var h='<h1>'+icn("book",22)+' เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
   /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
   var pf=DATA.profile||{};
-  h+='<div class="card" style="margin-bottom:12px"><div class="ct">🪪 ข้อมูลของบอส<span class="more" onclick="go(\'me\')">แก้ไข ›</span></div>';
-  h+='<div class="rowitem"><div style="font-size:20px">🙋</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">📱 '+(pf.phone?esc(pf.phone):'ยังไม่บันทึกเบอร์')+' · 🎂 '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div class="ct">'+icn("user",16)+' ข้อมูลของบอส<span class="more" onclick="go(\'me\')">แก้ไข ›</span></div>';
+  h+='<div class="rowitem"><div style="color:#E0466E">'+icn("user",22)+'</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">'+icn("phone",12)+' '+(pf.phone?esc(pf.phone):'ยังไม่บันทึกเบอร์')+' · '+icn("gift",12)+' '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
   h+='</div>';
   /* ลิสต์เรื่องราวทั้งหมดที่เลขาเก็บให้: ความจำ / ไฟล์ / ปฏิทินนัด — กดกระโดดไปดูได้เลย */
   h+='<div class="grid">';
-  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_mem\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(facts.length)+'</div><div class="l">🧠 ความจำ (เรื่อง)</div></div>';
-  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_files\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(files.length)+'</div><div class="l">📁 ไฟล์ในคลัง</div></div>';
-  h+='<div class="c" style="cursor:pointer;grid-column:1 / -1" onclick="go(\'home\')"><div class="v">'+num((DATA.reminders||[]).length)+'</div><div class="l">📅 นัด/เตือนที่รออยู่ — กดดูปฏิทินเต็มเดือน</div></div>';
+  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_mem\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(facts.length)+'</div><div class="l">'+icn("bulb",13)+' ความจำ (เรื่อง)</div></div>';
+  h+='<div class="c" style="cursor:pointer" onclick="document.getElementById(\'st_files\').scrollIntoView({behavior:\'smooth\'})"><div class="v">'+num(files.length)+'</div><div class="l">'+icn("folder",13)+' ไฟล์ในคลัง</div></div>';
+  h+='<div class="c" style="cursor:pointer;grid-column:1 / -1" onclick="go(\'home\')"><div class="v">'+num((DATA.reminders||[]).length)+'</div><div class="l">'+icn("calendar",13)+' นัด/เตือนที่รออยู่ — กดดูปฏิทินเต็มเดือน</div></div>';
   h+='</div>';
   /* ---- ความจำ: ดูอย่างเดียว + แจ้งแก้ไข (ไม่ให้พิมพ์แก้ตรง) ---- */
-  h+='<h2 id="st_mem">🧠 ความจำของบอส</h2>';
+  h+='<h2 id="st_mem">'+icn("bulb",17)+' ความจำของบอส</h2>';
   h+='<div class="l" style="margin:0 2px 11px">เลขาจำเองจากที่บอสคุยในแชต · ถ้าจำผิดกด ✏️ แจ้งแก้ไขได้เลย</div>';
   if(!facts.length){h+='<div class="empty">ยังไม่มีความจำ — เล่าเรื่องงาน/ลูกค้าให้เลขาฟังในแชต เดี๋ยวจำให้เอง เช่น "ลูกค้าสมชายชอบต่อราคา"</div>'}
   else{
@@ -621,12 +651,12 @@ function vStory(){
       h+='<div class="gh">'+FACT_TH[key][0]+' '+FACT_TH[key][1]+' ('+arr.length+')</div>';
       for(var j=0;j<arr.length;j++){var f=arr[j];
         h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(f.fact_text)+(f.subject?'<span class="pill">'+esc(f.subject)+'</span>':'')+'</div><div class="m">จำเมื่อ '+fdate(f.last_seen_at||f.created_at)+'</div></div>'+
-          '<button class="ic" title="แจ้งแก้ไข" onclick="reportFact(\''+f.id+'\')">✏️</button><button class="ic" title="ลบ" onclick="delFact(\''+f.id+'\')">🗑️</button></div>';
+          '<button class="ic" title="แจ้งแก้ไข" onclick="reportFact(\''+f.id+'\')">'+icn("pencil",15)+'</button><button class="ic" title="ลบ" onclick="delFact(\''+f.id+'\')">'+icn("trash",15)+'</button></div>';
       }
     }
   }
   /* ---- คลังไฟล์: จัดเป็นโฟลเดอร์ (มีทั้งไฟล์และภาพ) ---- */
-  h+='<h2 id="st_files">📁 คลังไฟล์</h2>';
+  h+='<h2 id="st_files">'+icn("folder",17)+' คลังไฟล์</h2>';
   if(!files.length){h+='<div class="empty">ยังไม่มีไฟล์ — ส่งรูป/สลิป/เอกสารเข้าแชต เดี๋ยวเก็บเข้าคลังให้</div>'}
   else{
     var byF={};for(var k=0;k<files.length;k++){var fid=files[k].folder_id||"_none";(byF[fid]=byF[fid]||[]).push(files[k])}
@@ -644,7 +674,7 @@ function vStory(){
   return h;
 }
 function fileRow(d){var nm=d.title||d.file_name||"ไฟล์";
-  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" onclick="delFile(\''+d.id+'\')">🗑️</button></div>';
+  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
 }
 function toggleFolder(id){var e=$("#fld_"+id),a=$("#fa_"+id);if(!e){return}var op=e.style.display==="none";e.style.display=op?"block":"none";if(a){a.textContent=op?"▾":"▸"}}
 function reportFact(id){
@@ -668,14 +698,14 @@ async function openFile(id){
 
 /* ---------- ฮีลใจ ---------- */
 function vHeal(){
-  var h='<h1>💛 ฮีลใจ</h1><div class="sub">พื้นที่ปลอดภัยของคุณ · ข้อมูลนี้เป็นความลับเฉพาะคุณ</div>';
+  var h='<h1>'+icn("heart",22)+' ฮีลใจ</h1><div class="sub">พื้นที่ปลอดภัยของคุณ · ข้อมูลนี้เป็นความลับเฉพาะคุณ</div>';
   var recentSafety=(DATA.mood||[]).slice(0,10).some(function(m){return m.is_safety});
   if(recentSafety){h+='<div style="height:10px"></div>'+safetyCard()}
   h+='<div class="hlhero" onclick="openHealRoom()">'
     +'<img src="img/p10-heart.png" alt="">'
-    +'<div class="hlt">🔋 ห้องพักใจ</div>'
+    +'<div class="hlt">'+icn("battery",22)+' ห้องพักใจ</div>'
     +'<div class="hls">โมโห เครียด เหนื่อยใจ?<br>แวะชาร์จพลังใจแค่ 2–3 นาที แล้วค่อยกลับไปลุยต่อ</div>'
-    +'<button class="hlbtn" onclick="event.stopPropagation();openHealRoom()">🔋 เข้าห้องพักใจ →</button>'
+    +'<button class="hlbtn" onclick="event.stopPropagation();openHealRoom()">'+icn("battery",17)+' เข้าห้องพักใจ →</button>'
     +'</div>';
   h+='<h2>วันนี้รู้สึกยังไง?</h2><div class="card"><div class="moods" id="moodpick">';
   for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+MOOD_TH[key][0]+'</span>'+MOOD_TH[key][1]+'</button>'}
@@ -726,15 +756,15 @@ function vMe(){
   h+='</div>';
   h+='<label class="f">วันเกิด (สำหรับดูดวง)</label><input id="pf_birth" type="date" value="'+esc(pr.birth_date||"")+'">';
   h+='<label class="f">เบอร์โทร</label><input id="pf_phone" type="tel" inputmode="numeric" value="'+esc(pr.phone||"")+'" placeholder="0812345678">';
-  h+='<label class="f">☀️ เวลาส่งสรุปตอนเช้า</label>'+hourSel("pf_bh",pr.brief_hour==null?8:Number(pr.brief_hour));
-  h+='<label class="f">🌙 เวลาส่งสรุปตอนเย็น</label>'+hourSel("pf_rh",pr.report_hour==null?20:Number(pr.report_hour));
+  h+='<label class="f">'+icn("sun",13)+' เวลาส่งสรุปตอนเช้า</label>'+hourSel("pf_bh",pr.brief_hour==null?8:Number(pr.brief_hour));
+  h+='<label class="f">'+icn("moon",13)+' เวลาส่งสรุปตอนเย็น</label>'+hourSel("pf_rh",pr.report_hour==null?20:Number(pr.report_hour));
   h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
   h+='<h2>บัญชี</h2><div class="rowitem"><div class="grow"><div class="t">แพลนปัจจุบัน</div>'+(pr.plan_expires_at?'<div class="m">ถึง '+fdate(pr.plan_expires_at)+'</div>':'')+'</div><div class="pill">'+esc(plan)+'</div></div>';
   h+='<h2>ข้อมูลส่วนตัว (PDPA)</h2>';
-  h+='<div class="card"><button class="btn ghost" style="width:100%;margin-bottom:9px" onclick="doExport()">⬇️ ดาวน์โหลดข้อมูลของฉัน</button>';
-  h+='<button class="btn warn" style="width:100%" onclick="doErase()">🗑️ ลบข้อมูลของฉันทั้งหมด</button>';
+  h+='<div class="card"><button class="btn ghost" style="width:100%;margin-bottom:9px" onclick="doExport()">'+icn("download",15)+' ดาวน์โหลดข้อมูลของฉัน</button>';
+  h+='<button class="btn warn" style="width:100%" onclick="doErase()">'+icn("trash",15)+' ลบข้อมูลของฉันทั้งหมด</button>';
   h+='<div class="l" style="margin-top:8px">การลบจะลบงาน/นัด/เงิน/ประวัติแชต/ความจำ/บันทึกอารมณ์ทั้งหมด กู้คืนไม่ได้</div></div>';
   h+='<div class="foot">My YES BOSS</div>';
   return h;
