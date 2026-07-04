@@ -213,67 +213,102 @@ function nav(){
 function go(t){TAB=t;MSEL=null;draw();window.scrollTo(0,0)}
 function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
 
-/* ---------- 📝 onboarding (?tab=start): ฟอร์มลงทะเบียน -> สไลด์สอนใช้แบบแชตเดโม่ ---------- */
-var OBS=0; /* 0=ฟอร์ม, 1..N=สไลด์ */
-var OB_SLIDES=[
-  {ic:"⏰",t:"ตั้งเตือนให้",s:"บอกเวลา เดี๋ยวเลขาเด้งเตือนตรงเป๊ะ",u:"พรุ่งนี้ 9 โมง ประชุมทีม",b:"รับทราบค่ะบอส 📌 พรุ่งนี้ 09:00<br>ถึงเวลาเลขาเด้งเตือนแน่นอน",x:"พรุ่งนี้ 9 โมง ประชุมทีม"},
-  {ic:"💸",t:"จดเงินให้",s:"พิมพ์สั้นๆ หรือส่งรูปสลิปก็ได้",u:"ค่าข้าว 60",b:"จดแล้ว! 🧾 วันนี้ใช้ไป 240.-<br>เดือนนี้รวม 3,120.-",x:"ค่าข้าว 60"},
-  {ic:"📁",t:"ไฟล์ไม่มีวันหาย",s:"ส่งไฟล์/รูป/เอกสารมาเก็บ เรียกคืนได้ทุกเมื่อ",u:"ขอใบเสนอราคาร้าน A หน่อย",b:"นี่เลยค่ะ 👇<br>📄 ใบเสนอราคา-ร้านA.pdf",x:"มีไฟล์อะไรบ้าง"},
-  {ic:"🔮",t:"ดูดวงได้จริง",s:"ราศี ไพ่ทาโรต์ เลขศาสตร์เบอร์มงคล",u:"ดูดวง",b:"วันนี้การงานเด่นมาก 💼✨<br>สีมงคล: ชมพู เลขนำโชค: 9",x:"ดูดวง"},
-  {ic:"💛",t:"ฮีลใจยามเหนื่อย",s:"เหนื่อยมาระบายได้ มีห้องพักใจให้ด้วย",u:"วันนี้เหนื่อยมากเลย",b:"เหนื่อยมากเลยเนอะ 🤍 เล่าให้เลขาฟังได้นะ<br>อยู่ตรงนี้แล้ว",x:"ขอกำลังใจหน่อย"},
-  {ic:"🌙",t:"สรุปให้เช้า-เย็น",s:"งาน+นัด+เงินของวัน ครบในข้อความเดียว",u:"สรุปวันนี้",b:"วันนี้: นัด 2 รายการ งานค้าง 3<br>ใช้ไป 240.- 💪 เคลียร์ต่อพรุ่งนี้",x:"สรุปวันนี้"}
+/* ---------- 📝 onboarding (?tab=start): wizard ยินยอม -> เลือกเลขา+ตั้งชื่อ -> ข้อมูลบอส -> ทัวร์ฟีเจอร์ ---------- */
+var WZ=0,TI=0,CH="ครับบอส",SNAME="",F_NM=null,F_PH=null,F_AG="",F_WF="",F_AC="",WZ_OK=false;
+var WZ_CSS='<style>.wz{max-width:430px;margin:0 auto;padding:14px 16px 110px;box-sizing:border-box}.wzbar{height:6px;background:#F6E3EA;border-radius:99px;overflow:hidden;margin:4px 0 10px}.wzbar i{display:block;height:100%;background:#E8779B;border-radius:99px;transition:.3s}.wzsteps{display:flex;justify-content:space-between;margin-bottom:16px}.wzst{flex:1;text-align:center;font-size:11px;color:#B0889A}.wzst .b{width:26px;height:26px;border-radius:99px;background:#fff;border:1.5px solid #F1D3DE;color:#C4547E;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-weight:800;font-size:12px}.wzst.on .b{background:#E8779B;border-color:#E8779B;color:#fff}.wzst.done .b{background:#FDE7EF;border-color:#F4A9C0;color:#C4547E}.wzst.on{color:#C4547E;font-weight:700}.wzh1{font-size:20px;font-weight:800;color:#3A3A3C;margin:2px 0}.wzsub{font-size:13px;color:#6E6E73;margin:0 0 12px}.wzhero{display:block;width:130px;margin:6px auto 2px}.wzcard{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(232,119,155,.12);margin-bottom:12px}.wzul{margin:0;padding:0;list-style:none}.wzul li{display:flex;gap:8px;font-size:13.5px;color:#3A3A3C;line-height:1.5;margin:8px 0}.wzul li:before{content:"";width:7px;height:7px;border-radius:99px;background:#F4A9C0;margin-top:6px;flex:none}.wzck{display:flex;gap:10px;align-items:flex-start;background:#FFF3F7;border:1.5px solid #F8DCE7;border-radius:14px;padding:12px;font-size:13.5px;color:#3A3A3C}.wzck input{width:20px;height:20px;accent-color:#E8779B;flex:none;margin-top:1px}.secc{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #F1D3DE;border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}.secc.on{border-color:#E8779B;background:#FFF6FA;box-shadow:0 4px 14px rgba(232,119,155,.18)}.secc img{width:64px;height:80px;object-fit:contain;flex:none}.secc .t{flex:1}.secc .t b{font-size:16px;color:#3A3A3C;display:block}.secc .t span{font-size:12px;color:#6E6E73;display:block;margin-top:2px}.secc .t i{font-size:12px;color:#C4547E;font-style:normal;display:block;margin-top:4px}.secc .r{width:22px;height:22px;border-radius:99px;border:2px solid #F1D3DE;flex:none}.secc.on .r{border-color:#E8779B;background:radial-gradient(circle,#E8779B 45%,#fff 50%)}.wzf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.wzf input,.wzf select{width:100%;box-sizing:border-box;border:1.5px solid #F1D3DE;border-radius:12px;padding:11px 12px;font-size:15px;background:#FFF9FB;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.wzf input:focus,.wzf select:focus{border-color:#E8779B}.wznav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #F6E3EA;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;max-width:430px;margin:0 auto;box-sizing:border-box}.wzback{flex:1;border:1.5px solid #F1D3DE;background:#fff;color:#C4547E;border-radius:99px;padding:13px;font-size:15px;font-weight:700}.wznext{flex:2;border:0;background:#E8779B;color:#fff;border-radius:99px;padding:13px;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(232,119,155,.35)}.wznext:disabled{opacity:.4;box-shadow:none}.tourh{display:flex;gap:12px;align-items:center;margin-bottom:10px}.tourh img{width:64px;height:80px;object-fit:contain;flex:none}.tourh h2{font-size:19px;margin:0;color:#3A3A3C}.tourh p{font-size:12.5px;color:#6E6E73;margin:2px 0 0}.tchat{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 18px rgba(232,119,155,.12);margin-bottom:10px}.tcu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.tcb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.tcb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.tcb .m{background:#FFF3F7;border:1px solid #F8DCE7;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.ttry{display:block;width:100%;border:1.5px solid #E8779B;background:#fff;color:#C4547E;font-size:14px;font-weight:800;padding:11px;border-radius:99px;margin-top:2px}.tdots{display:flex;gap:5px;justify-content:center;margin:10px 0 4px}.tdots i{width:7px;height:7px;border-radius:99px;background:#F1D3DE;transition:.2s}.tdots i.on{width:22px;background:#E8779B}</style>';
+var SEC_CARDS=[
+  {c:"ครับบอส",img:"img/p08-clipboard-write.png",d:"สุภาพ เป๊ะ เชื่อถือได้",ex:"รับทราบครับบอส เดี๋ยวจัดการให้เลยครับ 📋"},
+  {c:"ค่ะบอส",img:"img/p06-ok-wink.png",d:"อบอุ่น ใจดี เป็นกันเอง",ex:"รับทราบค่ะบอส เดี๋ยวจัดการให้เลยนะคะ 😊"},
+  {c:"ขาบอส",img:"img/p02-giggle-hearts.png",d:"สดใส ตัวแม่ มีลูกเล่น",ex:"จัดไปขาบอส~ ตัวแม่จัดการให้เลยจ้า 💅✨"}
 ];
-var OB_CSS='<style>.ob{max-width:430px;margin:0 auto;padding:18px 16px 28px;min-height:100vh;box-sizing:border-box}.obh{text-align:center;margin:6px 0 14px}.obh .k{color:#C4547E;font-size:13px;font-weight:700}.obh h1{margin:4px 0 2px;font-size:22px;color:#3A3A3C}.obh p{margin:0;font-size:13px;color:#6E6E73}.obf{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(232,119,155,.12)}.obf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.obf input,.obf select{width:100%;box-sizing:border-box;border:1.5px solid #F1D3DE;border-radius:12px;padding:11px 12px;font-size:15px;background:#FFF9FB;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.obf input:focus,.obf select:focus{border-color:#E8779B}.obbtn{display:block;width:100%;border:0;border-radius:14px;background:#E8779B;color:#fff;font-size:16px;font-weight:800;padding:14px;margin-top:16px;box-shadow:0 4px 12px rgba(232,119,155,.35)}.obskip{display:block;text-align:center;margin:12px auto 0;background:none;border:0;color:#B0889A;font-size:13px;text-decoration:underline}.obdots{display:flex;gap:5px;justify-content:center;margin:4px 0 12px}.obdots i{width:7px;height:7px;border-radius:99px;background:#F1D3DE;transition:.2s}.obdots i.on{width:22px;background:#E8779B}.obchat{background:#fff;border-radius:18px;padding:22px 14px;min-height:230px;display:flex;flex-direction:column;gap:10px;justify-content:center;box-shadow:0 4px 18px rgba(232,119,155,.12)}.obu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.obb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.obb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.obb .m{background:#FFF3F7;border:1px solid #F8DCE7;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.obtry{display:block;width:100%;border:0;border-radius:14px;background:#E8779B;color:#fff;font-size:16px;font-weight:800;padding:14px;margin-top:14px;box-shadow:0 4px 12px rgba(232,119,155,.35)}.obnav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}.obnav button{width:42px;height:42px;border-radius:99px;border:1.5px solid #F1D3DE;background:#fff;font-size:16px;color:#C4547E}.obnav .pg{font-size:13px;color:#6E6E73}.obgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}.obgrid .g{background:#fff;border-radius:14px;padding:12px;box-shadow:0 3px 12px rgba(232,119,155,.10)}.obgrid .g b{display:block;font-size:13px;color:#3A3A3C;margin-top:3px}.obgrid .g span{font-size:11px;color:#6E6E73;line-height:1.35;display:block;margin-top:2px}</style>';
-function vStart(){
-  if(OBS===0)return OB_CSS+obForm();
-  if(OBS<=OB_SLIDES.length)return OB_CSS+obSlide(OBS-1);
-  return OB_CSS+obMore();
+var TOUR=[
+  {img:"img/p09-clock.png",t:"⏰ เตือน / นัดหมาย",s:"พิมพ์ภาษาคนปกติ เลขาแปลงเป็นนัดให้เอง",u:"พรุ่งนี้ 9 โมง ประชุมทีม",b:"รับทราบ 📌 พรุ่งนี้ 09:00<br>ถึงเวลาเด้งเตือนแน่นอน",x:"พรุ่งนี้ 9 โมง ประชุมทีม",pts:["สั่งเตือนซ้ำได้ เช่น “ทุกวันจันทร์ 9 โมง”","ส่งเสียง (วอยซ์) สั่งแทนพิมพ์ก็ได้","กดเพิ่มนัดลงปฏิทินมือถือได้เลย"]},
+  {img:"img/p08-clipboard-write.png",t:"💸 จดรายรับรายจ่าย",s:"พิมพ์สั้นๆ หรือส่งรูปสลิป เลขาจดให้หมด",u:"ค่าข้าว 60",b:"จดแล้ว! 🧾 วันนี้ใช้ไป 240.-<br>เดือนนี้รวม 3,120.-",x:"ค่าข้าว 60",pts:["ส่งรูปสลิป/ใบเสร็จ อ่านให้อัตโนมัติ","แยกกระเป๋า ส่วนตัว / ครอบครัว / บริษัท","ถาม “สรุปภาษี” ได้ VAT + หัก ณ ที่จ่ายครบ"]},
+  {img:"img/p07-desk-work.png",t:"📁 คลังไฟล์ส่วนตัว",s:"ส่งมาเก็บ เรียกคืนได้ทุกเมื่อ ไม่มีวันหาย",u:"ขอใบเสนอราคาร้าน A หน่อย",b:"นี่เลย 👇<br>📄 ใบเสนอราคา-ร้านA.pdf",x:"มีไฟล์อะไรบ้าง",pts:["ส่งไฟล์ รูป เอกสาร มาเก็บได้เลยในแชต","ขอคืนด้วยชื่อไฟล์ เลขาหาให้ทันที","จัดเป็นโฟลเดอร์ได้ เหมือนมีตู้เอกสาร"]},
+  {img:"img/p02-giggle-hearts.png",t:"🔮 ดูดวง ไพ่ เบอร์มงคล",s:"เรื่องดวงยกให้เลขาดูแล",u:"ดูดวง",b:"วันนี้การงานเด่นมาก 💼✨<br>สีมงคล: ชมพู เลขนำโชค: 9",x:"ดูดวง",pts:["ดวงราศีรายวัน อัปเดตทุกเช้า","เปิดไพ่ทาโรต์ ถามเรื่องที่ค้างคาใจ","เช็คเบอร์มงคลตามวันเกิดของบอส"]},
+  {img:"img/p10-heart.png",t:"💛 ฮีลใจยามเหนื่อย",s:"เหนื่อยมาระบายได้ เลขาอยู่ตรงนี้เสมอ",u:"วันนี้เหนื่อยมากเลย",b:"เหนื่อยมากเลยเนอะ 🤍<br>เล่าให้ฟังได้นะ อยู่ตรงนี้แล้ว",x:"ขอกำลังใจหน่อย",pts:["ระบายได้ทุกเวลา ไม่ตัดสิน ไม่สั่งสอน","มี “ห้องพักใจ” เกมชาร์จพลังใจในแอป","เรื่องที่ระบายไม่ถูกเก็บบันทึกไว้"]},
+  {img:"img/p13-sofa-relax.png",t:"🌙 สรุปให้ทุกเช้า-เย็น",s:"ไม่ต้องถามก็ได้ เลขาสรุปมาให้เอง",u:"สรุปวันนี้",b:"วันนี้: นัด 2 · งานค้าง 3<br>ใช้ไป 240.- เคลียร์ต่อพรุ่งนี้ 💪",x:"สรุปวันนี้",pts:["เช้าบรีฟงานวันนี้ เย็นสรุป + งานพรุ่งนี้","เลือกเวลาส่งที่บอสสะดวกได้","งาน นัด เงิน ครบจบในข้อความเดียว"]}
+];
+function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ===2?wzForm():wzTour())}
+function wzHead(){
+  var names=["ยินยอม","เลขา","ข้อมูล","ฟีเจอร์"],pct=[15,40,65,90][WZ];
+  var h='<div class="wzbar"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
+  for(var i=0;i<4;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
+  return h+'</div>';
 }
-function obForm(){
+function wzNav(back,next,label,dis){
+  return '<div class="wznav">'+(back?'<button class="wzback" onclick="'+back+'">‹ ย้อนกลับ</button>':'')
+    +'<button class="wznext" onclick="'+next+'"'+(dis?' disabled':'')+'>'+label+'</button></div>';
+}
+function wzConsent(){
+  return '<div class="wz">'+wzHead()
+    +'<img class="wzhero" src="img/p01-clipboard-hello.png" alt="">'
+    +'<div style="text-align:center"><div class="wzh1">ยินดีต้อนรับสู่ YES BOSS 💕</div><p class="wzsub">เลขาส่วนตัวของบอส อยู่ในไลน์ ตลอด 24 ชม.</p></div>'
+    +'<div class="wzcard"><b style="font-size:14px;color:#C4547E">ก่อนเริ่ม ขอบอกเรื่องข้อมูลของบอสตรงๆ 🔒</b><ul class="wzul">'
+    +'<li>เลขาเก็บเฉพาะสิ่งที่บอสให้จด — งาน นัด รายรับรายจ่าย ไฟล์ และข้อมูลที่กรอกตอนลงทะเบียน</li>'
+    +'<li>ใช้เพื่อให้บริการเลขาเท่านั้น (เตือนงาน สรุปยอด ค้นคืนของ) ไม่ขาย ไม่แชร์ให้ใครทั้งนั้น</li>'
+    +'<li>บอสดู แก้ หรือลบข้อมูลได้เองทุกเมื่อ — พิมพ์ “ลบข้อมูลของฉัน” ลบทั้งหมดทันที (ตาม PDPA)</li>'
+    +'</ul></div>'
+    +'<label class="wzck"><input type="checkbox" id="wz_ok" '+(WZ_OK?"checked":"")+' onchange="WZ_OK=this.checked;draw()"><span>อ่านแล้ว ยินยอมให้เก็บและใช้ข้อมูลตามข้างต้น</span></label>'
+    +'</div>'+wzNav(null,"WZ=1;draw()","ยินยอม ไปต่อเลย ›",!WZ_OK);
+}
+function wzPick(i){CH=SEC_CARDS[i].c;draw()}
+function wzSecretary(){
+  var h='<div class="wz">'+wzHead()
+    +'<div class="wzh1">เลือกบุคลิกของเลขา</div><p class="wzsub">คำลงท้ายที่เลขาจะใช้ตอบบอส — เปลี่ยนทีหลังได้</p>';
+  for(var i=0;i<SEC_CARDS.length;i++){var s=SEC_CARDS[i];
+    h+='<div class="secc'+(CH===s.c?" on":"")+'" onclick="wzPick('+i+')"><img src="'+s.img+'" alt=""><div class="t"><b>'+s.c+'</b><span>'+s.d+'</span><i>“'+s.ex+'”</i></div><div class="r"></div></div>';}
+  h+='<div class="wzf wzcard" style="margin-top:14px"><label style="margin-top:0">ตั้งชื่อให้เลขาของบอส <span style="font-weight:400;color:#B0889A">(ไม่บังคับ)</span></label>'
+    +'<input id="wz_sn" maxlength="30" placeholder="เช่น บอสซี่ / มะลิ / พี่เลขา" value="'+esc(SNAME)+'" onchange="SNAME=this.value.trim()">'
+    +'</div></div>'
+    +wzNav("WZ=0;draw()","SNAME=$(\'#wz_sn\').value.trim();WZ=2;draw()","ไปต่อ ›",false);
+}
+function wzForm(){
   var pr=(DATA&&DATA.profile)||{};
-  var sel=function(id,label,opts){var h='<label>'+label+'</label><select id="'+id+'">';for(var i=0;i<opts.length;i++){h+='<option value="'+opts[i][0]+'">'+opts[i][1]+'</option>'}return h+'</select>'};
-  return '<div class="ob"><div class="obh"><div class="k">เริ่มต้นกับ YES BOSS</div><h1>เลขาขอทำความรู้จักหน่อย 💕</h1><p>30 วินาที เลขาจะได้ดูแลบอสได้ถูกใจ</p></div>'
-    +'<div class="obf">'
-    +'<label>ชื่อที่ให้เลขาเรียก</label><input id="ob_nm" maxlength="30" placeholder="อยากให้เลขาเรียกว่าอะไรดี" value="'+esc(pr.display_name||"")+'">'
-    +'<label>เบอร์มือถือ <span style="font-weight:400;color:#B0889A">(ไม่บังคับ)</span></label><input id="ob_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(pr.phone||"")+'">'
-    +sel("ob_ag","ช่วงอายุ",[["","เลือกช่วงอายุ"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
-    +sel("ob_wf","ฟีเจอร์ที่อยากลองมากที่สุด",[["","เลือกฟีเจอร์ที่อยากลอง"],["reminder","⏰ เตือนงาน/นัดหมาย"],["money","💸 จดรายรับรายจ่าย + สลิป"],["files","📁 เก็บไฟล์เอกสาร"],["fortune","🔮 ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛 ฮีลใจ / ที่พักใจ"],["brief","🌙 สรุปงานรายวัน"]])
-    +sel("ob_ac","รู้จัก YES BOSS จากช่องทางไหน",[["","เลือกช่องทาง"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
-    +'<button class="obbtn" onclick="obSave()">เริ่มใช้งานกับเลขา ✨</button>'
-    +'</div><button class="obskip" onclick="OBS=1;draw()">ข้ามไปดูวิธีใช้ก่อน</button></div>';
+  var nm=F_NM!==null?F_NM:(pr.display_name||""),ph=F_PH!==null?F_PH:(pr.phone||"");
+  var sel=function(id,label,cur,opts){var h='<label>'+label+'</label><select id="'+id+'">';for(var i=0;i<opts.length;i++){h+='<option value="'+opts[i][0]+'"'+(cur===opts[i][0]?" selected":"")+'>'+opts[i][1]+'</option>'}return h+'</select>'};
+  return '<div class="wz">'+wzHead()
+    +'<div class="wzh1">ให้เลขารู้จักบอสหน่อย</div><p class="wzsub">'+(SNAME||"เลขา")+'จะได้ดูแลบอสได้ถูกใจ 💕</p>'
+    +'<div class="wzf wzcard">'
+    +'<label style="margin-top:0">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="อยากให้เรียกว่าอะไรดี" value="'+esc(nm)+'">'
+    +'<label>เบอร์มือถือ <span style="font-weight:400;color:#B0889A">(ไม่บังคับ)</span></label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'">'
+    +sel("wz_ag","ช่วงอายุ",F_AG,[["","เลือกช่วงอายุ"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
+    +sel("wz_wf","อยากให้เลขาช่วยเรื่องไหนก่อน",F_WF,[["","เลือกเรื่องที่อยากลอง"],["reminder","⏰ เตือนงาน/นัดหมาย"],["money","💸 จดรายรับรายจ่าย + สลิป"],["files","📁 เก็บไฟล์เอกสาร"],["fortune","🔮 ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛 ฮีลใจ / ที่พักใจ"],["brief","🌙 สรุปงานรายวัน"]])
+    +sel("wz_ac","รู้จัก YES BOSS จากช่องทางไหน",F_AC,[["","เลือกช่องทาง"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
+    +'</div></div>'
+    +wzNav("wzStash();WZ=1;draw()","wzSave()","บันทึก ไปดูของเด็ด ›",false);
 }
-async function obSave(){
-  var nm=$("#ob_nm").value.trim();
-  if(!nm){toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
-  var pl={display_name:nm,phone:$("#ob_ph").value.trim(),age_range:$("#ob_ag").value,wanted_feature:$("#ob_wf").value,acq_channel:$("#ob_ac").value};
-  try{await api("onboard.save",pl);if(DATA&&DATA.profile){DATA.profile.display_name=nm}OBS=1;draw();toast("ยินดีที่ได้รู้จัก คุณ"+nm+" 💕")}
-  catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที")}
+function wzStash(){F_NM=$("#wz_nm").value.trim();F_PH=$("#wz_ph").value.trim();F_AG=$("#wz_ag").value;F_WF=$("#wz_wf").value;F_AC=$("#wz_ac").value}
+async function wzSave(){
+  wzStash();
+  if(!F_NM){toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
+  var btn=document.querySelector(".wznext");if(btn){btn.disabled=true;btn.textContent="กำลังบันทึก..."}
+  try{
+    await api("onboard.save",{display_name:F_NM,phone:F_PH,age_range:F_AG,wanted_feature:F_WF,acq_channel:F_AC,character:CH,secretary_name:SNAME});
+    if(DATA&&DATA.profile){DATA.profile.display_name=F_NM;DATA.profile.character=CH}
+    TI=0;WZ=3;draw();toast("ยินดีที่ได้รู้จัก คุณ"+F_NM+" 💕");
+  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="บันทึก ไปดูของเด็ด ›"}}
 }
-function obSlide(i){
-  var f=OB_SLIDES[i],n=OB_SLIDES.length+2,dots='<div class="obdots">';
-  for(var d=0;d<n;d++){dots+='<i class="'+(d===i+1?"on":"")+'"></i>'}dots+='</div>';
-  return '<div class="ob">'+dots
-    +'<div class="obh" style="text-align:left;display:flex;gap:10px;align-items:center"><div style="font-size:34px">'+f.ic+'</div><div><h1 style="font-size:19px;margin:0">'+f.t+'</h1><p>'+f.s+'</p></div></div>'
-    +'<div class="obchat"><div class="obu">'+esc(f.u)+'</div><div class="obb"><div class="av">🤍</div><div class="m">'+f.b+'</div></div></div>'
-    +'<button class="obtry" onclick="obTry(\''+f.x.replace(/'/g,"\\'")+'\')">ลองเลย →</button>'
-    +'<div class="obnav"><button onclick="OBS='+(i===0?0:i)+';draw()">‹</button><div class="pg">'+(i+2)+' / '+n+'</div><button onclick="OBS='+(i+2)+';draw()">›</button></div></div>';
-}
-function obMore(){
-  var n=OB_SLIDES.length+2,dots='<div class="obdots">';
-  for(var d=0;d<n;d++){dots+='<i class="'+(d===n-1?"on":"")+'"></i>'}dots+='</div>';
-  var g=function(ic,t,s){return '<div class="g"><div style="font-size:20px">'+ic+'</div><b>'+t+'</b><span>'+s+'</span></div>'};
-  return '<div class="ob">'+dots
-    +'<div class="obh" style="text-align:left;display:flex;gap:10px;align-items:center"><div style="font-size:34px">✨</div><div><h1 style="font-size:19px;margin:0">ทำได้อีกเยอะ</h1><p>นี่แค่ส่วนหนึ่งที่เลขาช่วยบอสได้</p></div></div>'
-    +'<div class="obgrid">'
-    +g("🃏","ไพ่ทาโรต์ + เบอร์มงคล","เปิดไพ่ เช็คเบอร์ ตามวันเกิดบอส")
-    +g("👛","แยกกระเป๋า 3 ใบ","ส่วนตัว / ครอบครัว / บริษัท")
-    +g("🧾","สรุปภาษีให้","VAT / หัก ณ ที่จ่าย / ประมาณภาษี")
-    +g("🎙️","สั่งงานด้วยเสียง","ขี้เกียจพิมพ์ พูดใส่วอยซ์ได้เลย")
-    +g("📊","แดชบอร์ด My YES BOSS","นัด เงิน ใจ ครบในหน้าเดียว")
-    +g("💬","ตั้งชื่อ-เลือกสไตล์เลขา","ครับบอส / ค่ะบอส / ขาบอส")
+function wzTour(){
+  var n=TOUR.length+1,dots='<div class="tdots">';
+  for(var d=0;d<n;d++){dots+='<i class="'+(d===TI?"on":"")+'"></i>'}dots+='</div>';
+  if(TI>=TOUR.length){
+    return '<div class="wz">'+wzHead()+dots
+      +'<img class="wzhero" src="img/p04-cheer-jump.png" alt="">'
+      +'<div style="text-align:center"><div class="wzh1">พร้อมแล้ว! 🎉</div><p class="wzsub">คุณ'+esc(F_NM||"บอส")+' มี'+esc(SNAME||"เลขา")+'คอยดูแลแล้ว<br>สงสัยอะไร พิมพ์ถามในแชตได้ตลอดเลย</p></div>'
+      +'<button class="wznext" style="width:100%;margin-bottom:10px" onclick="obFinish()">เริ่มคุยกับ'+esc(SNAME||"เลขา")+'เลย 💬</button>'
+      +'<button class="ttry" onclick="WZ=3;TI=0;go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>'
+      +'</div>'+wzNav("TI="+(TOUR.length-1)+";draw()","obFinish()","เริ่มใช้งาน 💬",false);
+  }
+  var f=TOUR[TI];
+  var pts='<ul class="wzul">';for(var i=0;i<f.pts.length;i++){pts+='<li>'+f.pts[i]+'</li>'}pts+='</ul>';
+  return '<div class="wz">'+wzHead()+dots
+    +'<div class="tourh"><img src="'+f.img+'" alt=""><div><h2>'+f.t+'</h2><p>'+f.s+'</p></div></div>'
+    +'<div class="tchat"><div class="tcu">'+esc(f.u)+'</div><div class="tcb"><div class="av">🤍</div><div class="m">'+f.b+'</div></div></div>'
+    +'<button class="ttry" onclick="obTry(\''+f.x.replace(/'/g,"\\'")+'\')">ลองสั่งจริงเลย →</button>'
+    +'<div class="wzcard" style="margin-top:12px">'+pts+'</div>'
     +'</div>'
-    +'<button class="obtry" onclick="obFinish()">เริ่มคุยกับเลขาเลย 💬</button>'
-    +'<div class="obnav"><button onclick="OBS='+(n-2)+';draw()">‹</button><div class="pg">'+n+' / '+n+'</div><button onclick="go(\'home\')">🏠</button></div></div>';
+    +wzNav(TI===0?"WZ=2;draw()":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
 }
 function obTry(t){
   try{
