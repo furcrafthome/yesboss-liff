@@ -633,7 +633,7 @@ function vStory(){
   /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
   var pf=DATA.profile||{};
   h+='<div class="card" style="margin-bottom:12px"><div class="ct">'+icn("user",16)+' ข้อมูลของบอส<span class="more" onclick="go(\'me\')">แก้ไข ›</span></div>';
-  h+='<div class="rowitem"><div style="color:#E0466E">'+icn("user",22)+'</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">'+icn("phone",12)+' '+(pf.phone?esc(pf.phone):'ยังไม่บันทึกเบอร์')+' · '+icn("gift",12)+' '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
+  h+='<div class="rowitem"><div style="color:#E0466E">'+icn("user",22)+'</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">'+icn("phone",12)+' '+(pf.phone?phMask(pf.phone):'ยังไม่บันทึกเบอร์')+' · '+icn("gift",12)+' '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
   h+='</div>';
   /* ลิสต์เรื่องราวทั้งหมดที่เลขาเก็บให้: ความจำ / ไฟล์ / ปฏิทินนัด — กดกระโดดไปดูได้เลย */
   h+='<div class="grid">';
@@ -1045,6 +1045,23 @@ var JOURNEYS={
 };
 window.openHealRoom=function(){P=pt();$h("healroom").style.display="block";document.body.style.overflow="hidden";hrHome()};
 function closeHealRoom(){clearTimers();chargeTok++;$h("healroom").style.display="none";document.body.style.overflow="";try{reload().catch(function(){})}catch(e){}}
+})();
+
+/* 🛡️ ปิดบังเบอร์โดยปริยาย — แตะเพื่อดู แล้วปิดเองใน 6 วิ (กันคนมองข้างจอ/หลุดตอนแคป) */
+function phMaskTxt(p){p=String(p);return p.length>=7?p.slice(0,3)+'•••'+p.slice(-3):'•••'}
+function phMask(p){return '<span data-ph="'+esc(p)+'" onclick="phReveal(this);event.stopPropagation()" style="cursor:pointer;border-bottom:1px dashed #C4547E">'+phMaskTxt(p)+' 👁</span>'}
+window.phReveal=function(el){var f=el.getAttribute('data-ph')||'';if(el.getAttribute('data-on')==='1'){el.setAttribute('data-on','');el.innerHTML=phMaskTxt(f)+' 👁';return}el.setAttribute('data-on','1');el.textContent=f;setTimeout(function(){if(el.getAttribute('data-on')==='1'){el.setAttribute('data-on','');el.innerHTML=phMaskTxt(f)+' 👁'}},6000)};
+
+/* 🛡️ ม่านความเป็นส่วนตัว: สลับแอป/พับจอปุ๊บ เบลอทั้งหน้า -> ภาพ preview ใน app switcher เป็นม่าน ไม่ใช่ข้อมูลบอส
+   (บล็อกแคปจอ 100% บนเว็บทำไม่ได้ — อันนี้คือชั้นป้องกันที่ทำได้จริงแบบเดียวกับแอปธนาคาร) */
+(function(){
+var v=document.createElement('div');v.id='pveil';
+v.style.cssText='position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.78);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)';
+v.innerHTML='<div style="text-align:center;color:#C4547E;font-weight:800;font-size:17px">🔒<br>ปกป้องข้อมูลของบอสอยู่<div style="font-size:12px;color:#85858E;font-weight:600;margin-top:5px">แตะเพื่อดูต่อ</div></div>';
+v.onclick=function(){v.style.display='none'};
+document.body.appendChild(v);
+document.addEventListener('visibilitychange',function(){v.style.display=document.hidden?'flex':'none'});
+window.addEventListener('pagehide',function(){v.style.display='flex'});
 })();
 
 boot();
