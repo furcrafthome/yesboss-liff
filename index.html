@@ -388,7 +388,7 @@ function wzTour(){
   return '<div class="wz">'+wzHead()+dots
     +'<div class="tourh"><img src="'+f.img+'" alt=""><div><h2>'+f.t+'</h2><p>'+f.s+'</p></div></div>'
     +'<div class="tchat"><div class="tcu">'+esc(f.u)+'</div><div class="tcb"><div class="av">🤍</div><div class="m">'+f.b+'</div></div></div>'
-    +'<button class="ttry" onclick="obTry(\''+f.x.replace(/'/g,"\\'")+'\')">ลองสั่งจริงเลย →</button>'
+    /* ปุ่ม "ลองสั่งจริง" ตัดออก (บอสสั่ง 2026-07-06) — กันหลุดออกจาก wizard กลางคัน ให้ดูทัวร์จนจบ */
     +'<div class="wzcard" style="margin-top:12px">'+pts+'</div>'
     +'</div>'
     +wzNav(TI===0?"WZ=2;draw()":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
