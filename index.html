@@ -247,8 +247,10 @@ async function boot(){
     try{localStorage.removeItem("yb_rl_t")}catch(e){}
     if(TAB==="start"){
       // 🔒 ลงทะเบียนแล้ว = ไม่ต้องเจอ wizard อีก (กันลูกค้าเก่า/ลิงก์ค้าง เด้งไปหน้าหลักเลย)
+      // ผ่าน wizard (บอกเล่าเรื่องของบอส) แล้วเท่านั้นถึงข้าม — ลูกค้าเก่ายินยอมแบบเก่า
+      // ยังไม่มี onboarded_at -> เห็น wizard 1 ครั้งเพื่อรับ consent ใหม่แบบชัดเจน (PDPA)
       var prq=DATA&&DATA.profile;
-      if(prq&&prq.display_name&&prq.pdpa_accepted_at){TAB="home"}
+      if(prq&&prq.onboarded_at){TAB="home"}
       else{wzRestore()} // โดนเด้ง login กลางทาง -> กลับมาต่อขั้นเดิม
     }
     draw();
