@@ -251,7 +251,12 @@ async function boot(){
       // ยังไม่มี onboarded_at -> เห็น wizard 1 ครั้งเพื่อรับ consent ใหม่แบบชัดเจน (PDPA)
       var prq=DATA&&DATA.profile;
       if(prq&&prq.onboarded_at){TAB="home"}
-      else{wzRestore()} // โดนเด้ง login กลางทาง -> กลับมาต่อขั้นเดิม
+      else{
+        // ลูกค้าเก่า: เติมสไตล์เลขา + ชื่อเลขาเดิมไว้ให้ (กดผ่านๆ ก็ไม่โดนสลับค่า)
+        if(prq&&prq.character)CH=prq.character;
+        if(prq&&prq.secretary_name)SNAME=prq.secretary_name;
+        wzRestore(); // โดนเด้ง login กลางทาง -> กลับมาต่อขั้นเดิม (ทับค่า default ข้างบนถ้ามี)
+      }
     }
     draw();
   }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
