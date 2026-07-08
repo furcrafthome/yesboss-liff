@@ -199,7 +199,12 @@ function $(s){return document.querySelector(s)}
 function esc(s){s=(s==null?"":""+s);return s.replace(/[<>&"]/g,function(c){return({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"})[c]})}
 function num(n){return Number(n||0).toLocaleString("th-TH")}
 function pt(){var c=(DATA&&DATA.profile&&DATA.profile.character)||"";return c==="ค่ะบอส"?"ค่ะ":c==="ขาบอส"?"จ้า":"ครับ"}
-function fdate(iso){try{return new Date(iso).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return ""}}
+/* 🌏 โซนเวลาผู้ใช้ (profile.timezone) — ทุกการโชว์/กรอกเวลาในหน้านี้ยึดโซนเดียวกับบอท ไม่ใช่เครื่องลูกค้า */
+function TZ(){try{var t=(DATA&&DATA.profile&&DATA.profile.timezone)||"Asia/Bangkok";new Intl.DateTimeFormat("en-US",{timeZone:t});return t}catch(e){return "Asia/Bangkok"}}
+function tzOff(tz,at){try{var p={},fp=new Intl.DateTimeFormat("en-CA",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(at);for(var i=0;i<fp.length;i++){p[fp[i].type]=fp[i].value}return Math.round((Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second)-at.getTime())/60000)}catch(e){return 420}}
+function wallUtc(ymd,hm){var g=Date.parse(ymd+"T"+hm+":00Z");var t=g-tzOff(TZ(),new Date(g))*60000;t=g-tzOff(TZ(),new Date(t))*60000;return new Date(t)}
+function gmtLb(tz){var m=tzOff(tz,new Date());var a=Math.abs(m);return "GMT"+(m<0?"-":"+")+Math.floor(a/60)+(a%60?":"+(a%60<10?"0":"")+(a%60):"")}
+function fdate(iso){try{return new Date(iso).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",timeZone:TZ()})}catch(e){return ""}}
 function toast(m){var t=$("#toast");t.textContent=m;t.className="show";setTimeout(function(){t.className=""},1700)}
 function errBox(m){return '<div class="err">😅 '+esc(m)+'<br><br><button class="btn" onclick="location.reload()">ลองใหม่</button></div>'}
 
@@ -406,9 +411,9 @@ function obFinish(){wzClear();try{liff.closeWindow()}catch(e){go("home")}}
 /* ---------- หน้าหลัก ---------- */
 var CALM=0,SELISO=null;
 var THMON=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-function todayBKK(){try{return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Bangkok"})}catch(e){return new Date().toISOString().slice(0,10)}}
-function bkkYMD(iso){try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:"Asia/Bangkok"})}catch(e){return (""+iso).slice(0,10)}}
-function thToday(){try{return new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",timeZone:"Asia/Bangkok"})}catch(e){return ""}}
+function todayBKK(){try{return new Date().toLocaleDateString("en-CA",{timeZone:TZ()})}catch(e){return new Date().toISOString().slice(0,10)}}
+function bkkYMD(iso){try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:TZ()})}catch(e){return (""+iso).slice(0,10)}}
+function thToday(){try{return new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",timeZone:TZ()})}catch(e){return ""}}
 function thDate(iso){try{return new Date(iso+"T00:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}catch(e){return iso}}
 function thMonth(off){var d=new Date();d.setMonth(d.getMonth()+off);return THMON[d.getMonth()]+" "+d.getFullYear()}
 function stat(bg,ic,col,val,cap,tab){return '<div class="st" onclick="go(\''+tab+'\')" style="cursor:pointer"><div class="ico" style="background:'+bg+';color:'+col+'">'+ic+'</div><div><div class="big" style="color:#23232B">'+num(val)+'</div><div class="cap">'+cap+'</div></div></div>'}
@@ -442,7 +447,7 @@ function apptsList(iso){
   var rem=(DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===iso});
   rem.sort(function(a,b){return (""+a.remind_at)<(""+b.remind_at)?-1:1});
   if(!rem.length){return '<div class="empty" style="padding:10px 2px">ไม่มีนัดวันนี้ 🎉</div>'}
-  var h='';for(var i=0;i<rem.length;i++){var r=rem[i];var tm=r.all_day?"ทั้งวัน":new Date(r.remind_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Bangkok"});
+  var h='';for(var i=0;i<rem.length;i++){var r=rem[i];var tm=r.all_day?"ทั้งวัน":new Date(r.remind_at).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",timeZone:TZ()});
     h+='<div class="appt"><div class="tm">'+tm+'</div><div class="tt">'+esc(r.reminder_text)+'</div></div>';}
   return h;
 }
@@ -464,7 +469,7 @@ async function saveAppt(iso){
   var t=$("#ap_txt")?$("#ap_txt").value.trim():"";
   if(!t){toast("บอกก่อนว่านัดอะไรนะ");return}
   var tm=$("#ap_time")&&$("#ap_time").value?$("#ap_time").value:"09:00";
-  var d=new Date(iso+"T"+tm+":00+07:00");
+  var d=wallUtc(iso,tm);
   if(d.getTime()<Date.now()-60000){toast("เวลานี้ผ่านมาแล้ว เลือกใหม่นะ");return}
   await act("reminder.add",{text:t,remind_at:d.toISOString()},"เพิ่มนัดแล้ว จะเตือนตรงเวลาเลย ⏰");
 }
@@ -542,7 +547,7 @@ function rsched(i){
 }
 async function saveSched(i,id){
   var val=$("#rd"+i).value;if(!val){toast("เลือกเวลาก่อนนะ");return}
-  await act("reminder.reschedule",{id:id,remind_at:new Date(val).toISOString()},"เลื่อนเวลาแล้ว");
+  await act("reminder.reschedule",{id:id,remind_at:wallUtc(val.slice(0,10),val.slice(11,16)).toISOString()},"เลื่อนเวลาแล้ว");
 }
 function delRem(id){if(confirm("ลบการแจ้งเตือนนี้?"))act("reminder.delete",{id:id},"ลบแล้ว")}
 function tgTask(id,done){act("task.toggle",{id:id,done:done},done?"เยี่ยม เสร็จอีกงาน! 🎉":"")}
@@ -766,6 +771,8 @@ function vMe(){
   h+='<label class="f">เบอร์โทร</label><input id="pf_phone" type="tel" inputmode="numeric" value="'+esc(pr.phone||"")+'" placeholder="0812345678">';
   h+='<label class="f">'+icn("sun",13)+' เวลาส่งสรุปตอนเช้า</label>'+hourSel("pf_bh",pr.brief_hour==null?8:Number(pr.brief_hour));
   h+='<label class="f">'+icn("moon",13)+' เวลาส่งสรุปตอนเย็น</label>'+hourSel("pf_rh",pr.report_hour==null?20:Number(pr.report_hour));
+  h+='<label class="f">🌏 โซนเวลา (อยู่ต่างประเทศ เลือกเมืองที่อยู่ได้เลย)</label>'+tzSel("pf_tz",pr.timezone||"Asia/Bangkok");
+  h+='<div class="l" style="margin-top:4px">เวลานัดเตือน สรุปเช้า/เย็น และเวลาทั้งหมด จะคิดตามโซนที่เลือกนี้</div>';
   h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
@@ -779,10 +786,13 @@ function vMe(){
 }
 var PCHAR=null;
 function hourSel(id,cur){var h='<select id="'+id+'">';for(var i=0;i<24;i++){h+='<option value="'+i+'"'+(i===cur?" selected":"")+'>'+(i<10?"0":"")+i+':00 น.</option>'}return h+'</select>'}
+/* 🌏 โซนเวลายอดนิยมของคนไทยในต่างแดน — ค่าที่เก็บ = ชื่อ IANA (ตรงกับที่บอท/cron ใช้) */
+var TZS=[["Asia/Bangkok","ไทย / ลาว / เวียดนาม"],["Asia/Yangon","พม่า"],["Asia/Jakarta","อินโดนีเซีย (จาการ์ตา)"],["Asia/Singapore","สิงคโปร์ / มาเลเซีย"],["Asia/Manila","ฟิลิปปินส์"],["Asia/Shanghai","จีน"],["Asia/Hong_Kong","ฮ่องกง"],["Asia/Taipei","ไต้หวัน"],["Asia/Tokyo","ญี่ปุ่น"],["Asia/Seoul","เกาหลีใต้"],["Asia/Kolkata","อินเดีย"],["Asia/Dhaka","บังกลาเทศ"],["Asia/Dubai","ดูไบ / UAE"],["Asia/Riyadh","ซาอุฯ / กาตาร์"],["Europe/Istanbul","ตุรกี"],["Europe/Moscow","รัสเซีย (มอสโก)"],["Europe/Berlin","ยุโรปกลาง (เยอรมนี ฝรั่งเศส อิตาลี)"],["Europe/London","อังกฤษ"],["Australia/Perth","ออสเตรเลียตะวันตก"],["Australia/Sydney","ออสเตรเลียตะวันออก"],["Pacific/Auckland","นิวซีแลนด์"],["America/New_York","สหรัฐฯ ฝั่งตะวันออก"],["America/Chicago","สหรัฐฯ ตอนกลาง"],["America/Denver","สหรัฐฯ เขตภูเขา"],["America/Los_Angeles","สหรัฐฯ ฝั่งตะวันตก"],["America/Sao_Paulo","บราซิล"]];
+function tzSel(id,cur){var h='<select id="'+id+'">',f=false;for(var i=0;i<TZS.length;i++){var z=TZS[i][0];if(z===cur)f=true;h+='<option value="'+z+'"'+(z===cur?" selected":"")+'>'+TZS[i][1]+' — '+gmtLb(z)+'</option>'}if(!f&&cur){h+='<option value="'+esc(cur)+'" selected>'+esc(cur)+' — '+gmtLb(cur)+'</option>'}return h+'</select>'}
 function pickChar(el,c){PCHAR=c;var bs=document.querySelectorAll("#pf_char button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
 async function saveProfile(){
   var pl={display_name:$("#pf_name").value,birth_date:$("#pf_birth").value||"",phone:$("#pf_phone").value,
-    brief_hour:Number($("#pf_bh").value),report_hour:Number($("#pf_rh").value)};
+    brief_hour:Number($("#pf_bh").value),report_hour:Number($("#pf_rh").value),timezone:$("#pf_tz").value};
   if(PCHAR)pl.character=PCHAR;
   await act("profile.update",pl,"บันทึกแล้ว 🙌");
 }
@@ -853,7 +863,7 @@ function starget(){return Math.round(8+si/curSteps.length*77)}
 function runJourney(k){var j=JOURNEYS[k];journeyKey=k;HS={};EMO=j.color;curSteps=j.steps;si=0;setBatt(8);
   $h("hrblbl").textContent="พลังใจเหลือน้อย 🪫";step()}
 function step(){if(si>=curSteps.length)return checkout();si++;curSteps[si-1](starget())}
-function tomorrow9(){var d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);return d.toISOString()}
+function tomorrow9(){var d=new Date(Date.parse(todayBKK()+"T00:00:00Z")+86400000).toISOString().slice(0,10);return wallUtc(d,"09:00").toISOString()}
 function logHeal(outcome){try{api("heal.log",{journey:journeyKey,outcome:outcome}).catch(function(){})}catch(e){}}
 /* ตั้งเตือนจริงผ่านเลขา — พังก็ไปต่อได้ (ห้ามขวางทางเดินใจ) */
 function setRem(t,text,okMsg){
