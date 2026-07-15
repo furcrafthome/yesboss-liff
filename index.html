@@ -789,6 +789,10 @@ function vMe(){
   h+='<label class="f">'+icn("moon",13)+' เวลาส่งสรุปตอนเย็น</label>'+hourSel("pf_rh",pr.report_hour==null?20:Number(pr.report_hour));
   h+='<label class="f">🌏 โซนเวลา (อยู่ต่างประเทศ เลือกเมืองที่อยู่ได้เลย)</label>'+tzSel("pf_tz",pr.timezone||"Asia/Bangkok");
   h+='<div class="l" style="margin-top:4px">เวลานัดเตือน สรุปเช้า/เย็น และเวลาทั้งหมด จะคิดตามโซนที่เลือกนี้</div>';
+  h+='<label class="f">🔁 เตือนซ้ำเมื่อไม่กดรับ</label><div class="seg" id="pf_rn">';
+  h+='<button class="'+(pr.renudge!==false?"on":"")+'" onclick="pickRn(this,true)">เปิด (แนะนำ)</button>';
+  h+='<button class="'+(pr.renudge===false?"on":"")+'" onclick="pickRn(this,false)">ปิด</button></div>';
+  h+='<div class="l" style="margin-top:4px">ถึงเวลานัดแล้วยังไม่กด "เสร็จแล้ว ✓" เลขาจะเตือนซ้ำให้ที่ +5 และ +15 นาที</div>';
   h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
@@ -806,10 +810,13 @@ function hourSel(id,cur){var h='<select id="'+id+'">';for(var i=0;i<24;i++){h+='
 var TZS=[["Asia/Bangkok","ไทย / ลาว / เวียดนาม"],["Asia/Yangon","พม่า"],["Asia/Jakarta","อินโดนีเซีย (จาการ์ตา)"],["Asia/Singapore","สิงคโปร์ / มาเลเซีย"],["Asia/Manila","ฟิลิปปินส์"],["Asia/Shanghai","จีน"],["Asia/Hong_Kong","ฮ่องกง"],["Asia/Taipei","ไต้หวัน"],["Asia/Tokyo","ญี่ปุ่น"],["Asia/Seoul","เกาหลีใต้"],["Asia/Kolkata","อินเดีย"],["Asia/Dhaka","บังกลาเทศ"],["Asia/Dubai","ดูไบ / UAE"],["Asia/Riyadh","ซาอุฯ / กาตาร์"],["Europe/Istanbul","ตุรกี"],["Europe/Moscow","รัสเซีย (มอสโก)"],["Europe/Berlin","ยุโรปกลาง (เยอรมนี ฝรั่งเศส อิตาลี)"],["Europe/London","อังกฤษ"],["Australia/Perth","ออสเตรเลียตะวันตก"],["Australia/Sydney","ออสเตรเลียตะวันออก"],["Pacific/Auckland","นิวซีแลนด์"],["America/New_York","สหรัฐฯ ฝั่งตะวันออก"],["America/Chicago","สหรัฐฯ ตอนกลาง"],["America/Denver","สหรัฐฯ เขตภูเขา"],["America/Los_Angeles","สหรัฐฯ ฝั่งตะวันตก"],["America/Sao_Paulo","บราซิล"]];
 function tzSel(id,cur){var h='<select id="'+id+'">',f=false;for(var i=0;i<TZS.length;i++){var z=TZS[i][0];if(z===cur)f=true;h+='<option value="'+z+'"'+(z===cur?" selected":"")+'>'+TZS[i][1]+' — '+gmtLb(z)+'</option>'}if(!f&&cur){h+='<option value="'+esc(cur)+'" selected>'+esc(cur)+' — '+gmtLb(cur)+'</option>'}return h+'</select>'}
 function pickChar(el,c){PCHAR=c;var bs=document.querySelectorAll("#pf_char button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
+var PRN=null;
+function pickRn(el,v){PRN=v;var bs=document.querySelectorAll("#pf_rn button");for(var i=0;i<bs.length;i++){bs[i].className=""}el.className="on"}
 async function saveProfile(){
   var pl={display_name:$("#pf_name").value,birth_date:$("#pf_birth").value||"",phone:$("#pf_phone").value,
     brief_hour:Number($("#pf_bh").value),report_hour:Number($("#pf_rh").value),timezone:$("#pf_tz").value};
   if(PCHAR)pl.character=PCHAR;
+  if(PRN!==null)pl.renudge=PRN;
   await act("profile.update",pl,"บันทึกแล้ว 🙌");
 }
 async function doExport(){
