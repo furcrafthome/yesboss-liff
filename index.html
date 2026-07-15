@@ -557,7 +557,7 @@ async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}awai
 
 /* ---------- เงิน ---------- */
 /* ---------- 💰 แท็บเงิน v2: เลือกเดือนย้อนหลัง + แยกกระเป๋า + หมวดหมู่ + Pro teaser ---------- */
-var MOFF=0,MSC="all",MCACHE={};
+var MOFF=0,MSC="all",MCACHE={},MBUD=[];
 var SCOPE_TABS=[["all","ทั้งหมด"],["personal",icn("user",13)+" ส่วนตัว"],["family",icn("home",13)+" ครอบครัว"],["company",icn("briefcase",13)+" บริษัท"]];
 function mKey(){return MOFF+"|"+MSC}
 function mMonthStr(){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+MOFF);var y=d.getFullYear(),m=d.getMonth()+1;return y+"-"+(m<10?"0":"")+m}
@@ -566,7 +566,7 @@ function mGo(off){MOFF=off;draw();window.scrollTo(0,0)}
 function mScope(s){MSC=s;draw()}
 async function mLoad(){
   var k=mKey();
-  try{var r=await api("money.report",{month:mMonthStr(),scope:MSC==="all"?null:MSC});MCACHE[k]=r.rows||[]}
+  try{var r=await api("money.report",{month:mMonthStr(),scope:MSC==="all"?null:MSC});MCACHE[k]=r.rows||[];MBUD=r.budgets||MBUD}
   catch(e){MCACHE[k]=[];toast(e.message||"โหลดไม่สำเร็จ")}
   if(TAB==="money")draw();
 }
@@ -610,6 +610,19 @@ function vMoney(){
   h+=card("VAT "+num(vat)+" · WHT "+num(wht),icn("receipt",13)+" ภาษี (บาท)");
   h+='</div>';
   if(MOFF===0&&MSC==="all"){var d=DATA.money.day;h+='<div class="gh">วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · สุทธิ '+num(d.net)+'</div>'}
+  /* 🎯 แถบงบ (เฉพาะมุมมองรวมทุกกระเป๋า — rows ถึงครบพอคำนวณ) */
+  if(MSC==="all"&&MBUD.length){
+    for(var bi=0;bi<MBUD.length;bi++){var b=MBUD[bi],bu=0;
+      for(var ri=0;ri<rows.length;ri++){var rw=rows[ri];if(rw.kind==="income")continue;
+        if(b.category){if(rw.category===b.category)bu+=Number(rw.amount||0)}
+        else if(b.scope){if(rw.scope===b.scope)bu+=Number(rw.amount||0)}
+        else bu+=Number(rw.amount||0)}
+      var bAmt=Number(b.amount),bpc=Math.round(bu/bAmt*100);
+      var bLbl=b.category?("หมวด"+b.category):b.scope?("กระเป๋า"+(SCOPE_TH[b.scope]||b.scope)):"รวม";
+      h+='<div style="margin:7px 2px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>🎯 งบ'+esc(bLbl)+'</span><b>'+num(bu)+'/'+num(bAmt)+(bu>bAmt?' 🔴':bpc>=80?' ⚠️':'')+'</b></div>'
+        +'<div class="bar" style="height:9px;background:#E9E9EF;margin-top:3px"><span style="width:'+Math.max(4,Math.min(100,bpc))+'%;background:'+(bu>bAmt?'#f85149':'linear-gradient(90deg,#F4A9C0,#ED6885)')+';border-radius:6px"></span></div></div>';
+    }
+  }
   h+='<div style="text-align:center;margin:2px 0 8px"><button class="btn sm" onclick="'+(mIsPro()?'mExport()':'mProAsk()')+'">📄 ส่งไฟล์ CSV เดือนนี้เข้าแชต'+(mIsPro()?'':' 🔒 Pro')+'</button></div>';
   if(rows.length&&inc+exp>0){h+='<div style="display:flex;justify-content:center;margin:6px 0">'+donutSvg(inc,exp)+'</div>'}
   if(MSC==="all"&&(scp.personal||scp.family||scp.company)){
