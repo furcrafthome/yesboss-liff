@@ -222,11 +222,27 @@ function relogin(){
     localStorage.setItem("yb_rl_t",String(Date.now()))}catch(e){}
   try{liff.logout()}catch(e){}
   var st="";
-  try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
-    if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
-    if(tb)st="?tab="+encodeURIComponent(tb)}catch(e){}
+  try{var qp=new URLSearchParams(location.search),tb=qp.get("tab"),af=qp.get("aff");
+    var ls=qp.get("liff.state");if(ls){var lq=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls);if(!tb)tb=lq.get("tab");if(!af)af=lq.get("aff")}
+    if(tb)st="?tab="+encodeURIComponent(tb);
+    if(af)st+=(st?"&":"?")+"aff="+encodeURIComponent(af)}catch(e){}
   if(liff.isInClient&&liff.isInClient()){location.replace("https://liff.line.me/2010582556-jAUGKlnX"+st)}
   else{try{liff.login()}catch(e){location.reload()}}
+}
+/* 🤝 มาจากลิงก์ affiliate ?aff=A-XXXX — เครดิตให้เงียบๆ แล้วโชว์หน้าต้อนรับ+ปุ่มแอดเลขา (ไม่โหลดแดชบอร์ด) */
+async function affWelcome(code){
+  var m="ยินดีต้อนรับสู่ YES BOSS 💗",d="เลขา AI ส่วนตัวในไลน์ — จดงาน เตือนนัด ดูแลรายรับรายจ่าย เริ่มใช้ฟรี";
+  try{var r=await api("aff.claim",{code:code});
+    if(r.ok&&!r.already)m="รับสิทธิ์จากผู้แนะนำเรียบร้อย 🎁";
+    else if(r.already)m="บอสมีเครดิตผู้แนะนำอยู่แล้ว 💗";
+    else if(r.reason==="not_new_user"){m="บอสเป็นลูกค้าเลขาอยู่แล้วนี่นา 💗";d="ใช้เลขาต่อได้เต็มที่เลย — ชวนเพื่อนรับ Pro ฟรีได้ด้วยนะ พิมพ์ \\"แนะนำเพื่อน\\" ในแชต"}
+  }catch(e){}
+  $("#app").innerHTML='<div style="min-height:78vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;gap:14px">'
+   +'<div style="font-size:46px">💗</div>'
+   +'<div style="font-size:21px;font-weight:800">'+esc(m)+'</div>'
+   +'<div style="color:#8b8b92;font-size:14px;line-height:1.6;max-width:300px">'+esc(d)+'</div>'
+   +'<a class="btn" style="font-size:17px;padding:14px 28px;text-decoration:none;display:inline-block" href="https://lin.ee/U7kOStU">➕ เพิ่มเลขาเป็นเพื่อนเลย</a>'
+   +'<a href="'+location.pathname+'" style="color:#B85C7E;font-size:13px">เปิดหน้าแดชบอร์ด</a></div>';
 }
 async function api(action,payload){
   var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{}})});
@@ -245,6 +261,10 @@ async function boot(){
     IDT=liff.getIDToken();
     if(!IDT){$("#app").innerHTML=errBox("ต้องเปิดสิทธิ์ openid ให้ LIFF ก่อนนะ");return}
     if(tokenExpired(IDT)){relogin();return}
+    /* 🤝 ลิงก์ affiliate: เครดิต + หน้าต้อนรับ แล้วจบเลย (คนใหม่ยังไม่มีข้อมูลให้โชว์ในแดชบอร์ด) */
+    try{var _q=new URLSearchParams(location.search),_af=_q.get("aff");
+      if(!_af){var _l=_q.get("liff.state");if(_l){_af=new URLSearchParams(_l.charAt(0)==="?"?_l.slice(1):_l).get("aff")}}
+      if(_af){await affWelcome(_af);return}}catch(e){}
     try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
       if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
       if(tb==="story")tb="home"; // ปุ่มเรื่องราวของบอส (rich menu) -> เข้าหน้าหลักแดชบอร์ดรวม (บอสยืนยัน 2026-07-04); แท็บ 📖 ในแอปยังเปิดหน้าเรื่องราวได้
