@@ -524,7 +524,7 @@ function vTodo(){
   h+='<h2>'+icn("clock",17)+' การแจ้งเตือนที่รออยู่ ('+DATA.reminders.length+')</h2>';
   if(!DATA.reminders.length){h+='<div class="empty">ยังไม่มีการแจ้งเตือน — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 9 โมงเตือนโทรหาลูกค้า"</div>'}
   for(var i=0;i<DATA.reminders.length;i++){var r=DATA.reminders[i];
-    h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(r.reminder_text)+(r.repeat&&r.repeat!=="none"?'<span class="pill">🔁 '+esc(r.repeat)+'</span>':'')+'</div><div class="m">'+(r.all_day?"ทั้งวัน · ":"")+fdate(r.remind_at)+'</div><div id="rs'+i+'"></div></div>'+
+    h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(r.reminder_text)+(r.repeat&&r.repeat!=="none"?'<span class="pill">🔁 '+({daily:'ทุกวัน',weekly:'ทุกสัปดาห์',monthly:'ทุกเดือน',yearly:'ทุกปี',weekdays:'จ-ศ',monthend:'สิ้นเดือน'}[r.repeat]||esc(r.repeat))+'</span>':'')+'</div><div class="m">'+(r.all_day?"ทั้งวัน · ":"")+fdate(r.remind_at)+'</div><div id="rs'+i+'"></div></div>'+
       '<button class="ic" onclick="rsched('+i+')">'+icn("clock",15)+'</button><button class="ic" onclick="delRem(\''+r.id+'\')">'+icn("trash",15)+'</button></div>';
   }
   h+='<h2>✅ งานที่ต้องทำ ('+DATA.tasks.open.length+')</h2>';
