@@ -235,7 +235,7 @@ async function affWelcome(code){
   try{var r=await api("aff.claim",{code:code});
     if(r.ok&&!r.already)m="รับสิทธิ์จากผู้แนะนำเรียบร้อย 🎁";
     else if(r.already)m="บอสมีเครดิตผู้แนะนำอยู่แล้ว 💗";
-    else if(r.reason==="not_new_user"){m="บอสเป็นลูกค้าเลขาอยู่แล้วนี่นา 💗";d="ใช้เลขาต่อได้เต็มที่เลย — ชวนเพื่อนรับ Pro ฟรีได้ด้วยนะ พิมพ์ \\"แนะนำเพื่อน\\" ในแชต"}
+    else if(r.reason==="not_new_user"){m="บอสเป็นลูกค้าเลขาอยู่แล้วนี่นา 💗";d="ใช้เลขาต่อได้เต็มที่เลย — ชวนเพื่อนรับ Pro ฟรีได้ด้วยนะ พิมพ์ 'แนะนำเพื่อน' ในแชต"}
   }catch(e){}
   $("#app").innerHTML='<div style="min-height:78vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;gap:14px">'
    +'<div style="font-size:46px">💗</div>'
