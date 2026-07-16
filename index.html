@@ -560,6 +560,23 @@ function vTodo(){
       h+='<div class="rowitem"><button class="chk" style="opacity:.5" onclick="tgTask(\''+d.id+'\',false)">✓</button><div class="grow"><div class="t" style="text-decoration:line-through;color:#8b949e">'+esc(d.task_text)+'</div></div></div>';
     }
   }
+  /* 🏢 งานที่มอบทีม (Business ฝั่งคนมอบ) — เจ้านายตามงานจาก dashboard ได้ (feedback บอส 16 ก.ค.) */
+  if(DATA.team&&((DATA.team.open&&DATA.team.open.length)||(DATA.team.done&&DATA.team.done.length))){
+    h+='<h2>👥 งานที่มอบทีม ('+DATA.team.open.length+')</h2>';
+    if(!DATA.team.open.length){h+='<div class="empty">ไม่มีงานทีมค้าง 🎉</div>'}
+    var nowTm=Date.now();
+    for(var q=0;q<DATA.team.open.length;q++){var tw=DATA.team.open[q];
+      var late=tw.due_at&&Date.parse(tw.due_at)<nowTm;
+      var stp=tw.blocked_at?'<span class="pill" style="background:#fde8e8;color:#b42318">🆘 ติดปัญหา</span>':late?'<span class="pill" style="background:#fde8e8;color:#b42318">🔥 เลยกำหนด</span>':tw.ack_at?'<span class="pill">✓ รับแล้ว</span>':'<span class="pill" style="background:#fff3dc;color:#9a6700">👀 ยังไม่กดรับ</span>';
+      h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(tw.task_text)+' '+stp+'</div><div class="m">'+esc(tw.who||"สมาชิกทีม")+(tw.due_at?' · กำหนด '+fdate(tw.due_at):'')+'</div></div></div>';
+    }
+    if(DATA.team.done.length){h+='<h2>ทีมทำเสร็จสัปดาห์นี้ ('+DATA.team.done.length+')</h2>';
+      for(var q2=0;q2<DATA.team.done.length;q2++){var tdw=DATA.team.done[q2];
+        h+='<div class="rowitem"><div class="grow"><div class="t" style="text-decoration:line-through;color:#8b949e">'+esc(tdw.task_text)+'</div><div class="m">'+esc(tdw.who||"สมาชิกทีม")+'</div></div></div>';
+      }
+    }
+    h+='<div class="m" style="margin-top:6px">มอบงานในกลุ่มทีม: "บอส มอบงาน @คน งาน กำหนดส่ง" · ยกเลิก: พิมพ์ "ยกเลิกงานทีม เลขลำดับ" ในแชตเลขา</div>';
+  }
   return h;
 }
 function rsched(i){
