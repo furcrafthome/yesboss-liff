@@ -558,7 +558,7 @@ function vTodo(){
     var nowTm=Date.now();
     for(var q=0;q<(DATA.team.open||[]).length;q++){var tw=DATA.team.open[q];
       var late=tw.due_at&&Date.parse(tw.due_at)<nowTm;
-      var stp=tw.blocked_at?'<span class="pill" style="background:#fde8e8;color:#b42318">🆘 ติดปัญหา</span>':late?'<span class="pill" style="background:#fde8e8;color:#b42318">🔥 เลยกำหนด</span>':tw.ack_at?'<span class="pill">✓ รับแล้ว</span>':'<span class="pill" style="background:#fff3dc;color:#9a6700">👀 ยังไม่กดรับ</span>';
+      var stp=tw.blocked_at?'<span class="pill" style="background:#fde8e8;color:#b42318">🆘 ติดปัญหา</span>':late?'<span class="pill" style="background:#fde8e8;color:#b42318">🔥 เลยกำหนด</span>':tw.ack_at?'<span class="pill">🔨 กำลังทำ</span>':'<span class="pill" style="background:#fff3dc;color:#9a6700">👀 ยังไม่กดรับ</span>';
       h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(tw.task_text)+' '+stp+'</div><div class="m">'+esc(tw.who||"สมาชิกทีม")+(tw.due_at?' · กำหนด '+fdate(tw.due_at):'')+'</div></div></div>';
     }
   }
