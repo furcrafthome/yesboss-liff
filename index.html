@@ -437,7 +437,7 @@ function todayBKK(){try{return new Date().toLocaleDateString("en-CA",{timeZone:T
 function bkkYMD(iso){try{return new Date(iso).toLocaleDateString("en-CA",{timeZone:TZ()})}catch(e){return (""+iso).slice(0,10)}}
 function thToday(){try{return new Date().toLocaleDateString("th-TH",{day:"numeric",month:"long",timeZone:TZ()})}catch(e){return ""}}
 function thDate(iso){try{return new Date(iso+"T00:00:00").toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short"})}catch(e){return iso}}
-function thMonth(off){var d=new Date();d.setMonth(d.getMonth()+off);return THMON[d.getMonth()]+" "+d.getFullYear()}
+function thMonth(off){var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+off);return THMON[d.getMonth()]+" "+d.getFullYear()} // setDate(1) ก่อน: วันที่ 29-31 บวกเดือนแล้วล้น หัวเดือนเพี้ยน
 function stat(bg,ic,col,val,cap,tab){return '<div class="st" onclick="go(\''+tab+'\')" style="cursor:pointer"><div class="ico" style="background:'+bg+';color:'+col+'">'+ic+'</div><div><div class="big" style="color:#23232B">'+num(val)+'</div><div class="cap">'+cap+'</div></div></div>'}
 function donutSvg(income,expense){
   var tot=(income||0)+(expense||0),c=327,inc=tot>0?income/tot*c:0,exp=tot>0?expense/tot*c:0;
@@ -498,13 +498,14 @@ async function saveAppt(iso){
 async function refreshAll(){try{MCACHE={};DATA=await api("me.get");LSYNC=Date.now();draw();toast("อัปเดตล่าสุดแล้ว ✨")}catch(e){toast("โหลดไม่สำเร็จ ลองใหม่นะ")}}
 function vHome(){
   var pr=DATA.profile||{},nm=pr.display_name?"คุณ"+esc(pr.display_name):"บอส";
-  var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
+  var founder=(pr.supporter_badge==="supporter"||pr.supporter_badge==="business");
+  var plan=founder?"🎖️ ผู้ก่อตั้ง":((pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี");
   var today=todayBKK(),mth=DATA.money.month||{};
   var todayN=(DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===today}).length;
   var openT=(DATA.tasks&&DATA.tasks.open)||[];
   var facts=(DATA.story&&DATA.story.facts)||[],files=(DATA.story&&DATA.story.files)||[];
   var lastMood=DATA.mood&&DATA.mood[0];
-  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</span><span class="plan">'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div></div>';
+  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</span><span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div>'+(founder?'<div style="margin-top:11px;background:linear-gradient(135deg,#FFF7E6,#FDEBC8);border:1px solid #F0D089;border-radius:14px;padding:11px 13px;font-size:12.5px;color:#7A5B12;font-weight:600;line-height:1.55">🎖️ บอสคือ <b>ผู้ก่อตั้งรุ่นแรก</b> — ขอบคุณที่เชื่อในเลขาคนนี้ตั้งแต่วันแรกค่ะ 🤍 ทุกฟีเจอร์ปลดล็อกครบ + ล็อกราคานี้ตลอด</div>':'')+'</div>';
   h+='<div class="stats">';
   h+=stat("#F3F3F7",icn("clock",22),"#E0466E",todayN,"นัดวันนี้","todo");
   h+=stat("#F3F3F7",icn("check",22),"#E0466E",openT.length,"งานค้าง","todo");
