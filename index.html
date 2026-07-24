@@ -235,7 +235,7 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
 <div><div class="hbrow"><span style="font-size:20px">🔋</span><div class="hbatt"><div id="hrfill"></div></div><span id="hrpct">8%</span></div><div id="hrblbl">พลังใจ</div></div>
 <div id="hrstage"></div>
 </div></div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <script>
 var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0;
 var ICONS={
@@ -283,6 +283,36 @@ function wallUtc(ymd,hm){var g=Date.parse(ymd+"T"+hm+":00Z");var t=g-tzOff(TZ(),
 function gmtLb(tz){var m=tzOff(tz,new Date());var a=Math.abs(m);return "GMT"+(m<0?"-":"+")+Math.floor(a/60)+(a%60?":"+(a%60<10?"0":"")+(a%60):"")}
 function fdate(iso){try{return new Date(iso).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",timeZone:TZ()})}catch(e){return ""}}
 function fdateOnly(d){try{return new Date(d+"T00:00:00").toLocaleDateString("th-TH",{day:"numeric",month:"short"})}catch(e){return d||""}}
+function ftime(iso){try{return new Date(iso).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",timeZone:TZ()})}catch(e){return ""}}
+/* ⚠️ กล่องยืนยันสำหรับของที่ "ลบแล้วกู้ไม่ได้จริงๆ" (ไฟล์ในคลัง / ลบทั้งบัญชี PDPA)
+   ของพวกนี้จะใช้ undo ไม่ได้ เพราะไฟล์ในที่เก็บถูกลบไปแล้ว/กฎหมายบังคับให้ลบจริง
+   แต่ confirm() ของเบราว์เซอร์ก็ใช้ไม่ได้: คนกด "ตกลง" อัตโนมัติโดยไม่อ่าน
+   (ของเดิมถาม confirm ซ้อนสองชั้นตอนลบทั้งบัญชี — พิสูจน์แล้วว่าไม่ช่วย กดรัวสองทีได้พอกัน)
+   ตัวนี้บังคับให้ "พิมพ์คำยืนยัน" ถ้าเรื่องใหญ่ = ต้องอ่านถึงจะผ่านได้จริง */
+function dlg(o){
+  return new Promise(function(res){
+    var w=document.createElement("div");
+    w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");w.setAttribute("aria-label",o.title);
+    w.style.cssText="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px";
+    var need=o.typeWord||"";
+    w.innerHTML='<div style="background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3)">'
+      +'<div style="font-size:17px;font-weight:800">'+esc(o.title)+'</div>'
+      +'<div style="font-size:14px;line-height:1.65;color:var(--muted);margin-top:9px">'+o.body+'</div>'
+      +(need?'<label class="f" for="dlgin">พิมพ์คำว่า <b style="color:var(--neg)">'+esc(need)+'</b> เพื่อยืนยัน</label><input id="dlgin" autocomplete="off" autocapitalize="off">':'')
+      +'<div class="eact"><button class="btn warn" id="dlgok"'+(need?" disabled":"")+'>'+esc(o.okText||"ยืนยัน")+'</button>'
+      +'<button class="btn ghost" id="dlgno">ไม่ลบแล้ว</button></div></div>';
+    document.body.appendChild(w);
+    var ok=w.querySelector("#dlgok"),no=w.querySelector("#dlgno"),inp=w.querySelector("#dlgin");
+    function close(v){document.body.removeChild(w);document.removeEventListener("keydown",esckey);res(v)}
+    function esckey(e){if(e.key==="Escape")close(false)}
+    document.addEventListener("keydown",esckey);
+    if(inp){inp.oninput=function(){ok.disabled=inp.value.trim()!==need};setTimeout(function(){inp.focus()},50)}
+    else{setTimeout(function(){no.focus()},50)}
+    ok.onclick=function(){if(!ok.disabled)close(true)};
+    no.onclick=function(){close(false)};
+    w.onclick=function(e){if(e.target===w)close(false)};
+  });
+}
 var TOASTT=null;
 function toast(m){tshow(m,null,1700)}
 /* ↩️ แถบแจ้งเตือนพร้อมปุ่ม "เลิกทำ" — ตัวนี้มาแทน confirm() ทั้ง 8 จุด
@@ -448,7 +478,7 @@ function wzPersist(){try{localStorage.setItem("yb_wz",JSON.stringify({z:WZ,ti:TI
 function wzRestore(){try{var s=JSON.parse(localStorage.getItem("yb_wz")||"null");
   if(s&&Date.now()-(s.t||0)<1800000){WZ=s.z||0;TI=s.ti||0;if(s.ch)CH=s.ch;SNAME=s.sn||"";F_NM=s.nm;F_PH=s.ph;F_AG=s.ag||"";F_WF=s.wf||"";F_AC=s.ac||"";F_BZ=s.bz||"";WZ_OK=!!s.ok;WZ_MK=!!s.mk}}catch(e){}}
 function wzClear(){try{localStorage.removeItem("yb_wz")}catch(e){}}
-var WZ_CSS='<style>.wz{max-width:430px;margin:0 auto;padding:14px 16px 110px;box-sizing:border-box}.wzbar{height:6px;background:#EDEDF2;border-radius:99px;overflow:hidden;margin:4px 0 10px}.wzbar i{display:block;height:100%;background:#E8779B;border-radius:99px;transition:.3s}.wzsteps{display:flex;justify-content:space-between;margin-bottom:16px}.wzst{flex:1;text-align:center;font-size:11px;color:#85858E}.wzst .b{width:26px;height:26px;border-radius:99px;background:#fff;border:1.5px solid #E5E5EB;color:#C4547E;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-weight:800;font-size:12px}.wzst.on .b{background:#E8779B;border-color:#E8779B;color:#fff}.wzst.done .b{background:#FDE7EF;border-color:#F4A9C0;color:#C4547E}.wzst.on{color:#C4547E;font-weight:700}.wzh1{font-size:20px;font-weight:800;color:#3A3A3C;margin:2px 0}.wzsub{font-size:13px;color:#6E6E73;margin:0 0 12px}.wzhero{display:block;width:130px;margin:6px auto 2px}.wzcard{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:12px}.wzul{margin:0;padding:0;list-style:none}.wzul li{display:flex;gap:8px;font-size:13.5px;color:#3A3A3C;line-height:1.5;margin:8px 0}.wzul li:before{content:"";width:7px;height:7px;border-radius:99px;background:#F4A9C0;margin-top:6px;flex:none}.wzck{display:flex;gap:10px;align-items:flex-start;background:#F5F5F8;border:1.5px solid #E9E9EF;border-radius:14px;padding:12px;font-size:13.5px;color:#3A3A3C}.wzck input{width:20px;height:20px;accent-color:#E8779B;flex:none;margin-top:1px}.secc{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #E5E5EB;border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}.secc.on{border-color:#E8779B;background:#F7F8FA;box-shadow:0 4px 14px rgba(232,119,155,.18)}.secc img{width:64px;height:80px;object-fit:contain;flex:none}.secc .t{flex:1}.secc .t b{font-size:16px;color:#3A3A3C;display:block}.secc .t span{font-size:12px;color:#6E6E73;display:block;margin-top:2px}.secc .t i{font-size:12px;color:#C4547E;font-style:normal;display:block;margin-top:4px}.secc .r{width:22px;height:22px;border-radius:99px;border:2px solid #E5E5EB;flex:none}.secc.on .r{border-color:#E8779B;background:radial-gradient(circle,#E8779B 45%,#fff 50%)}.wzf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.wzf input,.wzf select{width:100%;box-sizing:border-box;border:1.5px solid #E5E5EB;border-radius:12px;padding:11px 12px;font-size:15px;background:#FAFAFC;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.wzf input:focus,.wzf select:focus{border-color:#E8779B}.wznav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #EDEDF2;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;max-width:430px;margin:0 auto;box-sizing:border-box}.wzback{flex:1;border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:13px;font-size:15px;font-weight:700}.wznext{flex:2;border:0;background:#E8779B;color:#fff;border-radius:99px;padding:13px;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(232,119,155,.35)}.wznext:disabled{opacity:.4;box-shadow:none}.tourh{display:flex;gap:12px;align-items:center;margin-bottom:10px}.tourh img{width:64px;height:80px;object-fit:contain;flex:none}.tourh h2{font-size:19px;margin:0;color:#3A3A3C}.tourh p{font-size:12.5px;color:#6E6E73;margin:2px 0 0}.tchat{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:10px}.tcu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.tcb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.tcb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.tcb .m{background:#F5F5F8;border:1px solid #E9E9EF;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.ttry{display:block;width:100%;border:1.5px solid #E8779B;background:#fff;color:#C4547E;font-size:14px;font-weight:800;padding:11px;border-radius:99px;margin-top:2px}.tdots{display:flex;gap:5px;justify-content:center;margin:10px 0 4px}.tdots i{width:7px;height:7px;border-radius:99px;background:#E5E5EB;transition:.2s}.tdots i.on{width:22px;background:#E8779B}.wzdet{border-bottom:1px solid #F0F0F4}.wzdet:last-of-type{border-bottom:0}.wzdet summary{list-style:none;display:flex;align-items:center;gap:8px;padding:11px 2px;font-size:14px;font-weight:700;color:#3A3A3C;cursor:pointer}.wzdet summary::-webkit-details-marker{display:none}.wzdet summary:after{content:"▾";margin-left:auto;color:#C4547E;transition:.2s}.wzdet[open] summary:after{transform:rotate(180deg)}.wzdet .dd{padding:0 2px 12px;font-size:13.5px;color:#3A3A3C;line-height:1.55}.wzlink{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13.5px;font-weight:700;text-decoration:underline;padding:2px 0 12px;text-align:center}#pvov{position:fixed;inset:0;background:#fff;z-index:99;display:flex;flex-direction:column}.pvtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #EDEDF2;padding-top:calc(10px + env(safe-area-inset-top))}.pvtop b{color:#C4547E;font-size:15px}.pvtop button{border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px}#pvov iframe{flex:1;border:0;width:100%}</style>';
+var WZ_CSS='<style>.wz{max-width:430px;margin:0 auto;padding:14px 16px 110px;box-sizing:border-box}.wzbar{height:6px;background:#EDEDF2;border-radius:99px;overflow:hidden;margin:4px 0 10px}.wzbar i{display:block;height:100%;background:#E8779B;border-radius:99px;transition:.3s}.wzsteps{display:flex;justify-content:space-between;margin-bottom:16px}.wzst{flex:1;text-align:center;font-size:11px;color:#85858E}.wzst .b{width:26px;height:26px;border-radius:99px;background:#fff;border:1.5px solid #E5E5EB;color:#C4547E;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-weight:800;font-size:12px}.wzst.on .b{background:#E8779B;border-color:#E8779B;color:#fff}.wzst.done .b{background:#FDE7EF;border-color:#F4A9C0;color:#C4547E}.wzst.on{color:#C4547E;font-weight:700}.wzh1{font-size:20px;font-weight:800;color:#3A3A3C;margin:2px 0}.wzsub{font-size:13px;color:#6E6E73;margin:0 0 12px}.wzhero{display:block;width:130px;margin:6px auto 2px}.wzcard{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:12px}.wzul{margin:0;padding:0;list-style:none}.wzul li{display:flex;gap:8px;font-size:13.5px;color:#3A3A3C;line-height:1.5;margin:8px 0}.wzul li:before{content:"";width:7px;height:7px;border-radius:99px;background:#F4A9C0;margin-top:6px;flex:none}.wzck{display:flex;gap:10px;align-items:flex-start;background:#F5F5F8;border:1.5px solid #E9E9EF;border-radius:14px;padding:12px;font-size:13.5px;color:#3A3A3C}.wzck input{width:20px;height:20px;accent-color:#E8779B;flex:none;margin-top:1px}.secc{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #E5E5EB;border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}.secc.on{border-color:#E8779B;background:#F7F8FA;box-shadow:0 4px 14px rgba(232,119,155,.18)}.secc img{width:64px;height:80px;object-fit:contain;flex:none}.secc .t{flex:1}.secc .t b{font-size:16px;color:#3A3A3C;display:block}.secc .t span{font-size:12px;color:#6E6E73;display:block;margin-top:2px}.secc .t i{font-size:12px;color:#C4547E;font-style:normal;display:block;margin-top:4px}.secc .r{width:22px;height:22px;border-radius:99px;border:2px solid #E5E5EB;flex:none}.secc.on .r{border-color:#E8779B;background:radial-gradient(circle,#E8779B 45%,#fff 50%)}.wzf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.wzf input,.wzf select{width:100%;box-sizing:border-box;border:1.5px solid #E5E5EB;border-radius:12px;padding:11px 12px;font-size:15px;background:#FAFAFC;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.wzf input:focus,.wzf select:focus{border-color:#E8779B}.wznav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #EDEDF2;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;max-width:430px;margin:0 auto;box-sizing:border-box}.wzback{flex:1;border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:13px;font-size:15px;font-weight:700}.wznext{flex:2;border:0;background:#E8779B;color:#fff;border-radius:99px;padding:13px;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(232,119,155,.35)}.wznext:disabled{opacity:.4;box-shadow:none}.tourh{display:flex;gap:12px;align-items:center;margin-bottom:10px}.tourh img{width:64px;height:80px;object-fit:contain;flex:none}.tourh h2{font-size:19px;margin:0;color:#3A3A3C}.tourh p{font-size:12.5px;color:#6E6E73;margin:2px 0 0}.tchat{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:10px}.tcu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.tcb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.tcb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.tcb .m{background:#F5F5F8;border:1px solid #E9E9EF;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.ttry{display:block;width:100%;border:1.5px solid #E8779B;background:#fff;color:#C4547E;font-size:14px;font-weight:800;padding:11px;border-radius:99px;margin-top:2px}.tdots{display:flex;gap:5px;justify-content:center;margin:10px 0 4px}.tdots i{width:7px;height:7px;border-radius:99px;background:#E5E5EB;transition:.2s}.tdots i.on{width:22px;background:#E8779B}.wzdet{border-bottom:1px solid #F0F0F4}.wzdet:last-of-type{border-bottom:0}.wzdet summary{list-style:none;display:flex;align-items:center;gap:8px;padding:11px 2px;font-size:14px;font-weight:700;color:#3A3A3C;cursor:pointer}.wzdet summary::-webkit-details-marker{display:none}.wzdet summary:after{content:"▾";margin-left:auto;color:#C4547E;transition:.2s}.wzdet[open] summary:after{transform:rotate(180deg)}.wzdet .dd{padding:0 2px 12px;font-size:13.5px;color:#3A3A3C;line-height:1.55}.wzlink{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13.5px;font-weight:700;text-decoration:underline;padding:2px 0 12px;text-align:center}#pvov{position:fixed;inset:0;background:#fff;z-index:99;display:flex;flex-direction:column}.pvtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #EDEDF2;padding-top:calc(10px + env(safe-area-inset-top))}.pvtop b{color:#C4547E;font-size:15px}.pvtop button{border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px}#pvov iframe{flex:1;border:0;width:100%}.wfgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:8px 0 4px}.wfc{background:#fff;border:2px solid #E5E5EB;border-radius:16px;padding:14px 8px;font-family:inherit;font-size:13px;font-weight:700;color:#3A3A3C;line-height:1.35;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}.wfc .e{font-size:26px;line-height:1}.wfc.on{border-color:#E8779B;background:#FFF6FA;box-shadow:0 4px 14px rgba(232,119,155,.2)}.wzmore{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13px;font-weight:700;padding:12px 0;text-align:center;font-family:inherit;min-height:44px}@media (prefers-color-scheme:dark){.wzcard,.wfc,.secc,.tchat{background:#1F1F27;border-color:#2E2E38}.wzh1,.wzf label,.wfc,.tourh h2,.tcb .m{color:#EDEDF2}.wzsub,.wzst,.tourh p{color:#A9A9B6}.wzf input,.wzf select{background:#24242D;border-color:#3A3A46;color:#EDEDF2}.wznav{background:rgba(31,31,39,.97);border-color:#2E2E38}.wzback,.ttry,.wzlink,.wzmore{background:#1F1F27;color:#FF9FBB;border-color:#4A2F3B}.wznext{background:#FF9FBB;color:#2A0A16}.wfc.on{background:#3A2530;border-color:#FF9FBB}.tcb .m{background:#24242D;border-color:#2E2E38}.wzck{background:#24242D;border-color:#2E2E38;color:#EDEDF2}}</style>';
 var SEC_CARDS=[
   {c:"ครับบอส",img:"img/p08-clipboard-write.webp",d:"สุภาพ เป๊ะ เชื่อถือได้",ex:"รับทราบครับบอส เดี๋ยวจัดการให้เลยครับ 📋"},
   {c:"ค่ะบอส",img:"img/p06-ok-wink.webp",d:"อบอุ่น ใจดี เป็นกันเอง",ex:"รับทราบค่ะบอส เดี๋ยวจัดการให้เลยนะคะ 😊"},
@@ -463,11 +493,17 @@ var TOUR=[
   {img:"img/p13-sofa-relax.webp",t:"🌙 สรุปให้ทุกเช้า-เย็น",s:"ไม่ต้องถามก็ได้ เลขาสรุปมาให้เอง",u:"สรุปวันนี้",b:"วันนี้: นัด 2 · งานค้าง 3<br>ใช้ไป 240.- เคลียร์ต่อพรุ่งนี้ 💪",x:"สรุปวันนี้",pts:["เช้าบรีฟงานวันนี้ เย็นสรุป + งานพรุ่งนี้","เลือกเวลาส่งที่บอสสะดวกได้","งาน นัด เงิน ครบจบในข้อความเดียว"]},
   {img:"img/p05-megaphone.webp",t:"👥 เลขาในกลุ่ม LINE",s:"เตือนทั้งทีม/ครอบครัว พร้อมกันทั้งกลุ่ม",u:"บอส เตือนพรุ่งนี้ 9 โมง ประชุมทีม",b:"รับทราบ! 📌 พรุ่งนี้ 09:00<br>เตือนทุกคนในกลุ่มแน่นอน",x:"บอส เตือนพรุ่งนี้ 9 โมง ประชุมทีม",pts:["① แอดเลขาเป็นเพื่อน (บอสทำแล้ว ✓)","② เปิดกลุ่ม → เมนู ≡ → สมาชิก → เชิญ → เลือก YES, BOSS!","③ พิมพ์ “บอส เตือน...” ในกลุ่ม — เตือนครั้งเดียว/ประกาศ ฟรี","⚠️ กลุ่มต้องไม่มีบอทตัวอื่นอยู่ (กฎของ LINE: บอทอยู่ได้กลุ่มละ 1 ตัว)"]}
 ];
-function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ===2?wzForm():wzTour())}
+/* ทางเดินใหม่ 3 จอ: ยินยอม -> เลือกเลขา -> ชื่อ+อยากลองอะไร -> (จอ 4) สำเร็จจริง
+   ทัวร์ 7 การ์ดยังอยู่ครบ แต่ย้ายไปเป็น "ของแถม" (WZ=4) ที่กดดูได้ ไม่ใช่กำแพงที่ต้องผ่าน */
+function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ===2?wzForm():WZ===3?wzWin():wzTour())}
+/* แถบขั้นตอน: โชว์ 3 ขั้นจริง (ยินยอม -> เลขา -> ชื่อ) แล้วจบ
+   จอ "สำเร็จครั้งแรก" (WZ=3) กับทัวร์ (WZ=4) ไม่นับเป็นขั้นตอนที่ต้องผ่าน — ลงทะเบียนเสร็จตั้งแต่ขั้น 3
+   เดิมโชว์ 4 ขั้นแล้วขั้นสุดท้ายคือทัวร์ 7 การ์ด = ลูกค้าเห็นว่ายังอีกไกลตั้งแต่จอแรก */
 function wzHead(){
-  var names=["ยินยอม","เลขา","ข้อมูล","ฟีเจอร์"],pct=[15,40,65,90][WZ];
-  var h='<div class="wzbar"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
-  for(var i=0;i<4;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
+  if(WZ>=3){return '<div class="wzbar"><i style="width:100%"></i></div><div class="wzsteps"><div class="wzst done" style="flex:none;margin:0 auto"><div class="b">✓</div>ลงทะเบียนเสร็จแล้ว</div></div>'}
+  var names=["ยินยอม","เลือกเลขา","ชื่อบอส"],pct=[20,55,90][WZ];
+  var h='<div class="wzbar" role="progressbar" aria-valuenow="'+(WZ+1)+'" aria-valuemin="1" aria-valuemax="3" aria-label="ขั้นตอนที่ '+(WZ+1)+' จาก 3"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
+  for(var i=0;i<3;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
   return h+'</div>';
 }
 function wzNav(back,next,label,dis){
@@ -510,23 +546,53 @@ function wzSecretary(){
     +wzNav("WZ=0;draw()","SNAME=$(\'#wz_sn\').value.trim();WZ=2;draw()","ไปต่อ ›",false);
   return h;
 }
+/* ═══ 📝 จอที่ 3: ชื่อ + อยากให้ช่วยเรื่องไหนก่อน ═══
+   เดิมเป็นฟอร์ม 6 ช่อง (ชื่อ/เบอร์/อายุ/อยากลอง/ช่องทาง/ธุรกิจ) แล้วต่อด้วยทัวร์ 7 การ์ด = 11 จอ
+   ทั้ง 11 จอไม่มีตรงไหนที่ลูกค้าได้ผลลัพธ์จริงเลยสักครั้ง (ทัวร์เป็นบทสนทนาจำลองทั้งหมด)
+   และคำเชิญที่เพิ่งแก้ 25 ก.ค. ไปสัญญาไว้ว่า "ไม่ถึงนาที ทำครั้งเดียวจบ" — 11 จอทำให้คำนั้นไม่จริง
+   ของใหม่: บังคับแค่ "ชื่อ" · ที่เหลือพับเก็บเป็น "บอกเพิ่มอีกนิด (ไม่บังคับ)" · แล้วพาไปสำเร็จจริงเลย */
+var WF_CARDS=[["reminder","⏰","เตือนงาน / นัดหมาย"],["money","💸","จดรายรับ–รายจ่าย"],["brief","🌙","สรุปงานให้ทุกวัน"],["files","📁","เก็บไฟล์เอกสาร"],["fortune","🔮","ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛","ฮีลใจ / ที่พักใจ"]];
+var WZ_MORE=0;
+function wzPickWf(v){F_WF=v;wzPersist();draw()}
+function wzMore(){wzStash();WZ_MORE=WZ_MORE?0:1;draw()}
 function wzForm(){
   var pr=(DATA&&DATA.profile)||{};
   var nm=F_NM!==null?F_NM:(pr.display_name||""),ph=F_PH!==null?F_PH:(pr.phone||"");
-  var sel=function(id,label,cur,opts){var h='<label>'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()">';for(var i=0;i<opts.length;i++){h+='<option value="'+opts[i][0]+'"'+(cur===opts[i][0]?" selected":"")+'>'+opts[i][1]+'</option>'}return h+'</select>'};
-  return '<div class="wz">'+wzHead()
-    +'<div class="wzh1">ให้เลขารู้จักบอสหน่อย</div><p class="wzsub">'+(SNAME||"เลขา")+'จะได้ดูแลบอสได้ถูกใจ 💕</p>'
+  var h='<div class="wz">'+wzHead()
+    +'<div class="wzh1">ให้เลขาเรียกบอสว่าอะไรดี</div><p class="wzsub">ใส่แค่ชื่อก็เริ่มใช้ได้เลย 💕</p>'
     +'<div class="wzf wzcard">'
-    +'<label style="margin-top:0">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="อยากให้เรียกว่าอะไรดี" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
-    +'<label>เบอร์มือถือ <span style="font-weight:400;color:#85858E">(ไม่บังคับ)</span></label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
-    +sel("wz_ag","ช่วงอายุ",F_AG,[["","เลือกช่วงอายุ"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
-    +sel("wz_wf","อยากให้เลขาช่วยเรื่องไหนก่อน",F_WF,[["","เลือกเรื่องที่อยากลอง"],["reminder","⏰ เตือนงาน/นัดหมาย"],["money","💸 จดรายรับรายจ่าย + สลิป"],["files","📁 เก็บไฟล์เอกสาร"],["fortune","🔮 ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛 ฮีลใจ / ที่พักใจ"],["brief","🌙 สรุปงานรายวัน"]])
-    +sel("wz_ac","รู้จัก YES BOSS จากช่องทางไหน",F_AC,[["","เลือกช่องทาง"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
-    +'<label>บอสทำธุรกิจ/งานอะไรอยู่ <span style="font-weight:400;color:#85858E">(เล่าสั้นๆ เลขาจะจำไว้ดูแลให้ถูกจุด)</span></label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
-    +'</div></div>'
-    +wzNav("wzStash();WZ=1;draw()","wzSave()","บันทึก ไปดูของเด็ด ›",false);
+    +'<label style="margin-top:0" for="wz_nm">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="เช่น บอส, พี่หนึ่ง" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
+    +'</div>';
+  h+='<div class="wzh1" style="font-size:17px;margin-top:18px">อยากให้ช่วยเรื่องไหนก่อน</div>'
+    +'<p class="wzsub">เลือกแล้วได้ลองของจริงเลย ไม่ต้องดูตัวอย่าง</p>'
+    +'<div class="wfgrid">';
+  for(var i=0;i<WF_CARDS.length;i++){var c=WF_CARDS[i];
+    h+='<button type="button" class="wfc'+(F_WF===c[0]?" on":"")+'" aria-pressed="'+(F_WF===c[0]?"true":"false")+'" onclick="wzPickWf(\''+c[0]+'\')"><span class="e" aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>';
+  }
+  h+='</div>';
+  /* ข้อมูลที่เหลือ (เบอร์/อายุ/ช่องทางรู้จัก/ธุรกิจ) พับเก็บ — ยังเก็บได้เหมือนเดิมถ้าเขาอยากบอก
+     แต่ไม่ขวางทางคนที่แค่อยากเริ่มใช้ · ช่องทางรู้จักคือข้อมูลที่ทีมมาร์เก็ตติ้งใช้ จึงไม่ตัดทิ้ง */
+  h+='<button type="button" class="wzmore" onclick="wzMore()">'+(WZ_MORE?"▲ ซ่อน":"▾ บอกเพิ่มอีกนิด (ไม่บังคับ — เลขาจะดูแลได้ตรงใจขึ้น)")+'</button>';
+  if(WZ_MORE){
+    var sel=function(id,label,cur,opts){var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()">';for(var q=0;q<opts.length;q++){s+='<option value="'+opts[q][0]+'"'+(cur===opts[q][0]?" selected":"")+'>'+opts[q][1]+'</option>'}return s+'</select>'};
+    h+='<div class="wzf wzcard">'
+      +'<label style="margin-top:0" for="wz_bz">บอสทำธุรกิจ/งานอะไรอยู่</label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
+      +'<label for="wz_ph">เบอร์มือถือ</label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
+      +sel("wz_ag","ช่วงอายุ",F_AG,[["","ไม่บอกก็ได้"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
+      +sel("wz_ac","รู้จัก YES BOSS จากไหน",F_AC,[["","ไม่บอกก็ได้"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
+      +'</div>';
+  }
+  return h+'</div>'+wzNav("wzStash();WZ=1;draw()","wzSave()","เริ่มใช้เลย ›",false);
 }
-function wzStash(){F_NM=$("#wz_nm").value.trim();F_PH=$("#wz_ph").value.trim();F_AG=$("#wz_ag").value;F_WF=$("#wz_wf").value;F_AC=$("#wz_ac").value;var bz=$("#wz_bz");if(bz)F_BZ=bz.value.trim()}
+function wzStash(){
+  var g=function(id){var e=$(id);return e?e.value.trim():null};
+  var v;
+  v=g("#wz_nm");if(v!==null)F_NM=v;
+  v=g("#wz_ph");if(v!==null)F_PH=v;
+  v=g("#wz_bz");if(v!==null)F_BZ=v;
+  var a=$("#wz_ag");if(a)F_AG=a.value;
+  var c=$("#wz_ac");if(c)F_AC=c.value;
+}
 async function wzSave(){
   wzStash();
   if(!F_NM){toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
@@ -534,8 +600,65 @@ async function wzSave(){
   try{
     await api("onboard.save",{display_name:F_NM,phone:F_PH,age_range:F_AG,wanted_feature:F_WF,acq_channel:F_AC,business_story:F_BZ,character:CH,secretary_name:SNAME,marketing_ok:WZ_MK});
     if(DATA&&DATA.profile){DATA.profile.display_name=F_NM;DATA.profile.character=CH}
-    TI=0;WZ=3;draw();toast("ยินดีที่ได้รู้จัก คุณ"+F_NM+" 💕");
-  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="บันทึก ไปดูของเด็ด ›"}}
+    TI=0;WZ=3;draw();window.scrollTo(0,0);
+  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="เริ่มใช้เลย ›"}}
+}
+/* ═══ 🎯 จอสุดท้าย: "ความสำเร็จครั้งแรก" ของจริง ไม่ใช่ตัวอย่าง ═══
+   เดิมจอนี้คือทัวร์ 7 การ์ด + หน้า "พร้อมแล้ว!" แล้วปิดหน้าต่าง
+   ลูกค้าออกจาก wizard ไปโดยที่ยังไม่เคยได้อะไรจากเลขาเลยสักอย่าง
+   ตอนนี้พาไปทำของจริงตามสิ่งที่เขาเพิ่งเลือก แล้วค่อยเสนอทัวร์เป็นทางเลือก */
+function wzWin(){
+  var sn=esc(SNAME||"เลขา"),nm=esc(F_NM||"บอส");
+  var h='<div class="wz">'+wzHead()
+    +'<div style="text-align:center"><img class="wzhero" src="img/p04-cheer-jump.webp" alt=""><div class="wzh1">ยินดีที่ได้รู้จัก คุณ'+nm+' 💕</div></div>';
+  if(F_WF==="reminder"){
+    var tmr=addDays(todayBKK(),1);
+    h+='<p class="wzsub" style="text-align:center">ลองตั้งนัดแรกกันเลย — '+sn+'จะเตือนจริงตามเวลานี้</p>'
+      +'<div class="wzf wzcard">'
+      +'<label style="margin-top:0" for="ob_rt">เตือนเรื่องอะไร</label><input id="ob_rt" maxlength="120" value="เริ่มงาน" placeholder="เช่น ประชุมทีม">'
+      +'<label for="ob_rd">เมื่อไหร่</label><input id="ob_rd" type="datetime-local" value="'+tmr+'T09:00">'
+      +'<button class="wznext" style="width:100%;margin-top:14px" onclick="obWinRem(this)">ตั้งนัดนี้เลย ⏰</button>'
+      +'</div>';
+  }else if(F_WF==="money"){
+    h+='<p class="wzsub" style="text-align:center">ลองจดรายจ่ายแรกดู — จดครั้งเดียว '+sn+'สรุปให้ทั้งเดือน</p>'
+      +'<div class="wzf wzcard">'
+      +'<label style="margin-top:0" for="ob_mc">จ่ายอะไรไป</label><input id="ob_mc" maxlength="40" value="ค่าข้าว" placeholder="เช่น ค่ากาแฟ">'
+      +'<label for="ob_ma">กี่บาท</label><input id="ob_ma" type="number" inputmode="decimal" min="0" step="0.01" placeholder="60">'
+      +'<button class="wznext" style="width:100%;margin-top:14px" onclick="obWinMoney(this)">จดรายการนี้ 💸</button>'
+      +'</div>';
+  }else{
+    // เรื่องที่เหลือทำให้เสร็จในแชตดีกว่า (ไฟล์ต้องส่งไฟล์ / ดวงกับฮีลใจต้องคุย) — ส่งคำสั่งจริงเข้าแชตให้เลย
+    var TRY={files:["📁 ส่งไฟล์แรกเข้าคลัง","มีไฟล์อะไรบ้าง"],fortune:["🔮 เปิดดวงวันนี้","ดูดวงวันนี้"],heal:["💛 ระบายให้ฟังหน่อย","ขอกำลังใจหน่อย"],brief:["🌙 ขอสรุปวันนี้","สรุปวันนี้"]};
+    var t=TRY[F_WF]||["💬 เริ่มคุยกับ"+(SNAME||"เลขา"),"สวัสดี"];
+    h+='<p class="wzsub" style="text-align:center">ลองสั่ง'+sn+'จริงๆ เลย — แตะแล้วเห็นผลในแชตทันที</p>'
+      +'<button class="wznext" style="width:100%;margin-top:6px" onclick="obTry(\''+esc(t[1])+'\')">'+t[0]+'</button>';
+  }
+  h+='<div id="obdone"></div>';
+  h+='<button class="ttry" style="margin-top:14px" onclick="go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>';
+  h+='<button class="ttry" onclick="WZ=4;TI=0;draw();window.scrollTo(0,0)">ดูของเด็ดทั้งหมด (7 อย่าง) 👀</button>';
+  h+='<button class="ttry" onclick="obFinish()">ข้ามไปคุยในแชตเลย 💬</button>';
+  return h+'</div>';
+}
+async function obWinRem(btn){
+  var tx=$("#ob_rt").value.trim(),dt=$("#ob_rd").value;
+  if(!tx){toast("ใส่เรื่องที่จะเตือนหน่อยนะ");return}
+  if(!dt){toast("เลือกเวลาก่อนนะ");return}
+  btn.disabled=true;btn.textContent="กำลังตั้ง...";
+  try{
+    await api("reminder.add",{text:tx,remind_at:wallUtc(dt.slice(0,10),dt.slice(11,16)).toISOString()});
+    $("#obdone").innerHTML='<div class="wzcard" style="border-color:#7FD4A0;background:#F1FBF5;text-align:center;margin-top:12px"><div style="font-size:15px;font-weight:800;color:#12662C">✅ ตั้งให้แล้ว!</div><div style="font-size:13px;color:#2F6B45;margin-top:4px">ถึงเวลา '+esc(fdate(wallUtc(dt.slice(0,10),dt.slice(11,16)).toISOString()))+' เลขาจะเตือนจริงๆ นะ</div></div>';
+    btn.style.display="none";
+  }catch(e){toast(e.message||"ตั้งไม่สำเร็จ");btn.disabled=false;btn.textContent="ตั้งนัดนี้เลย ⏰"}
+}
+async function obWinMoney(btn){
+  var c=$("#ob_mc").value.trim(),a=Number($("#ob_ma").value);
+  if(!(a>0)){toast("ใส่จำนวนเงินก่อนนะ");return}
+  btn.disabled=true;btn.textContent="กำลังจด...";
+  try{
+    await api("money.add",{amount:a,kind:"expense",scope:"personal",category:c});
+    $("#obdone").innerHTML='<div class="wzcard" style="border-color:#7FD4A0;background:#F1FBF5;text-align:center;margin-top:12px"><div style="font-size:15px;font-weight:800;color:#12662C">✅ จดให้แล้ว!</div><div style="font-size:13px;color:#2F6B45;margin-top:4px">'+esc(c||"รายจ่าย")+' '+a.toLocaleString()+' บาท — ดูสรุปทั้งเดือนได้ในแท็บเงิน</div></div>';
+    btn.style.display="none";
+  }catch(e){toast(e.message||"จดไม่สำเร็จ");btn.disabled=false;btn.textContent="จดรายการนี้ 💸"}
 }
 function wzTour(){
   var n=TOUR.length+1,dots='<div class="tdots">';
@@ -545,7 +668,7 @@ function wzTour(){
       +'<img class="wzhero" src="img/p04-cheer-jump.webp" alt="">'
       +'<div style="text-align:center"><div class="wzh1">พร้อมแล้ว! 🎉</div><p class="wzsub">คุณ'+esc(F_NM||"บอส")+' มี'+esc(SNAME||"เลขา")+'คอยดูแลแล้ว<br>สงสัยอะไร พิมพ์ถามในแชตได้ตลอดเลย</p></div>'
       +'<button class="wznext" style="width:100%;margin-bottom:10px" onclick="obFinish()">เริ่มคุยกับ'+esc(SNAME||"เลขา")+'เลย 💬</button>'
-      +'<button class="ttry" onclick="WZ=3;TI=0;go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>'
+      +'<button class="ttry" onclick="go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>'
       +'</div>'+wzNav("TI="+(TOUR.length-1)+";draw()","obFinish()","เริ่มใช้งาน 💬",false);
   }
   var f=TOUR[TI];
@@ -553,10 +676,13 @@ function wzTour(){
   return '<div class="wz">'+wzHead()+dots
     +'<div class="tourh"><img src="'+f.img+'" alt=""><div><h2>'+f.t+'</h2><p>'+f.s+'</p></div></div>'
     +'<div class="tchat"><div class="tcu">'+esc(f.u)+'</div><div class="tcb"><div class="av">🤍</div><div class="m">'+f.b+'</div></div></div>'
-    /* ปุ่ม "ลองสั่งจริง" ตัดออก (บอสสั่ง 2026-07-06) — กันหลุดออกจาก wizard กลางคัน ให้ดูทัวร์จนจบ */
+    /* ปุ่ม "ลองสั่งจริง" ตัดออก (บอสสั่ง 2026-07-06) — กันหลุดออกจาก wizard กลางคัน ให้ดูทัวร์จนจบ
+       ตอนนี้ทัวร์ไม่ใช่ทางผ่านบังคับแล้ว (ย้ายมาเป็น WZ=4 ที่กดดูเอง หลังสำเร็จครั้งแรกไปแล้ว)
+       เลยไม่มีอะไรให้ "หลุด" อีก — ปุ่มลองสั่งจริงกลับมาได้ปลอดภัย */
     +'<div class="wzcard" style="margin-top:12px">'+pts+'</div>'
+    +(f.x?'<button class="ttry" style="margin-top:10px" onclick="obTry(\''+esc(f.x)+'\')">ลองสั่งจริงเลย: “'+esc(f.x)+'”</button>':'')
     +'</div>'
-    +wzNav(TI===0?"WZ=2;draw()":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
+    +wzNav(TI===0?"WZ=3;draw()":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
 }
 function obTry(t){
   try{
@@ -644,7 +770,7 @@ function vHome(){
   /* หน้าแรกใช้แค่จำนวน — nFacts/nFiles มาจาก me.get (เนื้อหาเต็มโหลดตอนกดแท็บ) · ||length = เผื่อโหลดเนื้อหาแล้ว */
   var st0=DATA.story||{},nFacts=(st0.nFacts!=null?st0.nFacts:(st0.facts||[]).length),nFiles=(st0.nFiles!=null?st0.nFiles:(st0.files||[]).length);
   var lastMood=DATA.mood&&DATA.mood[0];
-  var h='<div><span class="plan" style="background:#fff;cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</span><span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div>'+(founder?'<div style="margin-top:11px;background:linear-gradient(135deg,#FFF7E6,#FDEBC8);border:1px solid #F0D089;border-radius:14px;padding:11px 13px;font-size:12.5px;color:#7A5B12;font-weight:600;line-height:1.55">🎖️ บอสคือ <b>ผู้ก่อตั้งรุ่นแรก</b> — ขอบคุณที่เชื่อในเลขาคนนี้ตั้งแต่วันแรกค่ะ 🤍 ทุกฟีเจอร์ปลดล็อกครบ + ล็อกราคานี้ตลอด</div>':'')+'</div>';
+  var h='<div><button type="button" class="plan" style="cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</button><span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div>'+(founder?'<div style="margin-top:11px;background:linear-gradient(135deg,#FFF7E6,#FDEBC8);border:1px solid #F0D089;border-radius:14px;padding:11px 13px;font-size:12.5px;color:#7A5B12;font-weight:600;line-height:1.55">🎖️ บอสคือ <b>ผู้ก่อตั้งรุ่นแรก</b> — ขอบคุณที่เชื่อในเลขาคนนี้ตั้งแต่วันแรกค่ะ 🤍 ทุกฟีเจอร์ปลดล็อกครบ + ล็อกราคานี้ตลอด</div>':'')+'</div>';
   h+='<div class="stats">';
   h+=stat("#F3F3F7",icn("clock",22),"#E0466E",todayN,"นัดวันนี้","todo");
   h+=stat("#F3F3F7",icn("check",22),"#E0466E",openT.length,"งานค้าง","todo");
@@ -658,11 +784,11 @@ function vHome(){
   var lim=Math.min(openT.length,6);
   for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
     taskCard+='<div class="task"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t.task_text)+'" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
-  if(openT.length>lim){taskCard+='<div class="gh" style="text-align:center;color:#8A8A93;cursor:pointer;margin:8px 0 2px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</div>'}
+  if(openT.length>lim){taskCard+='<button type="button" class="gh" style="width:100%;text-align:center;background:none;border:0;font-family:inherit;cursor:pointer;margin:8px 0 2px;min-height:44px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</button>'}
   taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
   var sel=SELISO||today;
   var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
-  var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<span class="more" onclick="go(\'money\')">ดูทั้งหมด ›</span></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
+  var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<button type="button" class="more" style="background:none;border:0;font-family:inherit;cursor:pointer;min-height:32px" onclick="go(\'money\')">ดูทั้งหมด ›</button></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
     +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
     +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
     +'<div style="border-top:1px solid #EDEDF2;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>'
@@ -670,8 +796,8 @@ function vHome(){
   h+=taskCard+calCard+moneyCard;
   var me=lastMood?(MOOD_TH[lastMood.mood]||["🙂"])[0]:"🤍";
   h+='<div class="stats" style="margin:4px 0 0">';
-  h+='<div class="st" onclick="fortune()" style="cursor:pointer"><div class="ico" style="background:#F3F3F7;color:#E0466E">'+icn("sparkles",22)+'</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></div>';
-  h+='<div class="st" onclick="vent()" style="cursor:pointer"><div class="ico" style="background:#F3F3F7">'+me+'</div><div><div style="font-size:14.5px;font-weight:800">ระบายกับเลขา</div><div class="cap">อยู่เป็นเพื่อนเสมอ</div></div></div>';
+  h+='<button type="button" class="st" onclick="fortune()" style="cursor:pointer;width:100%;text-align:left;font-family:inherit"><div class="ico" style="background:#F3F3F7;color:#E0466E">'+icn("sparkles",22)+'</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></button>';
+  h+='<button type="button" class="st" onclick="vent()" style="cursor:pointer;width:100%;text-align:left;font-family:inherit"><div class="ico" style="background:#F3F3F7">'+me+'</div><div><div style="font-size:14.5px;font-weight:800">ระบายกับเลขา</div><div class="cap">อยู่เป็นเพื่อนเสมอ</div></div></button>';
   h+='</div>';
   h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
   return h;
@@ -680,27 +806,101 @@ function safetyCard(){
   return '<div class="safety">🤍 ถ้าตอนนี้รู้สึกหนักมากจนแบกไม่ไหว คุณไม่ได้อยู่คนเดียวนะ ลองโทรคุยกับ <a href="tel:1323">สายด่วนสุขภาพจิต 1323</a> (กรมสุขภาพจิต ฟรี 24 ชม.) เราอยู่ตรงนี้ด้วยเสมอ</div>';
 }
 
-/* ---------- งาน + เตือน (เรียงใหม่ตามบอสสั่ง 16 ก.ค.: งานส่วนตัว -> งานทีม -> เตือน · เตือนยาวย่อเหลือ 8) ---------- */
-var RSHOWALL=0;
+/* ═══ 📅 วันนี้ / ถัดไป — รวมงานกับนัดไว้ที่เดียว แต่แยกความหมายให้ชัด ═══
+   ปัญหาเดิม (ตรวจ 25 ก.ค.): ระบบมี 3 คำที่ทับกันมั่ว — "งาน" / "นัด" / "เตือน"
+   ทั้งที่ "เตือน" ไม่ใช่ประเภทที่ 3 แต่เป็น *วิธีบอก* ของนัด · แท็บชื่อ "เตือน+งาน"
+   หัวข้อในหน้าเขียน "การแจ้งเตือนที่รออยู่" การ์ดหน้าหลักเขียน "นัดวันนี้" — นับจากตารางเดียวกันหมด
+   และไม่มีอะไรตอบ "พรุ่งนี้-สัปดาห์นี้มีอะไรบ้าง" ได้เลย
+
+   เคาะคำใหม่ (ใช้ทั้งระบบตั้งแต่นี้):
+     📌 นัด = มีเวลาแน่นอน พลาดแล้วพลาดเลย (ตาราง reminders)
+     ✅ งาน = สิ่งที่ต้องทำให้เสร็จ มีกำหนดหรือไม่มีก็ได้ (ตาราง tasks)
+     🔔 เตือน = แค่วิธีบอก ไม่ใช่ประเภทของสิ่งของ — จึงไม่มีหัวข้อชื่อนี้อีกต่อไป */
+function dayKey(d){try{return new Date(d).toLocaleDateString("en-CA",{timeZone:TZ()})}catch(e){return String(d).slice(0,10)}}
+function addDays(ymd,n){var d=new Date(ymd+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+/* รวมงาน+นัดเป็นรายการเดียว แล้วแบ่งกอง: เลยกำหนด / วันนี้ / พรุ่งนี้ / สัปดาห์นี้ / ต่อไป / ไม่มีกำหนด */
+function agenda(){
+  var today=todayBKK(),tmr=addDays(today,1),wk=addDays(today,7),now=Date.now();
+  var B={late:[],today:[],tmr:[],week:[],later:[],none:[]};
+  (DATA.reminders||[]).forEach(function(r,ri){
+    var k=dayKey(r.remind_at);
+    // ri = ตำแหน่งใน DATA.reminders — edRem() ใช้ค้นตัวเดิมกลับ (แผงแก้ไขวาดลงกล่อง #rs<ri>)
+    var it={type:"appt",id:r.id,idx:ri,text:r.reminder_text,at:r.remind_at,allDay:r.all_day,repeat:r.repeat,sort:Date.parse(r.remind_at)||0};
+    if(Date.parse(r.remind_at)<now&&k<today)B.late.push(it);
+    else if(k===today)B.today.push(it);
+    else if(k===tmr)B.tmr.push(it);
+    else if(k<wk)B.week.push(it);
+    else B.later.push(it);
+  });
+  ((DATA.tasks&&DATA.tasks.open)||[]).forEach(function(t){
+    var due=t.due_date?String(t.due_date).slice(0,10):null;
+    var it={type:"task",id:t.id,text:t.task_text,due:due,sort:due?Date.parse(due+"T23:59:59Z"):Infinity};
+    if(!due)B.none.push(it);
+    else if(due<today)B.late.push(it);
+    else if(due===today)B.today.push(it);
+    else if(due===tmr)B.tmr.push(it);
+    else if(due<wk)B.week.push(it);
+    else B.later.push(it);
+  });
+  ["late","today","tmr","week","later"].forEach(function(k){B[k].sort(function(a,b){return a.sort-b.sort})});
+  return B;
+}
+function agRow(it){
+  if(it.type==="appt"){
+    var tm=it.allDay?"ทั้งวัน":ftime(it.at);
+    return '<div class="rowitem"><div style="font-size:12px;font-weight:800;color:var(--brand-ink);width:56px;flex:none">'+esc(tm)+'</div>'
+      +'<div class="grow"><div class="t">📌 '+esc(it.text)+(it.repeat&&it.repeat!=="none"?'<span class="pill">🔁 '+({daily:'ทุกวัน',weekly:'ทุกสัปดาห์',monthly:'ทุกเดือน',yearly:'ทุกปี',weekdays:'จ-ศ',monthend:'สิ้นเดือน'}[it.repeat]||esc(it.repeat))+'</span>':'')+'</div></div>'
+      +'<button class="ic" aria-label="แก้ไขนัด '+esc(it.text)+'" onclick="edRem('+it.idx+')">'+icn("pencil",15)+'</button>'
+      +'<button class="ic danger" aria-label="ลบนัด '+esc(it.text)+'" onclick="delRem(\''+it.id+'\')">'+icn("trash",15)+'</button></div>'
+      +'<div id="rs'+it.idx+'"></div>';
+  }
+  return '<div class="rowitem"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(it.text)+'" onclick="tgTask(\''+it.id+'\',true)"></button>'
+    +'<div class="grow"><div class="t">'+esc(it.text)+'</div></div>'
+    +'<button class="ic" aria-label="แก้ไขงาน: '+esc(it.text)+'" onclick="edTask(\''+it.id+'\')">'+icn("pencil",15)+'</button></div>'
+    +'<div id="et'+it.id+'"></div>';
+}
+function agSection(title,items,emptyMsg,cls){
+  if(!items.length)return emptyMsg?'<h2>'+title+'</h2><div class="empty">'+emptyMsg+'</div>':"";
+  var h='<h2>'+title+' ('+items.length+')</h2>';
+  if(cls)h+='<div class="'+cls+'">';
+  for(var i=0;i<items.length;i++)h+=agRow(items[i]);
+  if(cls)h+='</div>';
+  return h;
+}
 function vTodo(){
-  var h='<h1>งาน + เตือน</h1>';
-  /* ✅ งานส่วนตัว — บนสุด */
-  h+='<h2>✅ งานที่ต้องทำ ('+DATA.tasks.open.length+')</h2>';
-  h+='<div class="rowitem"><input id="ntask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTask()">เพิ่ม</button></div>';
-  if(!DATA.tasks.open.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  var B=agenda();
+  var h='<h1>วันนี้</h1><div class="sub">📌 นัด = มีเวลาแน่นอน · ✅ งาน = ทำให้เสร็จ</div>';
+  /* 🔥 เลยกำหนดต้องอยู่บนสุดเสมอ — เดิมโผล่แค่เป็น badge เล็กๆ ปนอยู่กลางลิสต์ */
+  if(B.late.length){
+    h+='<h2 style="color:var(--neg)">🔥 เลยกำหนดแล้ว ('+B.late.length+')</h2>';
+    for(var a=0;a<B.late.length;a++)h+=agRow(B.late[a]);
+  }
+  h+=agSection("📅 วันนี้",B.today,"วันนี้ว่าง ไม่มีนัดไม่มีงานถึงกำหนด 🎉");
+  h+=agSection("🌅 พรุ่งนี้",B.tmr,"");
+  h+=agSection("🗓 ภายในสัปดาห์นี้",B.week,"");
+  h+=agSection("⏭ ถัดจากนั้น",B.later,"");
+  /* ✅ งานที่ยังไม่ได้ตั้งกำหนด — กองแยก ไม่ปนกับไทม์ไลน์ */
+  h+='<h2>✅ งานที่ยังไม่ได้ตั้งกำหนด ('+B.none.length+')</h2>';
+  h+='<div class="rowitem"><input id="ntask" placeholder="เพิ่มงานใหม่..." style="margin:0" aria-label="งานใหม่"><button class="btn sm" onclick="addTask()">เพิ่ม</button></div>';
+  if(!B.none.length){h+='<div class="empty">ไม่มีงานค้างที่ไม่มีกำหนด 🎉</div>'}
   /* ☑️ โหมดเลือกหลายรายการ (มติบอส 24 ก.ค.: ติ๊กหลายงาน กดปิด/ลบทีเดียว — เข้าตรงจากการ์ดในแชตด้วย ?sel=1) */
   if(DATA.tasks.open.length>1&&!TSEL){h+='<button class="btn sm" style="width:100%;margin:2px 0 8px" onclick="tSelStart()">☑️ เลือกหลายรายการ (ปิด/ลบทีเดียว)</button>'}
-  if(TSEL){h+='<div style="position:sticky;top:0;z-index:5;background:#fff;padding:8px 0;display:flex;gap:6px;align-items:center;border-bottom:1px solid #F0E4EA"><b style="font-size:13.5px;flex:1">เลือกแล้ว '+TSEL.size+' งาน</b><button class="btn sm" onclick="tSelDo(false)">✅ ปิดที่เลือก</button><button class="btn sm" style="background:#fde8e8;color:#b42318" onclick="tSelDo(true)">🗑 ลบ</button><button class="btn sm" style="background:#eee;color:#444" onclick="tSelEnd()">ยกเลิก</button></div>'}
-  for(var j=0;j<DATA.tasks.open.length;j++){var t=DATA.tasks.open[j];
+  if(TSEL){h+='<div style="position:sticky;top:0;z-index:5;background:var(--surface);padding:8px 0;display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--line)"><b style="font-size:13.5px;flex:1">เลือกแล้ว '+TSEL.size+' งาน</b><button class="btn sm" onclick="tSelDo(false)">✅ ปิดที่เลือก</button><button class="btn sm warn" onclick="tSelDo(true)">🗑 ลบ</button><button class="btn sm ghost" onclick="tSelEnd()">ยกเลิก</button></div>'}
+  var NOD=TSEL?DATA.tasks.open:B.none;
+  for(var j=0;j<NOD.length;j++){var t=NOD[j];
     if(TSEL){var tOn=TSEL.has(String(t.id));
-      h+='<div class="rowitem" onclick="tSelTg(\''+t.id+'\')" style="cursor:pointer'+(tOn?';background:#FDF2F6':'')+'"><div style="width:22px;height:22px;border-radius:6px;border:2px solid #B85C7E;margin-right:10px;flex:none;text-align:center;line-height:19px;font-size:14px;color:#fff;background:'+(tOn?'#B85C7E':'#fff')+'">'+(tOn?'✓':'')+'</div><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div></div>';
+      h+='<button type="button" class="rowitem" style="width:100%;text-align:left;font-family:inherit;cursor:pointer'+(tOn?';background:var(--brand-soft)':'')+'" aria-pressed="'+(tOn?"true":"false")+'" onclick="tSelTg(\''+t.id+'\')"><span style="width:22px;height:22px;border-radius:6px;border:2px solid var(--brand-ink);margin-right:10px;flex:none;text-align:center;line-height:19px;font-size:14px;color:#fff;background:'+(tOn?'var(--brand-ink)':'transparent')+'">'+(tOn?'✓':'')+'</span><span class="grow"><span class="t">'+esc(t.task_text)+'</span></span></button>';
     }else{
-      h+='<div class="rowitem"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t.task_text)+'" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div>'+(t.due_date?'<div class="m">กำหนด '+esc(fdateOnly(t.due_date))+'</div>':'')+'</div>'
+      h+='<div class="rowitem"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t.task_text)+'" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div>'
         +'<button class="ic" aria-label="แก้ไขงาน: '+esc(t.task_text)+'" onclick="edTask(\''+t.id+'\')">'+icn("pencil",15)+'</button>'
         +'<button class="ic danger" aria-label="ลบงาน: '+esc(t.task_text)+'" onclick="delTask(\''+t.id+'\')">'+icn("trash",15)+'</button></div>'
         +'<div id="et'+t.id+'"></div>';
     }
   }
+  return h+vTodoRest();
+}
+function vTodoRest(){
+  var h='';
   /* 🏢 งานทีม (Business ฝั่งคนมอบ) — โชว์เสมอถ้าเป็น Business จะได้รู้ว่ามีมุมนี้ */
   if(DATA.team){
     h+='<h2>👥 งานที่มอบทีม ('+(DATA.team.open?DATA.team.open.length:0)+')</h2>';
@@ -712,16 +912,9 @@ function vTodo(){
       h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(tw.task_text)+' '+stp+'</div><div class="m">'+esc(tw.who||"สมาชิกทีม")+(tw.due_at?' · กำหนด '+fdate(tw.due_at):'')+'</div></div></div>';
     }
   }
-  /* ⏰ เตือน — ย้ายลงล่าง + ย่อ (ตัวนี้แหละที่เคยดันทุกอย่างจมจอ) */
-  var rms=DATA.reminders,rN=rms.length,rShow=RSHOWALL?rN:Math.min(rN,8);
-  h+='<h2>'+icn("clock",17)+' การแจ้งเตือนที่รออยู่ ('+rN+')</h2>';
-  if(!rN){h+='<div class="empty">ยังไม่มีการแจ้งเตือน — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 9 โมงเตือนโทรหาลูกค้า"</div>'}
-  for(var i=0;i<rShow;i++){var r=rms[i];
-    h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(r.reminder_text)+(r.repeat&&r.repeat!=="none"?'<span class="pill">🔁 '+({daily:'ทุกวัน',weekly:'ทุกสัปดาห์',monthly:'ทุกเดือน',yearly:'ทุกปี',weekdays:'จ-ศ',monthend:'สิ้นเดือน'}[r.repeat]||esc(r.repeat))+'</span>':'')+'</div><div class="m">'+(r.all_day?"ทั้งวัน · ":"")+fdate(r.remind_at)+'</div><div id="rs'+i+'"></div></div>'+
-      '<button class="ic" onclick="rsched('+i+')">'+icn("clock",15)+'</button><button class="ic" onclick="delRem(\''+r.id+'\')">'+icn("trash",15)+'</button></div>';
-  }
-  if(rN>8&&!RSHOWALL){h+='<button class="btn sm" style="width:100%" onclick="RSHOWALL=1;draw()">แสดงทั้งหมด ('+rN+')</button>'}
-  if(rN>8&&RSHOWALL){h+='<button class="btn sm" style="width:100%" onclick="RSHOWALL=0;draw()">ย่อรายการเตือน</button>'}
+  /* 📌 นัดทั้งหมดอยู่ในไทม์ไลน์ข้างบนแล้ว (วันนี้/พรุ่งนี้/สัปดาห์นี้/ถัดไป) — ไม่ทำลิสต์ซ้ำอีกชุด
+     เดิมมีหัวข้อ "การแจ้งเตือนที่รออยู่" แยกอีกกอง = นัดเดียวโผล่สองที่ ลูกค้าอ่านแล้วนับไม่ตรง */
+  if(!DATA.reminders.length){h+='<div class="empty" style="margin-top:14px">ยังไม่มีนัด — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 9 โมงเตือนโทรหาลูกค้า"</div>'}
   /* ประวัติเสร็จแล้ว — ท้ายสุด */
   if(DATA.tasks.done.length){h+='<h2>เสร็จแล้วล่าสุด</h2>';
     for(var k=0;k<DATA.tasks.done.length;k++){var d=DATA.tasks.done[k];
@@ -735,14 +928,43 @@ function vTodo(){
   }
   return h;
 }
-function rsched(i){
+/* ✏️ แก้นัดในที่ — ชื่อ + เวลา + ความถี่ · เดิมทำได้แค่ "เลื่อนเวลา" แก้ชื่อนัดไม่ได้เลย
+   ความถี่ (เตือนวนซ้ำ) = สิทธิ์ Pro — เกตจริงอยู่ฝั่ง server ด้วย ไม่ใช่แค่ซ่อนปุ่มตรงนี้ */
+function edRem(i){
   var r=DATA.reminders[i],el=$("#rs"+i);
+  if(!r||!el)return;
   if(el.innerHTML){el.innerHTML="";return}
-  el.innerHTML='<div style="margin-top:8px;display:flex;gap:8px"><input type="datetime-local" id="rd'+i+'" style="margin:0"><button class="btn sm" onclick="saveSched('+i+',\''+r.id+'\')">บันทึก</button></div>';
+  var d=new Date(r.remind_at),lo=isNaN(d.getTime())?"":localInput(r.remind_at);
+  var REP=[["none","ไม่ซ้ำ"],["daily","ทุกวัน"],["weekdays","จ–ศ"],["weekly","ทุกสัปดาห์"],["monthly","ทุกเดือน"],["monthend","สิ้นเดือน"],["yearly","ทุกปี"]];
+  var pro=mIsPro(),h='<div class="edit">';
+  h+='<label class="f" for="rt'+i+'">ชื่อนัด</label><input id="rt'+i+'" maxlength="300" value="'+esc(r.reminder_text)+'">';
+  h+='<label class="f" for="rd'+i+'">วันเวลา</label><input type="datetime-local" id="rd'+i+'" value="'+esc(lo)+'">';
+  h+='<label class="f" for="rr'+i+'">เตือนซ้ำ'+(pro?"":" 🔒 Pro")+'</label><select id="rr'+i+'"'+(pro?"":" disabled")+'>';
+  for(var q=0;q<REP.length;q++){h+='<option value="'+REP[q][0]+'"'+((r.repeat||"none")===REP[q][0]?" selected":"")+'>'+REP[q][1]+'</option>'}
+  h+='</select>';
+  if(!pro){h+='<div class="l" style="margin-top:5px">เตือนวนซ้ำอัตโนมัติอยู่ในแพ็ก Pro นะ</div>'}
+  h+='<div class="eact"><button class="btn sm" onclick="edRemSave('+i+',\''+r.id+'\')">บันทึก</button>'
+    +'<button class="btn sm ghost" onclick="edRem('+i+')">ยกเลิก</button></div></div>';
+  el.innerHTML=h;
 }
-async function saveSched(i,id){
-  var val=$("#rd"+i).value;if(!val){toast("เลือกเวลาก่อนนะ");return}
-  await act("reminder.reschedule",{id:id,remind_at:wallUtc(val.slice(0,10),val.slice(11,16)).toISOString()},"เลื่อนเวลาแล้ว");
+async function edRemSave(i,id){
+  var tx=$("#rt"+i).value.trim(),val=$("#rd"+i).value,rp=$("#rr"+i);
+  if(!tx){toast("ใส่ชื่อนัดด้วยนะ");return}
+  if(!val){toast("เลือกวันเวลาก่อนนะ");return}
+  var p={id:id,text:tx,remind_at:wallUtc(val.slice(0,10),val.slice(11,16)).toISOString()};
+  if(rp&&!rp.disabled)p.repeat=rp.value;
+  try{
+    var r=await api("reminder.update",p);
+    if(r&&r.ok===false){toast("แก้ไม่ได้ (นัดนี้อาจถูกเตือนไปแล้ว)");return}
+    await reload();toast("แก้ให้แล้ว ✓");
+  }catch(e){toast(e.message==="pro_only"?"เตือนวนซ้ำอยู่ในแพ็ก Pro นะ":(e.message||"แก้ไม่สำเร็จ"))}
+}
+/* ISO -> ค่าที่ใส่ใน input[type=datetime-local] ได้ (ตามโซนเวลาที่ลูกค้าตั้งไว้ ไม่ใช่ของเครื่อง) */
+function localInput(iso){
+  try{
+    var s=new Date(iso).toLocaleString("sv-SE",{timeZone:TZ()}); // sv-SE ให้รูปแบบ YYYY-MM-DD HH:MM:SS
+    return s.slice(0,10)+"T"+s.slice(11,16);
+  }catch(e){return String(iso).slice(0,16)}
 }
 function delRem(id){delUndo("reminder.delete",id,"นัดนี้")}
 function tgTask(id,done){act("task.toggle",{id:id,done:done},done?"เยี่ยม เสร็จอีกงาน! 🎉":"")}
@@ -775,9 +997,18 @@ function tSelTg(id){if(!TSEL)return;id=String(id);if(TSEL.has(id)){TSEL.delete(i
 async function tSelDo(del){
   if(!TSEL||!TSEL.size){toast("ติ๊กเลือกงานก่อนนะ");return}
   var n=TSEL.size,ids=Array.from(TSEL);
-  if(del&&!confirm("ลบ "+n+" งานถาวรเลยนะ?"))return;
+  // ลบหลายงานพร้อมกันไม่ต้องถามแล้ว — ทุกใบถูกถ่ายสำเนาลงถังขยะ กดเลิกทำได้ทันที
   for(var i=0;i<ids.length;i++){try{await api(del?"task.delete":"task.toggle",del?{id:ids[i]}:{id:ids[i],done:true})}catch(e){}}
-  TSEL=null;toast(del?"ลบ "+n+" งานแล้ว 🧹":"ปิด "+n+" งานแล้ว 🎉");await reload();
+  TSEL=null;await reload();
+  if(!del){toast("ปิด "+n+" งานแล้ว 🎉");return}
+  tshow("ลบ "+n+" งานแล้ว",async function(){
+    try{
+      var tr=await api("trash.list",{});
+      var back=(tr.rows||[]).filter(function(r){return r.table==="tasks"}).slice(0,n);
+      for(var k=0;k<back.length;k++){await api("trash.restore",{id:back[k].id})}
+      await reload();toast("เอา "+back.length+" งานกลับมาแล้ว 🤍");
+    }catch(e){toast("กู้คืนไม่ได้ ลองดูใน ถังขยะ")}
+  });
 }
 async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}await act("task.add",{text:v},"เพิ่มงานแล้ว")}
 
@@ -809,10 +1040,10 @@ function mProAsk(){
   }catch(e){toast("พิมพ์ \"สนใจ Pro\" ในแชตได้เลยนะ")}
 }
 function vMoney(){
-  var h='<h1>เงิน รับ–จ่าย <span class="plan" style="background:#fff;cursor:pointer;margin-left:6px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</span></h1>';
+  var h='<h1>เงิน รับ–จ่าย <button type="button" class="plan" style="cursor:pointer;margin-left:6px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</button></h1>';
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 8px">'
-    +'<button class="ic" onclick="mGo('+(MOFF-1)+')">◀️</button><b style="font-size:16px">'+thMonth(MOFF)+'</b>'
-    +'<button class="ic" '+(MOFF>=0?'style="visibility:hidden">':'onclick="mGo('+(MOFF+1)+')">')+'▶️</button></div>';
+    +'<button class="ic" aria-label="ดูเดือนก่อนหน้า" onclick="mGo('+(MOFF-1)+')">◀️</button><b style="font-size:16px">'+thMonth(MOFF)+'</b>'
+    +'<button class="ic" aria-label="ดูเดือนถัดไป" '+(MOFF>=0?'style="visibility:hidden">':'onclick="mGo('+(MOFF+1)+')">')+'▶️</button></div>';
   // 🔒 free ดูย้อนหลังได้ 1 เดือน — เก่ากว่านั้นคือ business-depth (Pro)
   if(MOFF<-1&&!mIsPro()){
     return h+mProCard("ดูย้อนหลังได้ทุกเดือน","ประวัติการเงินครบทุกเดือน + สรุปรายปี + ส่งออกไฟล์ทำบัญชี — อยู่ในแพ็ก Pro")
@@ -845,10 +1076,13 @@ function vMoney(){
         else bu+=Number(rw.amount||0)}
       var bAmt=Number(b.amount),bpc=Math.round(bu/bAmt*100);
       var bLbl=b.category?("หมวด"+b.category):b.scope?("กระเป๋า"+(SCOPE_TH[b.scope]||b.scope)):"รวม";
-      h+='<div style="margin:7px 2px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>🎯 งบ'+esc(bLbl)+'</span><b>'+num(bu)+'/'+num(bAmt)+(bu>bAmt?' 🔴':bpc>=80?' ⚠️':'')+'</b></div>'
-        +'<div class="bar" style="height:9px;background:#E9E9EF;margin-top:3px"><span style="width:'+Math.max(4,Math.min(100,bpc))+'%;background:'+(bu>bAmt?'#f85149':'linear-gradient(90deg,#F4A9C0,#ED6885)')+';border-radius:6px"></span></div></div>';
+      h+='<div style="margin:7px 2px"><div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:6px"><span style="flex:1">🎯 งบ'+esc(bLbl)+'</span><b>'+num(bu)+'/'+num(bAmt)+(bu>bAmt?' 🔴':bpc>=80?' ⚠️':'')+'</b>'
+        +'<button class="ic danger" style="min-width:34px;min-height:34px" aria-label="ลบงบ'+esc(bLbl)+'" onclick="budDel('+b.id+')">'+icn("trash",13)+'</button></div>'
+        +'<div class="bar" style="height:9px;margin-top:3px" role="img" aria-label="ใช้ไป '+bpc+' เปอร์เซ็นต์ของงบ"><span style="width:'+Math.max(4,Math.min(100,bpc))+'%;background:'+(bu>bAmt?'var(--neg)':'linear-gradient(90deg,#F4A9C0,var(--brand))')+';border-radius:6px"></span></div></div>';
     }
   }
+  /* 🎯 ตั้งงบเองได้จากหน้านี้ — เดิมวาดแถบงบสวยงามแต่ตั้งไม่ได้ ต้องไปพิมพ์ในแชตอย่างเดียว */
+  if(MSC==="all"){h+='<div id="budbox"></div><div style="text-align:center;margin:4px 0 10px"><button class="btn sm ghost" onclick="budOpen()">🎯 '+(MBUD.length?"เพิ่ม/แก้งบ":"ตั้งงบรายเดือน")+'</button></div>'}
   h+='<div style="text-align:center;margin:2px 0 8px"><button class="btn sm" onclick="'+(mIsPro()?'mExport()':'mProAsk()')+'">📄 ส่งไฟล์ CSV เดือนนี้เข้าแชต'+(mIsPro()?'':' 🔒 Pro')+'</button></div>';
   if(rows.length&&inc+exp>0){h+='<div style="display:flex;justify-content:center;margin:6px 0">'+donutSvg(inc,exp)+'</div>'}
   if(MSC==="all"&&(scp.personal||scp.family||scp.company)){
@@ -864,16 +1098,121 @@ function vMoney(){
     }
   }
   h+='<h2>รายการ ('+rows.length+')</h2>';
-  if(!rows.length){h+='<div class="empty">เดือนนี้ยังไม่มีรายการ'+(MSC!=="all"?"ในกระเป๋านี้":"")+' — ส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
+  /* ➕ จดเองจากหน้านี้ได้ — เดิมหน้าเงินทำได้อย่างเดียวคือ "ลบ"
+     เห็นยอดผิดหรืออยู่ผิดกระเป๋า ต้องลบทิ้งแล้วกลับไปพิมพ์ใหม่ในแชต = แดชบอร์ดดูได้อย่างเดียว */
+  h+='<div id="madd"></div><button class="btn ghost" style="width:100%;margin-bottom:10px" onclick="mAddOpen()">➕ จดรายรับ–รายจ่าย</button>';
+  if(!rows.length){h+='<div class="empty">เดือนนี้ยังไม่มีรายการ'+(MSC!=="all"?"ในกระเป๋านี้":"")+' — กดปุ่มข้างบน หรือส่งสลิป/พิมพ์ยอดในแชตได้เลย</div>'}
   for(var j=0;j<rows.length;j++){var e=rows[j];var isInc=e.kind==="income";
-    h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+esc(e.category||e.note||e.recipient||(isInc?"รายรับ":"รายจ่าย"))+'</div><div class="m">'+(e.transaction_date?fdateOnly(e.transaction_date):fdate(e.created_at))+'</div></div>'+
-      '<div style="font-weight:700;color:'+(isInc?"#3fb950":"#f85149")+'">'+(isInc?"+":"−")+num(e.amount)+'</div><button class="ic" onclick="delMoney(\''+e.id+'\')">'+icn("trash",15)+'</button></div>';
+    var enm=esc(e.category||e.note||e.recipient||(isInc?"รายรับ":"รายจ่าย"));
+    h+='<div class="rowitem"><div class="grow"><div class="t">'+(SCOPE_TH[e.scope]||"")+' '+enm+'</div><div class="m">'+(e.transaction_date?fdateOnly(e.transaction_date):fdate(e.created_at))+'</div></div>'+
+      '<div style="font-weight:700;color:'+(isInc?"var(--pos)":"var(--neg)")+'">'+(isInc?"+":"−")+num(e.amount)+'</div>'+
+      '<button class="ic" aria-label="แก้ไขรายการ '+enm+'" onclick="mEd(\''+e.id+'\')">'+icn("pencil",15)+'</button>'+
+      '<button class="ic danger" aria-label="ลบรายการ '+enm+'" onclick="delMoney(\''+e.id+'\')">'+icn("trash",15)+'</button></div>'+
+      '<div id="me'+e.id+'"></div>';
   }
   if(!mIsPro()){h+=mProCard("รีพอตธุรกิจแบบเต็ม","ย้อนหลังไม่จำกัด · สรุปรายปี · ส่งออกไฟล์ให้บัญชี · แยก VAT รายใบ")}
-  h+='<div class="foot">ยอดผิด? พิมพ์ในแชตได้เลย เช่น "แก้ยอด ค่ากาแฟ เป็น 60" หรือ "ลบรายการ ค่ากาแฟ" — หรือแตะถังขยะตรงนี้</div>';
+  h+='<div class="foot">ยอดผิด? แตะดินสอแก้ได้เลย · หรือพิมพ์ในแชตก็ได้ เช่น "แก้ยอด ค่ากาแฟ เป็น 60"</div>';
   return h;
 }
 function delMoney(id){delUndo("money.delete",id,"รายการนี้")}
+/* ---------- ➕ / ✏️ ฟอร์มเงิน (ใช้ร่างเดียวกันทั้งเพิ่มและแก้) ---------- */
+function mForm(pre,okLabel,onOk,onCancel){
+  pre=pre||{};
+  var sc=pre.scope||"personal",kd=pre.kind||"expense";
+  var h='<div class="edit">';
+  h+='<div class="seg" role="group" aria-label="ประเภท"><button type="button" data-k="expense" class="'+(kd==="expense"?"on":"")+'" onclick="mPick(this,\'k\')">− รายจ่าย</button>'
+    +'<button type="button" data-k="income" class="'+(kd==="income"?"on":"")+'" onclick="mPick(this,\'k\')">+ รายรับ</button></div>';
+  h+='<div class="row2"><div><label class="f" for="mf_amt">จำนวนเงิน (บาท)</label><input id="mf_amt" type="number" inputmode="decimal" min="0" step="0.01" value="'+esc(pre.amount!=null?String(pre.amount):"")+'" placeholder="0.00"></div>'
+    +'<div><label class="f" for="mf_date">วันที่</label><input id="mf_date" type="date" value="'+esc(pre.transaction_date?String(pre.transaction_date).slice(0,10):todayBKK())+'"></div></div>';
+  h+='<label class="f" for="mf_cat">หมวด (เช่น ค่าข้าว, ค่าน้ำมัน)</label><input id="mf_cat" maxlength="40" value="'+esc(pre.category||"")+'" placeholder="ไม่ใส่ก็ได้">';
+  h+='<label class="f" for="mf_note">รายละเอียด</label><input id="mf_note" maxlength="200" value="'+esc(pre.note||"")+'" placeholder="ไม่ใส่ก็ได้">';
+  h+='<label class="f">กระเป๋า</label><div class="seg" role="group" aria-label="กระเป๋า">';
+  var SCL=[["personal","ส่วนตัว"],["family","ครอบครัว"],["company","บริษัท"]];
+  for(var i=0;i<SCL.length;i++){h+='<button type="button" data-s="'+SCL[i][0]+'" class="'+(sc===SCL[i][0]?"on":"")+'" onclick="mPick(this,\'s\')">'+SCL[i][1]+'</button>'}
+  h+='</div>';
+  h+='<div class="eact"><button class="btn" onclick="'+onOk+'">'+okLabel+'</button><button class="btn ghost" onclick="'+onCancel+'">ยกเลิก</button></div></div>';
+  return h;
+}
+var MF_K="expense",MF_S="personal";
+function mPick(el,which){
+  var p=el.parentNode,bs=p.querySelectorAll("button");
+  for(var i=0;i<bs.length;i++){bs[i].className=""}
+  el.className="on";
+  if(which==="k")MF_K=el.getAttribute("data-k");else MF_S=el.getAttribute("data-s");
+}
+function mRead(){
+  var a=Number($("#mf_amt").value);
+  if(!(a>0)){toast("ใส่จำนวนเงินก่อนนะ");return null}
+  return {amount:a,kind:MF_K,scope:MF_S,category:$("#mf_cat").value.trim(),note:$("#mf_note").value.trim(),transaction_date:$("#mf_date").value||null};
+}
+function mAddOpen(){
+  var b=$("#madd");if(!b)return;
+  if(b.innerHTML){b.innerHTML="";return}
+  MF_K="expense";MF_S=(MSC!=="all"?MSC:"personal");
+  b.innerHTML=mForm({scope:MF_S},"จดเลย","mAddSave()","mAddOpen()");
+  var f=$("#mf_amt");if(f)f.focus();
+}
+async function mAddSave(){
+  var p=mRead();if(!p)return;
+  try{
+    var r=await api("money.add",p);
+    if(r&&r.dup){toast("รายการนี้เพิ่งจดไปเมื่อกี้ ไม่ได้ลงซ้ำนะ")}else{toast("จดให้แล้ว ✓")}
+    MCACHE={};await reload();
+  }catch(e){toast(e.message||"จดไม่สำเร็จ")}
+}
+function mEd(id){
+  var b=$("#me"+id);if(!b)return;
+  if(b.innerHTML){b.innerHTML="";return}
+  var rows=MCACHE[mKey()]||[],e=null;
+  for(var i=0;i<rows.length;i++){if(String(rows[i].id)===String(id))e=rows[i]}
+  if(!e)return;
+  MF_K=e.kind==="income"?"income":"expense";MF_S=e.scope||"personal";
+  b.innerHTML=mForm(e,"บันทึกการแก้","mEdSave(\'"+id+"\')","mEd(\'"+id+"\')");
+}
+async function mEdSave(id){
+  var p=mRead();if(!p)return;
+  p.id=id;
+  try{await api("money.update",p);MCACHE={};await reload();toast("แก้ให้แล้ว ✓")}catch(e){toast(e.message||"แก้ไม่สำเร็จ")}
+}
+/* ---------- 🎯 งบรายเดือน ---------- */
+var BUD_T="all"; // all = รวมทุกอย่าง · scope = ต่อกระเป๋า · cat = ต่อหมวด (เลือกพร้อมกันไม่ได้ จะนับซ้อน)
+function budOpen(){
+  var b=$("#budbox");if(!b)return;
+  if(b.innerHTML){b.innerHTML="";return}
+  BUD_T="all";
+  b.innerHTML='<div class="edit"><div class="at" style="font-weight:800;margin-bottom:6px">🎯 ตั้งงบต่อเดือน</div>'
+    +'<div class="seg" role="group" aria-label="ชนิดงบ">'
+    +'<button type="button" class="on" onclick="budT(this,\'all\')">รวมทุกอย่าง</button>'
+    +'<button type="button" onclick="budT(this,\'scope\')">ต่อกระเป๋า</button>'
+    +'<button type="button" onclick="budT(this,\'cat\')">ต่อหมวด</button></div>'
+    +'<div id="budsub"></div>'
+    +'<label class="f" for="bud_amt">งบเดือนละ (บาท)</label><input id="bud_amt" type="number" inputmode="decimal" min="1" placeholder="เช่น 15000">'
+    +'<div class="eact"><button class="btn" onclick="budSave()">ตั้งงบ</button><button class="btn ghost" onclick="budOpen()">ยกเลิก</button></div>'
+    +'<div class="l" style="margin-top:8px">เกินงบเมื่อไหร่ เลขาเตือนให้เอง (สัญญาณ 🦉 ของแพ็ก Pro)</div></div>';
+  budT(null,"all");
+}
+function budT(el,t){
+  BUD_T=t;
+  if(el){var bs=el.parentNode.querySelectorAll("button");for(var i=0;i<bs.length;i++)bs[i].className="";el.className="on"}
+  var s=$("#budsub");if(!s)return;
+  if(t==="scope"){
+    s.innerHTML='<label class="f" for="bud_sc">กระเป๋าไหน</label><select id="bud_sc"><option value="personal">ส่วนตัว</option><option value="family">ครอบครัว</option><option value="company">บริษัท</option></select>';
+  }else if(t==="cat"){
+    s.innerHTML='<label class="f" for="bud_ct">หมวดไหน</label><input id="bud_ct" maxlength="40" placeholder="เช่น ค่าข้าว">';
+  }else{s.innerHTML=""}
+}
+async function budSave(){
+  var a=Number($("#bud_amt").value);
+  if(!(a>0)){toast("ใส่จำนวนงบก่อนนะ");return}
+  var p={amount:a};
+  if(BUD_T==="scope")p.scope=$("#bud_sc").value;
+  if(BUD_T==="cat"){var c=$("#bud_ct").value.trim();if(!c){toast("ใส่ชื่อหมวดด้วยนะ");return}p.category=c}
+  try{await api("budget.upsert",p);MCACHE={};await reload();toast("ตั้งงบให้แล้ว 🎯")}catch(e){toast(e.message||"ตั้งงบไม่สำเร็จ")}
+}
+function budDel(id){
+  tshow("ลบงบนี้แล้ว",null,1700);
+  api("budget.delete",{id:id}).then(function(){MCACHE={};reload()}).catch(function(){toast("ลบไม่สำเร็จ")});
+}
 async function mExport(){toast("กำลังทำไฟล์...");try{var r=await api("money.export",{month:mMonthStr()});toast("ส่งไฟล์เข้าแชตเลขาแล้ว 📄 ("+(r.count||0)+" รายการ)")}catch(e){toast(e.message==="pro_only"?"ฟีเจอร์นี้อยู่ในแพ็ก Pro นะ":(e.message||"ส่งไม่สำเร็จ ลองใหม่อีกครั้ง"))}}
 
 /* ---------- 📖 เรื่องราวของบอส (ความจำ + ไฟล์) ---------- */
@@ -911,7 +1250,7 @@ function vStory(){
       h+='<div class="gh">'+FACT_TH[key][0]+' '+FACT_TH[key][1]+' ('+arr.length+')</div>';
       for(var j=0;j<arr.length;j++){var f=arr[j];
         h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(f.fact_text)+(f.subject?'<span class="pill">'+esc(f.subject)+'</span>':'')+'</div><div class="m">จำเมื่อ '+fdate(f.last_seen_at||f.created_at)+'</div></div>'+
-          '<button class="ic" title="แจ้งแก้ไข" onclick="reportFact(\''+f.id+'\')">'+icn("pencil",15)+'</button><button class="ic" title="ลบ" onclick="delFact(\''+f.id+'\')">'+icn("trash",15)+'</button></div>';
+          '<button class="ic" aria-label="แจ้งว่าความจำนี้ไม่ถูก" title="แจ้งแก้ไข" onclick="reportFact(\''+f.id+'\')">'+icn("pencil",15)+'</button><button class="ic danger" aria-label="ลบความจำนี้" title="ลบ" onclick="delFact(\''+f.id+'\')">'+icn("trash",15)+'</button></div>';
       }
     }
   }
@@ -934,21 +1273,29 @@ function vStory(){
   return h;
 }
 function fileRow(d){var nm=d.title||d.file_name||"ไฟล์";
-  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
+  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic danger" aria-label="ลบไฟล์นี้" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
 }
 function toggleFolder(id){var e=$("#fld_"+id),a=$("#fa_"+id);if(!e){return}var op=e.style.display==="none";e.style.display=op?"block":"none";if(a){a.textContent=op?"▾":"▸"}}
 function reportFact(id){
   var arr=(DATA.story&&DATA.story.facts)||[],f=null;
   for(var i=0;i<arr.length;i++){if(String(arr[i].id)===String(id)){f=arr[i];break}}
   if(!f){return}
-  if(!confirm("แจ้งเลขาว่าความจำนี้ไม่ถูก? เดี๋ยวเปิดแชตให้บอกที่ถูกต้อง"))return;
+  // ไม่ต้องถามยืนยัน — การกดนี้แค่พาไปพิมพ์ในแชต ไม่ได้ทำลายอะไร (confirm() ที่ขวางของไม่อันตราย = สร้างนิสัยกดผ่านโดยไม่อ่าน)
   try{
     if(liff.isInClient()){liff.sendMessages([{type:"text",text:"ขอแก้ความจำ: «"+f.fact_text+"»"}]);liff.closeWindow()}
     else{toast("เปิดในแอป LINE เพื่อแจ้งแก้ไขนะ")}
   }catch(e){try{liff.closeWindow()}catch(_e){toast("พิมพ์บอกเลขาในแชตได้เลยว่าตรงไหนไม่ถูก")}}
 }
 function delFact(id){delUndo("fact.delete",id,"ความจำนี้")}
-function delFile(id){if(confirm("ลบไฟล์นี้ออกจากคลัง? กู้คืนไม่ได้นะ"))act("file.delete",{id:id},"ลบไฟล์แล้ว")}
+/* 📁 ไฟล์ = ลบแล้วกู้ไม่ได้จริง (ตัวไฟล์ในที่เก็บถูกลบไปด้วย ไม่ใช่แค่แถวใน DB)
+   จึงเป็น 1 ใน 2 ที่ยังต้องถามก่อน — แต่ถามด้วยกล่องของเราที่บอกผลตรงๆ ไม่ใช่ confirm() ของเบราว์เซอร์ */
+async function delFile(id){
+  var nm="ไฟล์นี้",arr=(DATA.story&&DATA.story.files)||[];
+  for(var i=0;i<arr.length;i++){if(String(arr[i].id)===String(id)){nm=arr[i].title||arr[i].file_name||nm;break}}
+  var ok=await dlg({title:"ลบไฟล์ออกจากคลัง?",okText:"ลบไฟล์",
+    body:"<b>"+esc(nm)+"</b><br><br>ไฟล์นี้จะถูกลบออกจากที่เก็บจริงๆ <b>กู้คืนไม่ได้</b> ต่างจากงาน/นัด/รายการเงิน ที่ลบแล้วยังอยู่ในถังขยะ 30 วัน"});
+  if(ok)act("file.delete",{id:id},"ลบไฟล์แล้ว");
+}
 async function openFile(id){
   try{var res=await api("file.url",{id:id});
     if(res&&res.url){if(liff.isInClient()){liff.openWindow({url:res.url,external:true})}else{window.open(res.url,"_blank")}}
@@ -961,11 +1308,13 @@ function vHeal(){
   var h='<h1>'+icn("heart",22)+' ฮีลใจ</h1><div class="sub">พื้นที่ปลอดภัยของคุณ · ข้อมูลนี้เป็นความลับเฉพาะคุณ</div>';
   var recentSafety=(DATA.mood||[]).slice(0,10).some(function(m){return m.is_safety});
   if(recentSafety){h+='<div style="height:10px"></div>'+safetyCard()}
-  h+='<div class="hlhero" onclick="openHealRoom()">'
+  /* ⚠️ การ์ดนี้ครอบปุ่มไว้ข้างใน — ห้ามทำตัวครอบเป็น <button> (ปุ่มซ้อนปุ่ม = HTML ใช้ไม่ได้ เบราว์เซอร์แยกแท็กเอง)
+     ให้ปุ่มข้างในเป็นตัวรับการกดตัวเดียว ส่วนตัวครอบเป็นแค่พื้นหลัง = คีย์บอร์ด/screen reader เข้าถึงได้ถูกทาง */
+  h+='<div class="hlhero">'
     +'<img src="img/p10-heart.webp" alt="">'
     +'<div class="hlt">'+icn("battery",22)+' ห้องพักใจ</div>'
     +'<div class="hls">โมโห เครียด เหนื่อยใจ?<br>แวะชาร์จพลังใจแค่ 2–3 นาที แล้วค่อยกลับไปลุยต่อ</div>'
-    +'<button class="hlbtn" onclick="event.stopPropagation();openHealRoom()">'+icn("battery",17)+' เข้าห้องพักใจ →</button>'
+    +'<button type="button" class="hlbtn" onclick="openHealRoom()">'+icn("battery",17)+' เข้าห้องพักใจ →</button>'
     +'</div>';
   h+='<h2>วันนี้รู้สึกยังไง?</h2><div class="card"><div class="moods" id="moodpick">';
   for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+MOOD_TH[key][0]+'</span>'+MOOD_TH[key][1]+'</button>'}
@@ -1186,9 +1535,17 @@ async function doExport(){
   try{var res=await api("pdpa.export");var blob=new Blob([JSON.stringify(res.data,null,2)],{type:"application/json"});
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my-yesboss-data.json";a.click();toast("ดาวน์โหลดแล้ว")}catch(e){toast(e.message||"ผิดพลาด")}
 }
+/* 🔒 ลบทั้งบัญชี (PDPA) — ลบจริงตามกฎหมาย ไม่เข้าถังขยะ กู้ไม่ได้จริงๆ
+   เดิมถาม confirm() ซ้อนสองชั้น ซึ่งพิสูจน์แล้วว่าไม่ช่วย: กดรัวสองทีได้พอกัน
+   ของใหม่ให้ "พิมพ์คำว่า ลบทั้งหมด" = ต้องอ่านถึงจะผ่าน + บอกจำนวนของจริงที่จะหาย */
 async function doErase(){
-  if(!confirm("ลบข้อมูลทั้งหมดของคุณออกจากระบบ? กู้คืนไม่ได้นะ"))return;
-  if(!confirm("ยืนยันอีกครั้ง — ลบจริงๆ ใช่ไหม?"))return;
+  var d=DATA||{},nT=((d.tasks&&d.tasks.open)||[]).length+((d.tasks&&d.tasks.done)||[]).length;
+  var nR=(d.reminders||[]).length,nF=((d.story&&d.story.facts)||[]).length,nD=((d.story&&d.story.files)||[]).length;
+  var ok=await dlg({title:"ลบข้อมูลทั้งหมดของบอก?",okText:"ลบทั้งหมดถาวร",typeWord:"ลบทั้งหมด",
+    body:"ของที่จะหายไปตอนนี้:<br>• งาน "+nT+" · นัด "+nR+" · ความจำ "+nF+" เรื่อง · ไฟล์ "+nD
+      +"<br>• ประวัติแชต บันทึกอารมณ์ รายการเงิน และเรื่องที่แจ้งทีมงานทั้งหมด<br><br>"
+      +"<b>ลบจริง กู้คืนไม่ได้</b> — อันนี้ไม่เข้าถังขยะ 30 วันเหมือนการลบทั่วไป เพราะเป็นสิทธิ์ตาม PDPA ที่ต้องลบให้จริง"});
+  if(!ok)return;
   try{await api("pdpa.erase");$("#app").innerHTML='<div class="err">🔒 ลบข้อมูลของคุณเรียบร้อยแล้ว<br>ขอบคุณที่เคยใช้บริการนะ 🤍<br><br>หากอยากเริ่มใหม่ ทักหาเลขาในแชตได้เสมอ</div>'}catch(e){toast(e.message||"ผิดพลาด")}
 }
 
