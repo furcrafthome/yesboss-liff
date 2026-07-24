@@ -163,7 +163,7 @@ label.f{display:block;font-size:12px;color:#6F6F78;margin-top:13px;font-weight:6
 </div></div>
 <div id="toast"></div>
 <script>
-var IDT=null,DATA=null,TAB="home",MSEL=null,LSYNC=0;
+var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0;
 var ICONS={
 home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
 check:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
@@ -222,10 +222,11 @@ function relogin(){
     localStorage.setItem("yb_rl_t",String(Date.now()))}catch(e){}
   try{liff.logout()}catch(e){}
   var st="";
-  try{var qp=new URLSearchParams(location.search),tb=qp.get("tab"),af=qp.get("aff");
-    var ls=qp.get("liff.state");if(ls){var lq=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls);if(!tb)tb=lq.get("tab");if(!af)af=lq.get("aff")}
+  try{var qp=new URLSearchParams(location.search),tb=qp.get("tab"),af=qp.get("aff"),sv=qp.get("sel");
+    var ls=qp.get("liff.state");if(ls){var lq=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls);if(!tb)tb=lq.get("tab");if(!af)af=lq.get("aff");if(!sv)sv=lq.get("sel")}
     if(tb)st="?tab="+encodeURIComponent(tb);
-    if(af)st+=(st?"&":"?")+"aff="+encodeURIComponent(af)}catch(e){}
+    if(af)st+=(st?"&":"?")+"aff="+encodeURIComponent(af);
+    if(sv)st+=(st?"&":"?")+"sel=1"}catch(e){}
   if(liff.isInClient&&liff.isInClient()){location.replace("https://liff.line.me/2010582556-jAUGKlnX"+st)}
   else{try{liff.login()}catch(e){location.reload()}}
 }
@@ -268,7 +269,10 @@ async function boot(){
     try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
       if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
       if(tb==="story")tb="home"; // ปุ่มเรื่องราวของบอส (rich menu) -> เข้าหน้าหลักแดชบอร์ดรวม (บอสยืนยัน 2026-07-04); แท็บ 📖 ในแอปยังเปิดหน้าเรื่องราวได้
-      if(tb&&["home","todo","money","story","heal","me","start"].indexOf(tb)>=0){TAB=tb}}catch(e){}
+      if(tb&&["home","todo","money","story","heal","me","start"].indexOf(tb)>=0){TAB=tb}
+      /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
+      var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
+      if(sl==="1"&&TAB==="todo"){TSEL=new Set()}}catch(e){}
     DATA=await api("me.get");LSYNC=Date.now();
     try{localStorage.removeItem("yb_rl_t")}catch(e){}
     if(TAB==="start"){
@@ -299,7 +303,7 @@ function nav(){
   for(var i=0;i<it.length;i++){h+='<button class="'+(TAB===it[i][0]?"on":"")+'" onclick="go(\''+it[i][0]+'\')"><span class="ne">'+it[i][1]+'</span>'+it[i][2]+'</button>'}
   return h+'</div>';
 }
-function go(t){if(TAB==="start"&&t!=="start")wzClear();TAB=t;MSEL=null;draw();window.scrollTo(0,0)}
+function go(t){if(TAB==="start"&&t!=="start")wzClear();TAB=t;MSEL=null;TSEL=null;draw();window.scrollTo(0,0)}
 function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
 
 /* ---------- 📝 onboarding (?tab=start): wizard ยินยอม -> เลือกเลขา+ตั้งชื่อ -> ข้อมูลบอส -> ทัวร์ฟีเจอร์ ---------- */
@@ -549,8 +553,15 @@ function vTodo(){
   h+='<h2>✅ งานที่ต้องทำ ('+DATA.tasks.open.length+')</h2>';
   h+='<div class="rowitem"><input id="ntask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTask()">เพิ่ม</button></div>';
   if(!DATA.tasks.open.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  /* ☑️ โหมดเลือกหลายรายการ (มติบอส 24 ก.ค.: ติ๊กหลายงาน กดปิด/ลบทีเดียว — เข้าตรงจากการ์ดในแชตด้วย ?sel=1) */
+  if(DATA.tasks.open.length>1&&!TSEL){h+='<button class="btn sm" style="width:100%;margin:2px 0 8px" onclick="tSelStart()">☑️ เลือกหลายรายการ (ปิด/ลบทีเดียว)</button>'}
+  if(TSEL){h+='<div style="position:sticky;top:0;z-index:5;background:#fff;padding:8px 0;display:flex;gap:6px;align-items:center;border-bottom:1px solid #F0E4EA"><b style="font-size:13.5px;flex:1">เลือกแล้ว '+TSEL.size+' งาน</b><button class="btn sm" onclick="tSelDo(false)">✅ ปิดที่เลือก</button><button class="btn sm" style="background:#fde8e8;color:#b42318" onclick="tSelDo(true)">🗑 ลบ</button><button class="btn sm" style="background:#eee;color:#444" onclick="tSelEnd()">ยกเลิก</button></div>'}
   for(var j=0;j<DATA.tasks.open.length;j++){var t=DATA.tasks.open[j];
-    h+='<div class="rowitem"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div><button class="ic" onclick="delTask(\''+t.id+'\')">'+icn("trash",15)+'</button></div>';
+    if(TSEL){var tOn=TSEL.has(String(t.id));
+      h+='<div class="rowitem" onclick="tSelTg(\''+t.id+'\')" style="cursor:pointer'+(tOn?';background:#FDF2F6':'')+'"><div style="width:22px;height:22px;border-radius:6px;border:2px solid #B85C7E;margin-right:10px;flex:none;text-align:center;line-height:19px;font-size:14px;color:#fff;background:'+(tOn?'#B85C7E':'#fff')+'">'+(tOn?'✓':'')+'</div><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div></div>';
+    }else{
+      h+='<div class="rowitem"><button class="chk" onclick="tgTask(\''+t.id+'\',true)"></button><div class="grow"><div class="t">'+esc(t.task_text)+'</div></div><button class="ic" onclick="delTask(\''+t.id+'\')">'+icn("trash",15)+'</button></div>';
+    }
   }
   /* 🏢 งานทีม (Business ฝั่งคนมอบ) — โชว์เสมอถ้าเป็น Business จะได้รู้ว่ามีมุมนี้ */
   if(DATA.team){
@@ -598,6 +609,17 @@ async function saveSched(i,id){
 function delRem(id){if(confirm("ลบการแจ้งเตือนนี้?"))act("reminder.delete",{id:id},"ลบแล้ว")}
 function tgTask(id,done){act("task.toggle",{id:id,done:done},done?"เยี่ยม เสร็จอีกงาน! 🎉":"")}
 function delTask(id){act("task.delete",{id:id},"ลบแล้ว")}
+/* ☑️ เลือกหลายรายการ: ติ๊กสะสมใน TSEL แล้วยิง API รายตัวตอนกดยืนยัน (ใช้ endpoint เดิม ไม่แตะหลังบ้าน) */
+function tSelStart(){TSEL=new Set();draw()}
+function tSelEnd(){TSEL=null;draw()}
+function tSelTg(id){if(!TSEL)return;id=String(id);if(TSEL.has(id)){TSEL.delete(id)}else{TSEL.add(id)}draw()}
+async function tSelDo(del){
+  if(!TSEL||!TSEL.size){toast("ติ๊กเลือกงานก่อนนะ");return}
+  var n=TSEL.size,ids=Array.from(TSEL);
+  if(del&&!confirm("ลบ "+n+" งานถาวรเลยนะ?"))return;
+  for(var i=0;i<ids.length;i++){try{await api(del?"task.delete":"task.toggle",del?{id:ids[i]}:{id:ids[i],done:true})}catch(e){}}
+  TSEL=null;toast(del?"ลบ "+n+" งานแล้ว 🧹":"ปิด "+n+" งานแล้ว 🎉");await reload();
+}
 async function addTask(){var el=$("#ntask"),v=el.value.trim();if(!v){return}await act("task.add",{text:v},"เพิ่มงานแล้ว")}
 
 /* ---------- เงิน ---------- */
