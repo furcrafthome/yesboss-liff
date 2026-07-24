@@ -25,9 +25,11 @@
     // 🔑 จำกุญแจไว้ในเครื่อง — ใส่ครั้งเดียวพอ ครั้งหน้าเปิด app.yesboss.club/dash.html เฉยๆ ก็เข้าได้เลย
     //    (เก็บใน localStorage ของเครื่องบอสเท่านั้น ไม่ส่งไปไหน · ล้างได้ด้วยปุ่ม "ลืมเครื่องนี้")
     let key = _hash.split('|')[0];
+    // รับกุญแจได้ 3 ทาง: #hash (เดิม) · ?key= (ไอคอน/บุ๊คมาร์ค — บาง OS ตัด #hash ทิ้ง) · localStorage (จำไว้แล้ว)
+    try { if (!key) key = new URLSearchParams(location.search).get('key') || ''; } catch(e) {}
     try { if (!key) key = localStorage.getItem('yb_dash_key') || ''; } catch(e) {}
     try { if (key) localStorage.setItem('yb_dash_key', key); } catch(e) {}
-    if (key && location.hash) { try { history.replaceState(null,'',location.pathname); } catch(e) {} }
+    if (key) { try { history.replaceState(null,'',location.pathname); } catch(e) {} }
     const _tk = /(?:^|\|)ticket=([0-9a-f-]{36})/i.exec(_hash);
     let openTicket = _tk ? _tk[1] : null;
     let tickets = null, ticketView = null, ticketBusy = false; let data; let active = (_tk ? 'tickets' : 'executive'); let selectedUser = null; const q = new URLSearchParams(location.search); let rangeStart=q.get('start')||''; let rangeEnd=q.get('end')||'';
