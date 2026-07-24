@@ -104,7 +104,7 @@
         </button></li>`}).join('')}</ul>`;
     }
     function cohortBlocks(){
-      const c = d.cohorts; if(!c) return '';
+      const c = data.cohorts; if(!c) return '';
       const wk = c.weekly||[], bd = c.by_days||[], ns = c.name_signal||[], d2 = c.day2||{};
       const last = wk.filter(w=>!w.partial).slice(-1)[0], prev = wk.filter(w=>!w.partial).slice(-2)[0];
       const trend = (last&&prev) ? (last.d7_pct-prev.d7_pct) : 0;
