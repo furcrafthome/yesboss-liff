@@ -464,7 +464,7 @@ async function ensureStory(){
   DATA.story.loaded="ing";                 /* กันยิงซ้ำตอนกดแท็บรัวๆ */
   try{
     var r=await api("me.story");
-    DATA.story={facts:r.facts||[],files:r.files||[],folders:r.folders||[],contacts:r.contacts||[],crmLocked:!!r.crmLocked,nContacts:r.nContacts||0,nFacts:(r.facts||[]).length,nFiles:(r.files||[]).length,loaded:true};
+    DATA.story={facts:r.facts||[],files:r.files||[],folders:r.folders||[],nFacts:(r.facts||[]).length,nFiles:(r.files||[]).length,loaded:true};
   }catch(e){if(DATA.story)DATA.story.loaded=false}  /* พลาด = กดเข้าใหม่แล้วลองอีกได้ */
   if(TAB==="story")draw();
 }
@@ -1226,27 +1226,8 @@ function vStory(){
   if(s.loaded===false||s.loaded==="ing"){
     return '<h1>'+icn("book",22)+' เรื่องราวของบอส</h1><div class="sub">กำลังเปิดสมุดบันทึกให้'+(s.nFacts?' — จำไว้ '+s.nFacts+' เรื่อง':'')+'…</div>';
   }
-  var facts=s.facts||[],files=s.files||[],folders=s.folders||[],cts=s.contacts||[];
+  var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
   var h='<h1>'+icn("book",22)+' เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
-  /* 👥 ลูกค้าของบอส (Sprint3 ข้อ 13) — จดจากแชตเอง ไม่ต้องกรอกฟอร์ม */
-  h+='<div class="card" style="margin-bottom:12px"><div class="ct">👥 ลูกค้าของบอส'+(cts.length?'<span class="more">'+cts.length+' คน</span>':'')+'</div>';
-  if(s.crmLocked){
-    /* 💎 Free: โชว์ว่ามีอะไรรออยู่ ไม่ใช่ซ่อนเงียบ (ของเก่าที่เคยจดไม่ถูกลบ) */
-    h+='<div class="rowitem"><div class="grow"><div class="t">💎 สมุดลูกค้า — สิทธิ์ Pro</div><div class="m">'
-      +(s.nContacts?'มีลูกค้าที่เลขาเคยจดไว้ '+s.nContacts+' คน รออยู่ ':'')
-      +'จำชื่อ-เบอร์-รายละเอียดลูกค้าให้ ถามคืนได้ทุกเมื่อ<br>งาน · นัด · เงิน · แชต ยังใช้ฟรีเหมือนเดิม</div></div></div>';
-    h+='<div style="padding:10px 12px"><button class="btn" onclick="go(\'me\')">ดูวิธีปลดล็อก Pro ›</button></div>';
-  }else if(!cts.length){
-    h+='<div class="rowitem"><div class="grow"><div class="m">ยังไม่มีลูกค้าในสมุด — เล่าให้เลขาฟังในแชตได้เลย เช่น<br>“ลูกค้าพี่หนึ่ง เบอร์ 0812345678 ชอบไม้สัก”</div></div></div>';
-  }else{
-    for(var ci=0;ci<Math.min(cts.length,30);ci++){var c=cts[ci];
-      var sub=[c.phone?'📞 '+esc(c.phone):'',c.company?'🏢 '+esc(c.company):'',c.note?esc(c.note):''].filter(Boolean).join(' · ');
-      h+='<div class="rowitem"><div class="grow"><div class="t">'+esc(c.contact_name)+'</div>'+(sub?'<div class="m">'+sub+'</div>':'')+'</div>'
-        +(c.phone?'<a class="ic" aria-label="โทรหา '+esc(c.contact_name)+'" href="tel:'+esc(c.phone)+'">'+icn("phone",15)+'</a>':'')+'</div>';
-    }
-    if(cts.length>30)h+='<div class="rowitem"><div class="m">…และอีก '+(cts.length-30)+' คน</div></div>';
-  }
-  h+='</div>';
   if(facts.length||files.length){h+='<div class="gh">🧠 เลขาจำไว้ '+facts.length+' เรื่อง'+(files.length?' · 📁 '+files.length+' ไฟล์':'')+' — ยิ่งเล่า ยิ่งจำ ยิ่งดูแลถูกจุด 💗</div>'}
   /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
   var pf=DATA.profile||{};
