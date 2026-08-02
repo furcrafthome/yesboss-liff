@@ -568,6 +568,10 @@ function wzForm(){
     +'<div class="wzh1">ให้เลขาเรียกบอสว่าอะไรดี</div><p class="wzsub">ใส่แค่ชื่อก็เริ่มใช้ได้เลย 💕</p>'
     +'<div class="wzf wzcard">'
     +'<label style="margin-top:0" for="wz_nm">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="เช่น บอส, พี่หนึ่ง" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
+    /* 🧠 คำถามนี้เคยถูกซ่อนไว้หลังปุ่ม "บอกเพิ่มอีกนิด" — คน 895 คน/เดือนผ่านฟอร์มนี้ แต่ตอบแค่ 66 คน (7%)
+       ทั้งที่คำตอบเดียวนี้สร้าง fact ได้ 23% ของคลังทั้งระบบ จึงยกขึ้นมาให้เห็น (ยังไม่บังคับกรอกเหมือนเดิม) */
+    +'<label for="wz_bz">บอสทำธุรกิจ/งานอะไรอยู่ <span style="font-weight:400;opacity:.6">(ไม่บังคับ)</span></label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
+    +'<p class="wzsub" style="margin:7px 0 0">บอกไว้ประโยคเดียว เลขาจะจำไว้ตลอด แล้วช่วยงานได้ตรงเรื่องบอสขึ้นเยอะ 🧠</p>'
     +'</div>';
   h+='<div class="wzh1" style="font-size:17px;margin-top:18px">อยากให้ช่วยเรื่องไหนก่อน</div>'
     +'<p class="wzsub">เลือกแล้วได้ลองของจริงเลย ไม่ต้องดูตัวอย่าง</p>'
@@ -582,8 +586,7 @@ function wzForm(){
   if(WZ_MORE){
     var sel=function(id,label,cur,opts){var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()">';for(var q=0;q<opts.length;q++){s+='<option value="'+opts[q][0]+'"'+(cur===opts[q][0]?" selected":"")+'>'+opts[q][1]+'</option>'}return s+'</select>'};
     h+='<div class="wzf wzcard">'
-      +'<label style="margin-top:0" for="wz_bz">บอสทำธุรกิจ/งานอะไรอยู่</label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
-      +'<label for="wz_ph">เบอร์มือถือ</label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
+      +'<label style="margin-top:0" for="wz_ph">เบอร์มือถือ</label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
       +sel("wz_ag","ช่วงอายุ",F_AG,[["","ไม่บอกก็ได้"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
       +sel("wz_ac","รู้จัก YES BOSS จากไหน",F_AC,[["","ไม่บอกก็ได้"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
       +'</div>';
