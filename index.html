@@ -435,7 +435,13 @@ async function boot(){
       }
     }
     draw();
-    if(TAB==="story")ensureStory(); /* เผื่อเปิดตรงมาแท็บเรื่องราว (ลิงก์/สถานะค้าง) */
+    /* เปิดตรงมาที่แท็บไหน ต้องดึงข้อมูลแท็บนั้นด้วย — go() ทำให้แล้วตอนกดสลับแท็บ แต่ทางนี้คือ "เข้ามาครั้งแรก"
+       27 ก.ค.: เดิมมีแต่ story ปุ่ม "🆘 แจ้งปัญหา" ที่ห้อยท้ายทุกคำตอบลิงก์มา ?tab=help ตรงๆ
+       เข้ามาแล้ว HELP ยังเป็น null และไม่มีใครเรียก ensureHelp() → ค้าง "กำลังโหลดเรื่องที่แจ้งไว้..." ตลอดไป
+       คนที่ทีมงานตอบแล้วจึงเปิดอ่าน/ตอบกลับไม่ได้เลย (?tab=trash ก็เป็นเหมือนกัน) */
+    if(TAB==="story")ensureStory();
+    if(TAB==="help")ensureHelp();
+    if(TAB==="trash")ensureTrash();
   }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
 }
 
@@ -997,15 +1003,26 @@ function tSelEnd(){TSEL=null;draw()}
 function tSelTg(id){if(!TSEL)return;id=String(id);if(TSEL.has(id)){TSEL.delete(id)}else{TSEL.add(id)}draw()}
 async function tSelDo(del){
   if(!TSEL||!TSEL.size){toast("ติ๊กเลือกงานก่อนนะ");return}
-  var n=TSEL.size,ids=Array.from(TSEL);
+  var n=TSEL.size,ids=Array.from(TSEL),ok=0,er="";
   // ลบหลายงานพร้อมกันไม่ต้องถามแล้ว — ทุกใบถูกถ่ายสำเนาลงถังขยะ กดเลิกทำได้ทันที
-  for(var i=0;i<ids.length;i++){try{await api(del?"task.delete":"task.toggle",del?{id:ids[i]}:{id:ids[i],done:true})}catch(e){}}
+  /* 🐛 25 ก.ค.: เดิม catch(e){} กลืน error ทุกชนิด + ไม่เช็ค ok:false ที่ API ส่งกลับตอนปิดไม่ติด
+     แล้วเด้ง "ปิด N งานแล้ว 🎉" ทุกกรณี — โทเค็นหมดอายุ/เน็ตหลุด/แถวไม่แมตช์ = ลูกค้าเห็นข้อความสำเร็จ
+     ทั้งที่ไม่มีอะไรถูกปิดจริง แล้วงานยังค้างเหมือนเดิม (ตรงกับอาการ "กดเสร็จแล้วไม่หาย ปิดแอปเปิดใหม่ก็ยังอยู่")
+     กฎที่ยึด: นับผลจริงทีละใบ แล้วพูดตามที่เกิดขึ้นจริงเสมอ — สำเร็จบางส่วนก็ต้องบอกว่าบางส่วน */
+  for(var i=0;i<ids.length;i++){
+    try{
+      var rs=await api(del?"task.delete":"task.toggle",del?{id:ids[i]}:{id:ids[i],done:true});
+      if(rs&&rs.ok===false){er=er||(del?"ลบไม่ติด":"ปิดไม่ติด")}else{ok++}
+    }catch(e){er=er||(e&&e.message)||"ผิดพลาด"}
+  }
   TSEL=null;await reload();
-  if(!del){toast("ปิด "+n+" งานแล้ว 🎉");return}
-  tshow("ลบ "+n+" งานแล้ว",async function(){
+  if(!ok){toast(er||(del?"ลบไม่สำเร็จ ลองใหม่อีกที":"ปิดงานไม่สำเร็จ ลองใหม่อีกที"));return}
+  var part=ok<n?(" ("+ok+"/"+n+" — ที่เหลือไม่สำเร็จ ลองใหม่อีกที)"):"";
+  if(!del){toast("ปิด "+ok+" งานแล้ว 🎉"+part);return}
+  tshow("ลบ "+ok+" งานแล้ว"+part,async function(){
     try{
       var tr=await api("trash.list",{});
-      var back=(tr.rows||[]).filter(function(r){return r.table==="tasks"}).slice(0,n);
+      var back=(tr.rows||[]).filter(function(r){return r.table==="tasks"}).slice(0,ok);
       for(var k=0;k<back.length;k++){await api("trash.restore",{id:back[k].id})}
       await reload();toast("เอา "+back.length+" งานกลับมาแล้ว 🤍");
     }catch(e){toast("กู้คืนไม่ได้ ลองดูใน ถังขยะ")}
