@@ -451,7 +451,7 @@ async function boot(){
       สั่ง window.scrollTo(0,0) เองที่จุดนั้นอยู่แล้ว จึงไม่กระทบ */
 function draw(){
   var _y=window.scrollY||document.documentElement.scrollTop||0;
-  if(TAB==="dossier"&&!(DATA&&DATA.beta))TAB="me"; /* 🧪 คนนอกรอบทดลองเปิดลิงก์ตรงๆ ให้ตกกลับหน้าโปรไฟล์ */
+  if(TAB==="dossier"&&!(DATA&&DATA.newux))TAB="me"; /* 🆕 คนเก่ายังไม่มีแฟ้ม เปิดลิงก์ตรงๆ ให้ตกกลับหน้าโปรไฟล์ */
   if(TAB==="start"){$("#app").innerHTML=vStart();wzPersist()}
   else{
     var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal()
@@ -518,15 +518,20 @@ var TOUR=[
    ทัวร์ 7 การ์ดยังอยู่ครบ แต่ย้ายไปเป็น "ของแถม" (WZ=4) ที่กดดูได้ ไม่ใช่กำแพงที่ต้องผ่าน */
 /* 📁 มติบอส 3 ส.ค.: ยุบแฟ้มเจ้านายเข้ามาในจอลงทะเบียนเลย ไม่แยกไปกรอกทีหลัง
    0 ยินยอม · 1 เลือกเลขา · 2 แฟ้มหน้า 1 (เรื่องของบอส) · 3 แฟ้มหน้า 2 (วิธีดูแลบอส) · 4 สำเร็จ · 5 ทัวร์ */
-function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ<=3?wzForm():WZ===4?wzWin():wzTour())}
+function vStart(){if(WZ===3&&!wzNewUx())WZ=2; /* คนเก่าไม่มีหน้า 2 */
+  return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ<=3?wzForm():WZ===4?wzWin():wzTour())}
 /* แถบขั้นตอน: โชว์ 3 ขั้นจริง (ยินยอม -> เลขา -> ชื่อ) แล้วจบ
    จอ "สำเร็จครั้งแรก" (WZ=3) กับทัวร์ (WZ=4) ไม่นับเป็นขั้นตอนที่ต้องผ่าน — ลงทะเบียนเสร็จตั้งแต่ขั้น 3
    เดิมโชว์ 4 ขั้นแล้วขั้นสุดท้ายคือทัวร์ 7 การ์ด = ลูกค้าเห็นว่ายังอีกไกลตั้งแต่จอแรก */
 function wzHead(){
   if(WZ>=4){return '<div class="wzbar"><i style="width:100%"></i></div><div class="wzsteps"><div class="wzst done" style="flex:none;margin:0 auto"><div class="b">✓</div>ลงทะเบียนเสร็จแล้ว</div></div>'}
-  var names=["ยินยอม","เลือกเลขา","เรื่องของบอส","ดูแลบอส"],pct=[15,40,70,95][WZ];
-  var h='<div class="wzbar" role="progressbar" aria-valuenow="'+(WZ+1)+'" aria-valuemin="1" aria-valuemax="4" aria-label="ขั้นตอนที่ '+(WZ+1)+' จาก 4"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
-  for(var i=0;i<4;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
+  /* 🆕 คนเก่าใช้ฟอร์มเดิมที่จบในหน้าเดียว = มี 3 ขั้น ไม่ใช่ 4
+     ถ้าโชว์ 4 ขั้นให้เขา จะมีขั้น "ดูแลบอส" ค้างอยู่ตลอดแล้วไม่มีวันถึง = อ่านเหมือนระบบพัง */
+  var nUx=wzNewUx();
+  var names=nUx?["ยินยอม","เลือกเลขา","เรื่องของบอส","ดูแลบอส"]:["ยินยอม","เลือกเลขา","เรื่องของบอส"];
+  var nStep=names.length,pct=(nUx?[15,40,70,95]:[18,50,92])[WZ]||95;
+  var h='<div class="wzbar" role="progressbar" aria-valuenow="'+(WZ+1)+'" aria-valuemin="1" aria-valuemax="'+nStep+'" aria-label="ขั้นตอนที่ '+(WZ+1)+' จาก '+nStep+'"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
+  for(var i=0;i<nStep;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
   return h+'</div>';
 }
 function wzNav(back,next,label,dis){
@@ -593,9 +598,12 @@ function wzHours(id,label,cur,hint){
      ตื่น/นอน  -> ไม่รู้ = ปลุก 8 โมงเช้าทุกคนเหมือนเดิม
      อยากให้ช่วยเรื่องไหน -> ไม่รู้ = สอนใช้ผิดเรื่องตั้งแต่วันแรก
    ที่เหลือไม่บังคับ — ข้ามได้ตอนสมัคร แล้วประตูค่อยตามเก็บทีหลัง */
+/* 🆕 ที่เดียวในหน้าเว็บที่ตอบว่า "คนนี้ได้ของใหม่ไหม" — เซิร์ฟเวอร์ตัดสินมาแล้ว หน้าเว็บไม่คิดเอง */
+function wzNewUx(){return !!(DATA&&DATA.newux)}
 var WZ_REQ_P1=[["wz_nm","ชื่อที่ให้เลขาเรียก"],["wz_oc","บอสทำงานแบบไหน"],["d_ctry","ประเทศที่อยู่"]];
 var WZ_REQ_P2=[["wz_wk","เวลาตื่น"],["wz_sl","เวลาเข้านอน"]];
 function wzMissing(page){
+  if(!wzNewUx())return []; /* ฟอร์มเดิมไม่เคยบังคับกรอกอะไร */
   var need=(page===2?WZ_REQ_P1:WZ_REQ_P2),out=[],i,e;
   for(i=0;i<need.length;i++){e=$("#"+need[i][0]);if(!e||!String(e.value||"").trim())out.push(need[i][1])}
   if(page===2&&!F_WFS.length)out.push("เรื่องที่อยากให้ช่วย");
@@ -604,7 +612,58 @@ function wzMissing(page){
 function wzReq(){return '<span class="wzreq">จำเป็น</span>'}
 /* หน้า 1 ของแฟ้ม = "เรื่องของบอส" · หน้า 2 = "วิธีดูแลบอส" — ใช้ตัวช่วยชุดเดียวกับหน้าแฟ้มในแอป
    (dSeg/dMulti/dHour/dTa มาจากบล็อกแฟ้ม ไม่ได้เขียนซ้ำ) */
+/* 📋 ฟอร์มลงทะเบียน 'แบบเดิม' หน้าเดียว — สำหรับลูกค้าเก่าที่ยังไม่เคยผ่านประตู (68 คน)
+   บอสสั่ง 3 ส.ค.: เปิดของใหม่ให้เฉพาะคนใหม่ก่อน คนเก่ารอแจ้งวันศุกร์
+   ⚠️ ห้ามลบทิ้งจนกว่าจะถึง NEW_UX_ALL_FROM แล้วยืนยันว่าไม่มีใครค้างอยู่ที่ฟอร์มนี้
+   ต่างจากฟอร์มใหม่: ไม่มีช่องแฟ้มเจ้านาย · ไม่บังคับกรอกอะไรเลยนอกจากชื่อ · จบในหน้าเดียว */
+function wzFormLegacy(){
+  var pr=(DATA&&DATA.profile)||{};
+  var nm=F_NM!==null?F_NM:(pr.display_name||""),ph=F_PH!==null?F_PH:(pr.phone||"");
+  var h='<div class="wz">'+wzHead()
+    +'<div class="wzh1">ให้เลขาเรียกบอสว่าอะไรดี</div><p class="wzsub">ใส่แค่ชื่อก็เริ่มใช้ได้เลย 💕</p>'
+    +'<div class="wzf wzcard">'
+    +'<label style="margin-top:0" for="wz_nm">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="เช่น บอส, พี่หนึ่ง" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
+    /* 🧠 คำถามนี้เคยถูกซ่อนไว้หลังปุ่ม "บอกเพิ่มอีกนิด" — คน 895 คน/เดือนผ่านฟอร์มนี้ แต่ตอบแค่ 66 คน (7%)
+       ทั้งที่คำตอบเดียวนี้สร้าง fact ได้ 23% ของคลังทั้งระบบ จึงยกขึ้นมาให้เห็น (ยังไม่บังคับกรอกเหมือนเดิม) */
+    +'<label for="wz_bz">บอสทำธุรกิจ/งานอะไรอยู่ <span style="font-weight:400;opacity:.6">(ไม่บังคับ)</span></label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
+    +'<p class="wzsub" style="margin:7px 0 0">บอกไว้ประโยคเดียว เลขาจะจำไว้ตลอด แล้วช่วยงานได้ตรงเรื่องบอสขึ้นเยอะ 🧠</p>'
+    +'</div>';
+  /* 📁 บอสสั่ง 2 ส.ค.: ให้พิมพ์เอง ไม่ใช่เลือกจากปุ่ม — คนทำงานจริงมีอาชีพนอกลิสต์เยอะกว่าที่คิด */
+  h+='<div class="wzf wzcard" style="margin-top:14px">'
+    +'<label style="margin-top:0" for="wz_oc">บอสทำงานแบบไหน <span style="font-weight:400;opacity:.6">(ไม่บังคับ)</span></label>'
+    +'<input id="wz_oc" maxlength="80" placeholder="เช่น เจ้าของร้านกาแฟ, ฟรีแลนซ์ออกแบบ, พยาบาล" value="'+esc(F_OC)+'" onchange="wzStash();wzPersist()">'
+    +'<p class="wzsub" style="margin:7px 0 0">เลขาจะได้ช่วยให้ตรงกับชีวิตจริงของบอส</p>'
+    +'</div>';
+  h+='<div class="wzh1" style="font-size:17px;margin-top:18px">อยากให้ช่วยเรื่องไหนบ้าง</div>'
+    +'<p class="wzsub">เลือกได้หลายข้อ — เลือกแล้วได้ลองของจริงเลย</p>'
+    +'<div class="wfgrid">';
+  for(var i=0;i<WF_CARDS.length;i++){var c=WF_CARDS[i];var on=F_WFS.indexOf(c[0])>=0;
+    h+='<button type="button" class="wfc'+(on?" on":"")+'" aria-pressed="'+(on?"true":"false")+'" onclick="wzPickWf(\''+c[0]+'\')"><span class="e" aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>';
+  }
+  h+='</div>';
+  /* ⏰ ของที่ขาดหนักที่สุด: ระบบตั้งสรุปเช้า 8 โมง / สรุปเย็น 2 ทุ่ม ให้ "ทุกคนเท่ากัน" มาตลอด
+     คนขายของกลางคืน/ทำกะดึกจึงโดนปลุก 8 โมงเช้าทุกวัน — 2 คำถามนี้แปลงเป็นเวลาสรุป + ช่วงห้ามรบกวน */
+  h+='<div class="wzf wzcard" style="margin-top:14px">'
+    +'<div class="wzh1" style="font-size:16px;margin:0 0 2px">ปกติบอสตื่นกี่โมง เข้านอนกี่โมง</div>'
+    +'<p class="wzsub" style="margin:0 0 4px">เลขาจะได้ทักถูกเวลา ไม่ปลุกตอนที่บอสยังหลับ ⏰</p>'
+    +wzHours("wz_wk","ตื่นประมาณ",F_WK,"")
+    +wzHours("wz_sl","เข้านอนประมาณ",F_SL,"ช่วงระหว่างเข้านอน→ตื่น เลขาจะไม่ทักเลย")
+    +'</div>';
+  /* ข้อมูลการตลาด (เบอร์/อายุ/ช่องทางรู้จัก) พับเก็บไว้เหมือนเดิม — ไม่ขวางทางคนที่แค่อยากเริ่มใช้
+     ไม่ตัดทิ้งเพราะทีมมาร์เก็ตติ้งใช้จริง แต่ไม่ให้กินพื้นที่ของคำถามที่เลขาเอาไปทำงานได้ */
+  h+='<button type="button" class="wzmore" onclick="wzMore()">'+(WZ_MORE?"▲ ซ่อน":"▾ บอกเพิ่มอีกนิด (ไม่บังคับ)")+'</button>';
+  if(WZ_MORE){
+    var sel=function(id,label,cur,opts){var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()">';for(var q=0;q<opts.length;q++){s+='<option value="'+opts[q][0]+'"'+(cur===opts[q][0]?" selected":"")+'>'+opts[q][1]+'</option>'}return s+'</select>'};
+    h+='<div class="wzf wzcard">'
+      +'<label style="margin-top:0" for="wz_ph">เบอร์มือถือ</label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
+      +sel("wz_ag","ช่วงอายุ",F_AG,[["","ไม่บอกก็ได้"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
+      +sel("wz_ac","รู้จัก YES BOSS จากไหน",F_AC,[["","ไม่บอกก็ได้"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
+      +'</div>';
+  }
+  return h+'</div>'+wzNav("wzStash();WZ=1;draw()","wzSave()","เริ่มใช้เลย ›",false);
+}
 function wzForm(){
+  if(!wzNewUx())return wzFormLegacy(); /* 🆕 คนเก่า = ฟอร์มเดิมหน้าเดียว ไม่โดนของใหม่ */
   if(!DF)dossInit();
   var pr=(DATA&&DATA.profile)||{};
   var nm=F_NM!==null?F_NM:(pr.display_name||"");
@@ -708,7 +767,9 @@ async function wzSave(){
     await api("onboard.save",{display_name:F_NM,phone:F_PH,age_range:F_AG,wanted_feature:F_WF,acq_channel:F_AC,
       business_story:F_BZ,character:CH,secretary_name:SNAME,marketing_ok:WZ_MK,
       occupation:F_OC,wanted_features:F_WFS,wake_hour:F_WK,sleep_hour:F_SL});
-    await api("profile.update",{
+    /* 🆕 คนเก่าใช้ฟอร์มเดิมที่ไม่มีช่องแฟ้ม — ยิง profile.update ไปก็มีแต่ค่าว่าง
+       แถมจะไปจดว่า "ตอบช่องนี้แล้ว" ทั้งที่ไม่เคยเห็นคำถาม ทำให้ % ในแฟ้มเพี้ยนตอนเปิดให้ทุกคน */
+    if(wzNewUx())await api("profile.update",{
       call_me:DF.call_me||"",birth_date:DF.birth_date||"",country:DF.country||"",
       province:DF.province||"",city:DF.city||"",org_name:DF.org_name||"",occupation:F_OC||"",
       reply_style:DF.reply_style||"",marital_status:DF.marital_status||"",default_scope:DF.default_scope||"",
@@ -740,7 +801,7 @@ function wzWin(){
      ไม่บังคับสักอัน มีทางข้ามไปคุยในแชตอยู่ท้ายสุดเสมอ */
   h+='<div class="wzpick">';
   h+= wzPickBtn("go('home')", "📊", "เปิดแดชบอร์ด My YES BOSS", "ดูงาน นัด เงิน ครบในที่เดียว", "");
-  if(DATA&&DATA.beta){   /* 🧪 รอบทดลอง — ลูกค้าทั่วไปยังไม่เห็น 2 ใบนี้ */
+  if(DATA&&DATA.newux){   /* 🆕 ลูกค้าเก่ายังไม่เห็น 2 ใบนี้ */
     h+= wzPickBtn("wzClear();go('dossier')", "📁", "กรอกแฟ้มเจ้านาย",
           "กรอกแล้ว"+sn+"ทำงานได้เต็มประสิทธิภาพ ไม่ต้องถามซ้ำ", "อย่าลืมกรอก", 1);
     h+= wzPickBtn("obVideo()", "🎬", "คู่มือใช้งานแบบง่าย", "ดูวิดีโอสั้นๆ รู้เรื่องใน 58 วิ", "");
@@ -1655,8 +1716,12 @@ function dossInit(){
 function dNeed(f){var m=(DATA&&DATA.profile_missing)||[];return m.indexOf(f)>=0}
 function dLb(f,txt){return '<label class="f'+(dNeed(f)?' need':'')+'">'+txt+(dNeed(f)?'<i class="dot"></i>':'')+'</label>'}
 function dArr(v){if(!v)return[];if(typeof v==="string"){try{v=JSON.parse(v)}catch(e){return[]}}return Array.isArray(v)?v.slice():[]}
-function dSet(k,v){if(!DF)dossInit();DF[k]=(DF[k]===v?null:v);draw()}
-function dTog(k,v){if(!DF)dossInit();var a=DF[k]||[],i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);DF[k]=a;draw()}
+/* 🧷 เก็บของที่ลูกค้าพิมพ์ค้างอยู่ใน DOM ลง DF ก่อนจะ draw() ทับ
+   บั๊กเดิม: พิมพ์ "ชื่อร้าน" ค้างไว้ แล้วแตะชิปภาษา/ช่วงอายุ/วันหยุด -> วาดใหม่ด้วยค่าเก่า ข้อความหายเงียบ
+   จอลงทะเบียนกับหน้าแฟ้มใช้ชุดช่องคนละชุด จึงต้องเลือก stasher ให้ถูกบริบท */
+function dKeep(){if(TAB==="start")dStash2();else dStash()}
+function dSet(k,v){if(!DF)dossInit();dKeep();DF[k]=(DF[k]===v?null:v);draw()}
+function dTog(k,v){if(!DF)dossInit();dKeep();var a=DF[k]||[],i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);DF[k]=a;draw()}
 /* seg เลือกได้ค่าเดียว (กดซ้ำ = ล้างค่า — ทางถอนข้อมูลที่ให้ไปแล้ว ตามสิทธิ์ PDPA) */
 function dSeg(k,opts){
   var h='<div class="dchips">',i;
@@ -1928,18 +1993,27 @@ async function saveDossier(){
   }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที")}
   DBUSY=false;
 }
+/* 🔁 ดึงข้อมูลใหม่จากเซิร์ฟเวอร์ โดยไม่ทิ้งของที่ลูกค้ายังพิมพ์ค้างไว้
+   เดิมทุกที่สั่ง DF=null; await reload() ตรงๆ — เพิ่มคนสำคัญ 1 คน = ช่องที่กรอกไว้ทั้งหน้าหายหมด */
+async function dReload(){
+  dKeep();
+  var keep=DF,k;
+  DF=null;
+  await reload();
+  if(keep){dossInit();for(k in keep){if(keep[k]!==null&&keep[k]!==undefined&&keep[k]!=="")DF[k]=keep[k]}draw()}
+}
 async function addPerson(){
   var nm=dVal("#d_pname");
   if(!nm){toast("ใส่ชื่อคนที่อยากให้เลขาจำหน่อยนะ");return}
   var r=await api("people.save",{name:nm,relation:dVal("#d_prel")||"other",birth_date:dVal("#d_pbd"),note:dVal("#d_pnote")}).catch(function(e){return{error:e.message}});
   if(r&&r.error==="cap"){toast("แฟ้มเต็ม 20 คนแล้ว ลบคนที่ไม่ใช้ก่อนนะ");return}
   if(r&&r.error){toast("เพิ่มไม่สำเร็จ ลองใหม่อีกที");return}
-  DF=null;await reload();toast("จำ "+nm+" ไว้แล้ว 💛");
+  await dReload();toast("จำ "+nm+" ไว้แล้ว 💛");
 }
 async function delPerson(id,nm){
   var ok=await dlg({title:"ลบ "+nm+" ออกจากแฟ้ม?",okText:"ลบ",body:"เลขาจะเลิกจำและเลิกเตือนวันเกิดของคนนี้"});
   if(!ok)return;
-  await api("people.del",{id:id});DF=null;await reload();toast("ลบแล้ว");
+  await api("people.del",{id:id});await dReload();toast("ลบแล้ว");
 }
 async function addBill(){
   var t=dVal("#d_bt"),d=dValN("#d_bd");
@@ -1948,7 +2022,7 @@ async function addBill(){
   var r=await api("bill.add",{title:t,day:d,amount:dValN("#d_ba")}).catch(function(e){return{error:e.message}});
   if(r&&r.error){toast("ตั้งเตือนไม่สำเร็จ ลองใหม่อีกที");return}
   var e1=$("#d_bt");if(e1)e1.value="";var e2=$("#d_ba");if(e2)e2.value="";
-  DF=null;await reload();toast("ตั้งเตือนทุกวันที่ "+d+" ให้แล้ว ⏰");
+  await dReload();toast("ตั้งเตือนทุกวันที่ "+d+" ให้แล้ว ⏰");
 }
 
 function vMe(){
@@ -1956,8 +2030,8 @@ function vMe(){
   var pct=Number(DATA.profile_pct||0);
   var h='<h1>โปรไฟล์ & เลขา</h1>';
   /* 📁 ทางเข้าแฟ้มเจ้านาย — วางบนสุดของหน้าโปรไฟล์ (ที่เดียวที่คนเข้ามาหา "ตั้งค่าตัวเอง") */
-  /* 🧪 รอบทดลอง (บอสสั่ง 3 ส.ค. "ลองปรับแค่ในไลน์ของเราก่อน") — ลูกค้าทั่วไปยังไม่เห็นปุ่มนี้ */
-  if(DATA.beta){
+  /* 🆕 ทางเข้าแฟ้ม — ลูกค้าเก่ายังไม่เห็น จนกว่าจะถึงวันเปิดให้ทุกคน (ศุกร์ 7 ส.ค.) */
+  if(DATA.newux){
     h+='<button class="btn ghost" style="width:100%;justify-content:space-between;text-align:left;margin-bottom:14px" onclick="go(\'dossier\')">'
       +'<span>📁 แฟ้มเจ้านาย — ให้เลขารู้จักบอสมากขึ้น</span><span class="pill">'+pct+'%</span></button>';
   }
