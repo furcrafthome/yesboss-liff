@@ -3,40 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>เทสนาฬิกาปลุก — YES BOSS</title>
+<title>สร้างทางลัดตั้งปลุก — YES BOSS</title>
 <style>
-  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; }
+  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; }
-  body { margin:0; padding:32px 22px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
-         background:var(--bg); color:#2B2B2E; line-height:1.6;
-         display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-  h1 { font-size:22px; margin:0 0 10px; }
-  p  { font-size:15px; color:var(--gray); margin:0 0 28px; max-width:320px; }
-  button { width:100%; max-width:320px; border:0; border-radius:14px; padding:20px; font-size:18px;
-           font-weight:700; background:var(--pink); color:#fff; font-family:inherit; box-shadow:0 4px 14px rgba(232,119,155,.3); }
-  .big { font-size:52px; margin-bottom:6px; }
-  .verdict { font-size:22px; font-weight:700; margin-bottom:10px; }
-  .ok  { color:#B8437A; }
-  .bad { color:var(--gray); }
-  .hint { font-size:15px; color:var(--gray); max-width:300px; }
-  .step { display:none; flex-direction:column; align-items:center; width:100%; }
-  .step.on { display:flex; }
+  body { margin:0; padding:26px 20px 44px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+         background:var(--bg); color:#2B2B2E; line-height:1.65; max-width:460px; margin-inline:auto; }
+  h1 { font-size:21px; margin:0 0 6px; }
+  .lead { font-size:14px; color:var(--gray); margin:0 0 24px; }
+  ol { list-style:none; counter-reset:s; padding:0; margin:0 0 26px; }
+  li { counter-increment:s; position:relative; padding:0 0 20px 44px; }
+  li::before { counter-increment:none; content:counter(s); position:absolute; left:0; top:1px;
+               width:30px; height:30px; border-radius:50%; background:var(--pink); color:#fff;
+               font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; }
+  li::after { content:""; position:absolute; left:15px; top:34px; bottom:2px; width:2px; background:var(--line); }
+  li:last-child::after { display:none; }
+  li b { display:block; font-size:16px; margin-bottom:2px; }
+  li span { font-size:14px; color:var(--gray); }
+  .tap { display:inline-block; background:#fff; border:1.5px solid var(--soft); border-radius:7px;
+         padding:1px 8px; font-size:13.5px; color:var(--pink); font-weight:600; white-space:nowrap; }
+  .box { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center; }
+  .box h2 { font-size:17px; margin:0 0 4px; }
+  .box p { font-size:13.5px; color:var(--gray); margin:0 0 16px; }
+  button { width:100%; border:0; border-radius:12px; padding:17px; font-size:17px; font-weight:700;
+           background:var(--pink); color:#fff; font-family:inherit; box-shadow:0 4px 14px rgba(232,119,155,.28); }
+  .res { margin-top:14px; font-size:15px; font-weight:600; display:none; }
+  .res.on { display:block; }
+  .res.ok  { color:#B8437A; }
+  .res.bad { color:var(--gray); }
 </style>
 </head>
 <body>
 
-<div class="step on" id="s1">
-  <div class="big">⏰</div>
-  <h1>แตะปุ่มนี้ทีเดียว</h1>
-  <p>ถ้าแอปนาฬิกาเด้งขึ้นมา ให้ปิดแล้วกลับมาหน้านี้<br>ไม่ต้องทำอะไรในแอปนาฬิกา</p>
-  <button onclick="go()">แตะที่นี่</button>
-</div>
+<h1>⏰ สร้างทางลัด "yesboss"</h1>
+<p class="lead">ทำครั้งเดียวจบ ประมาณ 1 นาที<br>ทำเสร็จแล้วเลื่อนลงมากดปุ่มทดสอบข้างล่าง</p>
 
-<div class="step" id="s2">
-  <div class="big" id="icon"></div>
-  <div class="verdict" id="verdict"></div>
-  <div class="hint" id="hint"></div>
+<ol>
+  <li><b>เปิดแอป "คำสั่งลัด"</b>
+      <span>ไอคอนสีฟ้า-ม่วง มีรูปลูกศรสองอัน ถ้าหาไม่เจอให้ลากนิ้วลงกลางจอแล้วพิมพ์ว่า คำสั่งลัด</span></li>
+
+  <li><b>กดเครื่องหมาย <span class="tap">+</span> มุมขวาบน</b>
+      <span>จะได้ทางลัดเปล่าๆ ขึ้นมาอันนึง</span></li>
+
+  <li><b>ค้นหาคำว่า <span class="tap">ปลุก</span></b>
+      <span>มีช่องค้นหาอยู่กลางจอหรือล่างจอ พิมพ์ลงไปได้เลย</span></li>
+
+  <li><b>เลือก <span class="tap">สร้างนาฬิกาปลุก</span></b>
+      <span>หรือถ้าเครื่องเป็นภาษาอังกฤษจะชื่อ Create Alarm</span></li>
+
+  <li><b>แตะช่อง <span class="tap">เวลา</span> แล้วเลือก <span class="tap">ข้อมูลป้อนเข้าทางลัด</span></b>
+      <span>สำคัญที่สุด — ถ้าไม่เจอตัวเลือกนี้ ให้แตะช่องเวลาค้างไว้ แล้วดูรายการตัวแปรที่โผล่มา (ภาษาอังกฤษคือ Shortcut Input)</span></li>
+
+  <li><b>ตั้งชื่อทางลัดว่า <span class="tap">yesboss</span></b>
+      <span>แตะชื่อด้านบนสุดของจอเพื่อเปลี่ยนชื่อ ต้องสะกดแบบนี้เป๊ะๆ ตัวเล็กทั้งหมด ติดกัน แล้วกดเสร็จ</span></li>
+</ol>
+
+<div class="box">
+  <h2>ทดสอบเลย</h2>
+  <p>กดแล้วควรมีนาฬิกาปลุก 07:00 โผล่ในแอปนาฬิกา</p>
+  <button onclick="go()">ตั้งปลุก 7 โมงเช้า</button>
+  <div class="res" id="res"></div>
 </div>
 
 <script>
@@ -51,26 +77,19 @@ function go() {
     document.removeEventListener('visibilitychange', onLeave);
     window.removeEventListener('pagehide', onLeave);
     window.removeEventListener('blur', onLeave);
-    verdict(left || document.hidden);
+    var r = document.getElementById('res');
+    if (left || document.hidden) {
+      r.className = 'res on ok';
+      r.textContent = 'เด้งออกไปแล้ว — ไปเช็คในแอปนาฬิกาว่ามี 07:00 ขึ้นไหม';
+    } else {
+      r.className = 'res on bad';
+      r.textContent = 'ไม่มีอะไรเกิดขึ้น — บอกผมได้เลย';
+    }
   }, 1800);
 
-  try { window.location.href = 'clock-alarm://'; } catch (e) { verdict(false); }
-}
-
-function verdict(worked) {
-  document.getElementById('s1').className = 'step';
-  document.getElementById('s2').className = 'step on';
-  if (worked) {
-    document.getElementById('icon').textContent = '💗';
-    document.getElementById('verdict').className = 'verdict ok';
-    document.getElementById('verdict').textContent = 'เยี่ยม! ทางนี้แหละ';
-    document.getElementById('hint').textContent = 'บอกผมว่า "เด้ง" พอครับ';
-  } else {
-    document.getElementById('icon').textContent = '🙂';
-    document.getElementById('verdict').className = 'verdict bad';
-    document.getElementById('verdict').textContent = 'ไม่เด้ง ก็ไม่เป็นไร';
-    document.getElementById('hint').textContent = 'บอกผมว่า "ไม่เด้ง" พอครับ เรายังมีอีกทางที่ใช้ได้แน่';
-  }
+  try {
+    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent('07:00');
+  } catch (e) {}
 }
 </script>
 </body>
