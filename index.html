@@ -415,7 +415,7 @@ async function boot(){
     try{var qp=new URLSearchParams(location.search),tb=qp.get("tab");
       if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
       if(tb==="story")tb="home"; // ปุ่มเรื่องราวของบอส (rich menu) -> เข้าหน้าหลักแดชบอร์ดรวม (บอสยืนยัน 2026-07-04); แท็บ 📖 ในแอปยังเปิดหน้าเรื่องราวได้
-      if(tb&&["home","todo","money","story","heal","me","start","help","trash"].indexOf(tb)>=0){TAB=tb}
+      if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier"].indexOf(tb)>=0){TAB=tb}
       /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
       var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
       if(sl==="1"&&TAB==="todo"){TSEL=new Set()}}catch(e){}
@@ -445,17 +445,26 @@ async function boot(){
   }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
 }
 
+/* 🖱️ draw() วาดใหม่ทั้งจอ -> ตำแหน่งที่เลื่อนไว้หายทุกครั้ง
+   อาการที่บอสเจอ 3 ส.ค.: กดติ๊กเลือกกลางฟอร์ม แล้วจอเด้งกลับหัวหน้า ต้องเลื่อนลงมาใหม่ทุกครั้ง
+   -> จำตำแหน่งไว้แล้วคืนให้เสมอ · จอไหนที่ "ต้องขึ้นหัวจริงๆ" (เปลี่ยนแท็บ/เปลี่ยนขั้น)
+      สั่ง window.scrollTo(0,0) เองที่จุดนั้นอยู่แล้ว จึงไม่กระทบ */
 function draw(){
-  if(TAB==="start"){$("#app").innerHTML=vStart();wzPersist();window.scrollTo(0,0);return} // onboarding เต็มจอ ไม่มีแถบแท็บ
-  var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal()
-    :TAB==="help"?vHelp():TAB==="trash"?vTrash():vMe();
-  $("#app").innerHTML=v+nav();
+  var _y=window.scrollY||document.documentElement.scrollTop||0;
+  if(TAB==="dossier"&&!(DATA&&DATA.beta))TAB="me"; /* 🧪 คนนอกรอบทดลองเปิดลิงก์ตรงๆ ให้ตกกลับหน้าโปรไฟล์ */
+  if(TAB==="start"){$("#app").innerHTML=vStart();wzPersist()}
+  else{
+    var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal()
+      :TAB==="help"?vHelp():TAB==="trash"?vTrash():TAB==="dossier"?vDossier():vMe();
+    $("#app").innerHTML=v+nav();
+  }
+  if(_y)window.scrollTo(0,_y);
 }
 function nav(){
-  // help/trash เข้าจากลิงก์ในแชต + ปุ่มในหน้าโปรไฟล์ (ไม่กินช่องแถบล่าง — 6 ช่องเต็มแล้ว)
+  // help/trash/dossier เข้าจากลิงก์ในแชต + ปุ่มในหน้าโปรไฟล์ (ไม่กินช่องแถบล่าง — 6 ช่องเต็มแล้ว)
   // แท็บที่ไม่มีในแถบ ให้ไฮไลต์ "โปรไฟล์" ไว้ คนจะได้ไม่งงว่าตัวเองหลุดไปอยู่ไหน
   var it=[["home",icn("home",21),"หน้าหลัก"],["todo",icn("check",21),"วันนี้+งาน"],["money",icn("banknote",21),"เงิน"],["story",icn("book",21),"เรื่องราว"],["heal",icn("heart",21),"ฮีลใจ"],["me",icn("user",21),"โปรไฟล์"]];
-  var cur=(TAB==="help"||TAB==="trash")?"me":TAB;
+  var cur=(TAB==="help"||TAB==="trash"||TAB==="dossier")?"me":TAB;
   // role=tablist + aria-selected: เดิมทั้งหน้าไม่มี aria สักตัว screen reader อ่านเป็นปุ่มลอยๆ 6 ปุ่ม ไม่รู้ว่าอยู่แท็บไหน
   var h='<nav class="nav" role="tablist" aria-label="เมนูหลัก">';
   for(var i=0;i<it.length;i++){var on=cur===it[i][0];
@@ -478,13 +487,19 @@ function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="
 
 /* ---------- 📝 onboarding (?tab=start): wizard ยินยอม -> เลือกเลขา+ตั้งชื่อ -> ข้อมูลบอส -> ทัวร์ฟีเจอร์ ---------- */
 var WZ=0,TI=0,CH="ครับบอส",SNAME="",F_NM=null,F_PH=null,F_AG="",F_WF="",F_AC="",F_BZ="",WZ_OK=false,WZ_MK=false;
+/* 📁 186 — ช่องที่ "เลขาเอาไปใช้ได้จริง" (ของเดิม 3 ใน 6 ช่องเป็นข้อมูลการตลาด สมองไม่เคยแตะ)
+   F_OC=ทำงานอะไร · F_WFS=อยากให้ช่วยเรื่องไหนบ้าง (หลายข้อ) · F_WK/F_SL=ตื่น/นอนกี่โมง
+   ตื่น-นอน แปลงเป็น brief_hour/report_hour/ช่วงห้ามรบกวน ฝั่ง server — เลิก default 8 โมง/2 ทุ่ม ทุกคน */
+var F_OC="",F_WFS=[],F_WK="",F_SL="";
 /* 🔒 token LIFF อายุ ~1 ชม. — ถ้าหมดอายุกลางทางจะโดนเด้ง login ใหม่ทั้งหน้า
-   เลยจำสถานะ wizard ไว้ในเครื่อง (30 นาที) ให้กลับมาต่อขั้นเดิม ข้อมูลที่กรอกไม่หาย */
-function wzPersist(){try{localStorage.setItem("yb_wz",JSON.stringify({z:WZ,ti:TI,ch:CH,sn:SNAME,nm:F_NM,ph:F_PH,ag:F_AG,wf:F_WF,ac:F_AC,bz:F_BZ,ok:WZ_OK,mk:WZ_MK,t:Date.now()}))}catch(e){}}
+   เลยจำสถานะ wizard ไว้ในเครื่อง (30 นาที) ให้กลับมาต่อขั้นเดิม ข้อมูลที่กรอกไม่หาย
+   ⚠️ เพิ่มช่องใหม่ = ต้องเพิ่มทั้งใน wzPersist และ wzRestore ไม่งั้นโทเคนหมดอายุกลางทาง = ข้อมูลหาย */
+function wzPersist(){try{localStorage.setItem("yb_wz",JSON.stringify({z:WZ,ti:TI,ch:CH,sn:SNAME,nm:F_NM,ph:F_PH,ag:F_AG,wf:F_WF,ac:F_AC,bz:F_BZ,ok:WZ_OK,mk:WZ_MK,oc:F_OC,wfs:F_WFS,wk:F_WK,sl:F_SL,t:Date.now()}))}catch(e){}}
 function wzRestore(){try{var s=JSON.parse(localStorage.getItem("yb_wz")||"null");
-  if(s&&Date.now()-(s.t||0)<1800000){WZ=s.z||0;TI=s.ti||0;if(s.ch)CH=s.ch;SNAME=s.sn||"";F_NM=s.nm;F_PH=s.ph;F_AG=s.ag||"";F_WF=s.wf||"";F_AC=s.ac||"";F_BZ=s.bz||"";WZ_OK=!!s.ok;WZ_MK=!!s.mk}}catch(e){}}
+  if(s&&Date.now()-(s.t||0)<1800000){WZ=s.z||0;TI=s.ti||0;if(s.ch)CH=s.ch;SNAME=s.sn||"";F_NM=s.nm;F_PH=s.ph;F_AG=s.ag||"";F_WF=s.wf||"";F_AC=s.ac||"";F_BZ=s.bz||"";WZ_OK=!!s.ok;WZ_MK=!!s.mk;
+    F_OC=s.oc||"";F_WFS=Array.isArray(s.wfs)?s.wfs:[];F_WK=s.wk||"";F_SL=s.sl||""}}catch(e){}}
 function wzClear(){try{localStorage.removeItem("yb_wz")}catch(e){}}
-var WZ_CSS='<style>.wz{max-width:430px;margin:0 auto;padding:14px 16px 110px;box-sizing:border-box}.wzbar{height:6px;background:#EDEDF2;border-radius:99px;overflow:hidden;margin:4px 0 10px}.wzbar i{display:block;height:100%;background:#E8779B;border-radius:99px;transition:.3s}.wzsteps{display:flex;justify-content:space-between;margin-bottom:16px}.wzst{flex:1;text-align:center;font-size:11px;color:#85858E}.wzst .b{width:26px;height:26px;border-radius:99px;background:#fff;border:1.5px solid #E5E5EB;color:#C4547E;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-weight:800;font-size:12px}.wzst.on .b{background:#E8779B;border-color:#E8779B;color:#fff}.wzst.done .b{background:#FDE7EF;border-color:#F4A9C0;color:#C4547E}.wzst.on{color:#C4547E;font-weight:700}.wzh1{font-size:20px;font-weight:800;color:#3A3A3C;margin:2px 0}.wzsub{font-size:13px;color:#6E6E73;margin:0 0 12px}.wzhero{display:block;width:130px;margin:6px auto 2px}.wzcard{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:12px}.wzul{margin:0;padding:0;list-style:none}.wzul li{display:flex;gap:8px;font-size:13.5px;color:#3A3A3C;line-height:1.5;margin:8px 0}.wzul li:before{content:"";width:7px;height:7px;border-radius:99px;background:#F4A9C0;margin-top:6px;flex:none}.wzck{display:flex;gap:10px;align-items:flex-start;background:#F5F5F8;border:1.5px solid #E9E9EF;border-radius:14px;padding:12px;font-size:13.5px;color:#3A3A3C}.wzck input{width:20px;height:20px;accent-color:#E8779B;flex:none;margin-top:1px}.secc{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #E5E5EB;border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}.secc.on{border-color:#E8779B;background:#F7F8FA;box-shadow:0 4px 14px rgba(232,119,155,.18)}.secc img{width:64px;height:80px;object-fit:contain;flex:none}.secc .t{flex:1}.secc .t b{font-size:16px;color:#3A3A3C;display:block}.secc .t span{font-size:12px;color:#6E6E73;display:block;margin-top:2px}.secc .t i{font-size:12px;color:#C4547E;font-style:normal;display:block;margin-top:4px}.secc .r{width:22px;height:22px;border-radius:99px;border:2px solid #E5E5EB;flex:none}.secc.on .r{border-color:#E8779B;background:radial-gradient(circle,#E8779B 45%,#fff 50%)}.wzf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.wzf input,.wzf select{width:100%;box-sizing:border-box;border:1.5px solid #E5E5EB;border-radius:12px;padding:11px 12px;font-size:15px;background:#FAFAFC;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.wzf input:focus,.wzf select:focus{border-color:#E8779B}.wznav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #EDEDF2;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;max-width:430px;margin:0 auto;box-sizing:border-box}.wzback{flex:1;border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:13px;font-size:15px;font-weight:700}.wznext{flex:2;border:0;background:#E8779B;color:#fff;border-radius:99px;padding:13px;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(232,119,155,.35)}.wznext:disabled{opacity:.4;box-shadow:none}.tourh{display:flex;gap:12px;align-items:center;margin-bottom:10px}.tourh img{width:64px;height:80px;object-fit:contain;flex:none}.tourh h2{font-size:19px;margin:0;color:#3A3A3C}.tourh p{font-size:12.5px;color:#6E6E73;margin:2px 0 0}.tchat{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:10px}.tcu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.tcb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.tcb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.tcb .m{background:#F5F5F8;border:1px solid #E9E9EF;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.ttry{display:block;width:100%;border:1.5px solid #E8779B;background:#fff;color:#C4547E;font-size:14px;font-weight:800;padding:11px;border-radius:99px;margin-top:2px}.tdots{display:flex;gap:5px;justify-content:center;margin:10px 0 4px}.tdots i{width:7px;height:7px;border-radius:99px;background:#E5E5EB;transition:.2s}.tdots i.on{width:22px;background:#E8779B}.wzdet{border-bottom:1px solid #F0F0F4}.wzdet:last-of-type{border-bottom:0}.wzdet summary{list-style:none;display:flex;align-items:center;gap:8px;padding:11px 2px;font-size:14px;font-weight:700;color:#3A3A3C;cursor:pointer}.wzdet summary::-webkit-details-marker{display:none}.wzdet summary:after{content:"▾";margin-left:auto;color:#C4547E;transition:.2s}.wzdet[open] summary:after{transform:rotate(180deg)}.wzdet .dd{padding:0 2px 12px;font-size:13.5px;color:#3A3A3C;line-height:1.55}.wzlink{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13.5px;font-weight:700;text-decoration:underline;padding:2px 0 12px;text-align:center}#pvov{position:fixed;inset:0;background:#fff;z-index:99;display:flex;flex-direction:column}.pvtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #EDEDF2;padding-top:calc(10px + env(safe-area-inset-top))}.pvtop b{color:#C4547E;font-size:15px}.pvtop button{border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px}#pvov iframe{flex:1;border:0;width:100%}.wfgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:8px 0 4px}.wfc{background:#fff;border:2px solid #E5E5EB;border-radius:16px;padding:14px 8px;font-family:inherit;font-size:13px;font-weight:700;color:#3A3A3C;line-height:1.35;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}.wfc .e{font-size:26px;line-height:1}.wfc.on{border-color:#E8779B;background:#FFF6FA;box-shadow:0 4px 14px rgba(232,119,155,.2)}.wzmore{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13px;font-weight:700;padding:12px 0;text-align:center;font-family:inherit;min-height:44px}@media (prefers-color-scheme:dark){.wzcard,.wfc,.secc,.tchat{background:#1F1F27;border-color:#2E2E38}.wzh1,.wzf label,.wfc,.tourh h2,.tcb .m{color:#EDEDF2}.wzsub,.wzst,.tourh p{color:#A9A9B6}.wzf input,.wzf select{background:#24242D;border-color:#3A3A46;color:#EDEDF2}.wznav{background:rgba(31,31,39,.97);border-color:#2E2E38}.wzback,.ttry,.wzlink,.wzmore{background:#1F1F27;color:#FF9FBB;border-color:#4A2F3B}.wznext{background:#FF9FBB;color:#2A0A16}.wfc.on{background:#3A2530;border-color:#FF9FBB}.tcb .m{background:#24242D;border-color:#2E2E38}.wzck{background:#24242D;border-color:#2E2E38;color:#EDEDF2}}</style>';
+var WZ_CSS='<style>.wz{max-width:430px;margin:0 auto;padding:14px 16px 110px;box-sizing:border-box}.wzbar{height:6px;background:#EDEDF2;border-radius:99px;overflow:hidden;margin:4px 0 10px}.wzbar i{display:block;height:100%;background:#E8779B;border-radius:99px;transition:.3s}.wzsteps{display:flex;justify-content:space-between;margin-bottom:16px}.wzst{flex:1;text-align:center;font-size:11px;color:#85858E}.wzst .b{width:26px;height:26px;border-radius:99px;background:#fff;border:1.5px solid #E5E5EB;color:#C4547E;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-weight:800;font-size:12px}.wzst.on .b{background:#E8779B;border-color:#E8779B;color:#fff}.wzst.done .b{background:#FDE7EF;border-color:#F4A9C0;color:#C4547E}.wzst.on{color:#C4547E;font-weight:700}.wzh1{font-size:20px;font-weight:800;color:#3A3A3C;margin:2px 0}.wzsub{font-size:13px;color:#6E6E73;margin:0 0 12px}.wzhero{display:block;width:130px;margin:6px auto 2px}.wzcard{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:12px}.wzul{margin:0;padding:0;list-style:none}.wzul li{display:flex;gap:8px;font-size:13.5px;color:#3A3A3C;line-height:1.5;margin:8px 0}.wzul li:before{content:"";width:7px;height:7px;border-radius:99px;background:#F4A9C0;margin-top:6px;flex:none}.wzck{display:flex;gap:10px;align-items:flex-start;background:#F5F5F8;border:1.5px solid #E9E9EF;border-radius:14px;padding:12px;font-size:13.5px;color:#3A3A3C}.wzck input{width:20px;height:20px;accent-color:#E8779B;flex:none;margin-top:1px}.secc{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #E5E5EB;border-radius:18px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.15s}.secc.on{border-color:#E8779B;background:#F7F8FA;box-shadow:0 4px 14px rgba(232,119,155,.18)}.secc img{width:64px;height:80px;object-fit:contain;flex:none}.secc .t{flex:1}.secc .t b{font-size:16px;color:#3A3A3C;display:block}.secc .t span{font-size:12px;color:#6E6E73;display:block;margin-top:2px}.secc .t i{font-size:12px;color:#C4547E;font-style:normal;display:block;margin-top:4px}.secc .r{width:22px;height:22px;border-radius:99px;border:2px solid #E5E5EB;flex:none}.secc.on .r{border-color:#E8779B;background:radial-gradient(circle,#E8779B 45%,#fff 50%)}.wzf label{display:block;font-size:13px;font-weight:700;color:#3A3A3C;margin:12px 0 5px}.wzf input,.wzf select{width:100%;box-sizing:border-box;border:1.5px solid #E5E5EB;border-radius:12px;padding:11px 12px;font-size:15px;background:#FAFAFC;color:#3A3A3C;outline:none;-webkit-appearance:none;appearance:none}.wzf input:focus,.wzf select:focus{border-color:#E8779B}.wznav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #EDEDF2;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;max-width:430px;margin:0 auto;box-sizing:border-box}.wzback{flex:1;border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:13px;font-size:15px;font-weight:700}.wznext{flex:2;border:0;background:#E8779B;color:#fff;border-radius:99px;padding:13px;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(232,119,155,.35)}.wznext:disabled{opacity:.4;box-shadow:none}.tourh{display:flex;gap:12px;align-items:center;margin-bottom:10px}.tourh img{width:64px;height:80px;object-fit:contain;flex:none}.tourh h2{font-size:19px;margin:0;color:#3A3A3C}.tourh p{font-size:12.5px;color:#6E6E73;margin:2px 0 0}.tchat{background:#fff;border-radius:18px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 18px rgba(25,25,55,.06);margin-bottom:10px}.tcu{align-self:flex-end;background:#E8779B;color:#fff;border-radius:16px 16px 4px 16px;padding:9px 13px;font-size:14px;max-width:82%}.tcb{align-self:flex-start;display:flex;gap:7px;align-items:flex-end;max-width:88%}.tcb .av{width:26px;height:26px;border-radius:99px;background:#FDE7EF;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}.tcb .m{background:#F5F5F8;border:1px solid #E9E9EF;color:#3A3A3C;border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:14px;line-height:1.45}.ttry{display:block;width:100%;border:1.5px solid #E8779B;background:#fff;color:#C4547E;font-size:14px;font-weight:800;padding:11px;border-radius:99px;margin-top:2px}.tdots{display:flex;gap:5px;justify-content:center;margin:10px 0 4px}.tdots i{width:7px;height:7px;border-radius:99px;background:#E5E5EB;transition:.2s}.tdots i.on{width:22px;background:#E8779B}.wzdet{border-bottom:1px solid #F0F0F4}.wzdet:last-of-type{border-bottom:0}.wzdet summary{list-style:none;display:flex;align-items:center;gap:8px;padding:11px 2px;font-size:14px;font-weight:700;color:#3A3A3C;cursor:pointer}.wzdet summary::-webkit-details-marker{display:none}.wzdet summary:after{content:"▾";margin-left:auto;color:#C4547E;transition:.2s}.wzdet[open] summary:after{transform:rotate(180deg)}.wzdet .dd{padding:0 2px 12px;font-size:13.5px;color:#3A3A3C;line-height:1.55}.wzlink{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13.5px;font-weight:700;text-decoration:underline;padding:2px 0 12px;text-align:center}#pvov{position:fixed;inset:0;background:#fff;z-index:99;display:flex;flex-direction:column}.pvtop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #EDEDF2;padding-top:calc(10px + env(safe-area-inset-top))}.pvtop b{color:#C4547E;font-size:15px}.pvtop button{border:1.5px solid #E5E5EB;background:#fff;color:#C4547E;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px}#pvov iframe{flex:1;border:0;width:100%}.wfgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:8px 0 4px}.wfc{background:#fff;border:2px solid #E5E5EB;border-radius:16px;padding:14px 8px;font-family:inherit;font-size:13px;font-weight:700;color:#3A3A3C;line-height:1.35;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}.wfc .e{font-size:26px;line-height:1}.wfc.on{border-color:#E8779B;background:#FFF6FA;box-shadow:0 4px 14px rgba(232,119,155,.2)}.wzmore{display:block;width:100%;background:none;border:0;color:#C4547E;font-size:13px;font-weight:700;padding:12px 0;text-align:center;font-family:inherit;min-height:44px}.wzreq{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:#E8779B;border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:middle;letter-spacing:.02em}.wznote{background:#FFF6FA;border:2px solid #F4A9C0;border-radius:18px;padding:16px 17px;margin:4px 0 14px;text-align:left}.wzready{font-size:14.5px;color:#3A3A3C;margin:6px 0 0;font-weight:700}.wzpick{display:flex;flex-direction:column;gap:10px;margin-top:16px}.wzpk{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid #E5E5EB;border-radius:16px;padding:14px 15px;font-family:inherit;cursor:pointer}.wzpk:hover{border-color:#F4A9C0;background:#FFF9FB}.wzpk .ic{font-size:24px;line-height:1;flex:none}.wzpk .tx{flex:1;min-width:0}.wzpk .tx b{display:block;font-size:15px;font-weight:800;color:#3A3A3C;line-height:1.4}.wzpk .tx span{display:block;font-size:12.5px;color:#85858E;line-height:1.5;margin-top:2px}.wzpk .bd{display:inline-block;font-style:normal;font-size:10.5px;font-weight:800;color:#fff;background:#E8779B;border-radius:99px;padding:2px 8px;margin-left:7px;vertical-align:middle}.wzpk .ar{color:#C4547E;font-size:20px;font-weight:800;flex:none}.wzpk.hot{background:#FFF3F7;border:2.5px solid #E8779B;box-shadow:0 6px 20px rgba(232,119,155,.28)}.wzpk.hot:hover{background:#FFE9F1;border-color:#D8577F}.wzpk.hot .tx b{font-size:16.5px;color:#B8365F}.wzpk.hot .tx span{color:#8A6472}.wzpk .ast{font-style:normal;color:#E01B3C;font-weight:900;font-size:21px;line-height:0;margin-right:5px;vertical-align:-2px}.wzpk.hot .bd{background:#E01B3C}.wzpk.hot .ar{color:#B8365F}@media (prefers-color-scheme:dark){.wzpk.hot{background:#3A2530;border-color:#FF9FBB;box-shadow:0 6px 20px rgba(0,0,0,.4)}.wzpk.hot .tx b{color:#FFB3C9}.wzpk.hot .tx span{color:#C9A8B4}.wzpk .ast{color:#FF5C78}.wzpk.hot .bd{background:#FF5C78;color:#2A0A16}.wzpk.hot .ar{color:#FFB3C9}}@media (prefers-color-scheme:dark){.wzready{color:#EDEDF2}.wzpk{background:#1F1F27;border-color:#2E2E38}.wzpk:hover{background:#26232C;border-color:#4A2F3B}.wzpk .tx b{color:#EDEDF2}.wzpk .tx span{color:#A9A9B6}}.wznote-h{font-size:19px;font-weight:800;color:#C4547E;letter-spacing:-.01em;margin-bottom:8px}.wznote-b{font-size:14.5px;line-height:1.75;color:#3A3A3C}.wznote-b b{color:#C4547E}.wznote-sm{display:block;margin-top:8px;font-size:12.5px;color:#85858E}@media (prefers-color-scheme:dark){.wznote{background:#3A2530;border-color:#7A4A5E}.wznote-h{color:#FF9FBB}.wznote-b{color:#EDEDF2}.wznote-b b{color:#FF9FBB}.wznote-sm{color:#A9A9B6}}.wzopt{font-weight:400;color:#A5A5AE;font-size:11.5px}.wz .dchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}.wz .dchips button{background:#FAFAFC;border:1.5px solid #E5E5EB;color:#3A3A3C;border-radius:999px;padding:9px 14px;font-size:13px;font-family:inherit;min-height:40px}.wz .dchips button.on{background:#E8779B;border-color:#E8779B;color:#fff;font-weight:700}.wz textarea.dta{width:100%;box-sizing:border-box;border:1.5px solid #E5E5EB;border-radius:12px;padding:11px 12px;font-size:15px;background:#FAFAFC;color:#3A3A3C;font-family:inherit;min-height:70px;resize:vertical}@media (prefers-color-scheme:dark){.wzcard,.wfc,.secc,.tchat{background:#1F1F27;border-color:#2E2E38}.wzh1,.wzf label,.wfc,.tourh h2,.tcb .m{color:#EDEDF2}.wzsub,.wzst,.tourh p{color:#A9A9B6}.wzf input,.wzf select{background:#24242D;border-color:#3A3A46;color:#EDEDF2}.wznav{background:rgba(31,31,39,.97);border-color:#2E2E38}.wzback,.ttry,.wzlink,.wzmore{background:#1F1F27;color:#FF9FBB;border-color:#4A2F3B}.wznext{background:#FF9FBB;color:#2A0A16}.wfc.on{background:#3A2530;border-color:#FF9FBB}.tcb .m{background:#24242D;border-color:#2E2E38}.wzck{background:#24242D;border-color:#2E2E38;color:#EDEDF2}}</style>';
 var SEC_CARDS=[
   {c:"ครับบอส",img:"img/p08-clipboard-write.webp",d:"สุภาพ เป๊ะ เชื่อถือได้",ex:"รับทราบครับบอส เดี๋ยวจัดการให้เลยครับ 📋"},
   {c:"ค่ะบอส",img:"img/p06-ok-wink.webp",d:"อบอุ่น ใจดี เป็นกันเอง",ex:"รับทราบค่ะบอส เดี๋ยวจัดการให้เลยนะคะ 😊"},
@@ -501,15 +516,17 @@ var TOUR=[
 ];
 /* ทางเดินใหม่ 3 จอ: ยินยอม -> เลือกเลขา -> ชื่อ+อยากลองอะไร -> (จอ 4) สำเร็จจริง
    ทัวร์ 7 การ์ดยังอยู่ครบ แต่ย้ายไปเป็น "ของแถม" (WZ=4) ที่กดดูได้ ไม่ใช่กำแพงที่ต้องผ่าน */
-function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ===2?wzForm():WZ===3?wzWin():wzTour())}
+/* 📁 มติบอส 3 ส.ค.: ยุบแฟ้มเจ้านายเข้ามาในจอลงทะเบียนเลย ไม่แยกไปกรอกทีหลัง
+   0 ยินยอม · 1 เลือกเลขา · 2 แฟ้มหน้า 1 (เรื่องของบอส) · 3 แฟ้มหน้า 2 (วิธีดูแลบอส) · 4 สำเร็จ · 5 ทัวร์ */
+function vStart(){return WZ_CSS+(WZ===0?wzConsent():WZ===1?wzSecretary():WZ<=3?wzForm():WZ===4?wzWin():wzTour())}
 /* แถบขั้นตอน: โชว์ 3 ขั้นจริง (ยินยอม -> เลขา -> ชื่อ) แล้วจบ
    จอ "สำเร็จครั้งแรก" (WZ=3) กับทัวร์ (WZ=4) ไม่นับเป็นขั้นตอนที่ต้องผ่าน — ลงทะเบียนเสร็จตั้งแต่ขั้น 3
    เดิมโชว์ 4 ขั้นแล้วขั้นสุดท้ายคือทัวร์ 7 การ์ด = ลูกค้าเห็นว่ายังอีกไกลตั้งแต่จอแรก */
 function wzHead(){
-  if(WZ>=3){return '<div class="wzbar"><i style="width:100%"></i></div><div class="wzsteps"><div class="wzst done" style="flex:none;margin:0 auto"><div class="b">✓</div>ลงทะเบียนเสร็จแล้ว</div></div>'}
-  var names=["ยินยอม","เลือกเลขา","ชื่อบอส"],pct=[20,55,90][WZ];
-  var h='<div class="wzbar" role="progressbar" aria-valuenow="'+(WZ+1)+'" aria-valuemin="1" aria-valuemax="3" aria-label="ขั้นตอนที่ '+(WZ+1)+' จาก 3"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
-  for(var i=0;i<3;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
+  if(WZ>=4){return '<div class="wzbar"><i style="width:100%"></i></div><div class="wzsteps"><div class="wzst done" style="flex:none;margin:0 auto"><div class="b">✓</div>ลงทะเบียนเสร็จแล้ว</div></div>'}
+  var names=["ยินยอม","เลือกเลขา","เรื่องของบอส","ดูแลบอส"],pct=[15,40,70,95][WZ];
+  var h='<div class="wzbar" role="progressbar" aria-valuenow="'+(WZ+1)+'" aria-valuemin="1" aria-valuemax="4" aria-label="ขั้นตอนที่ '+(WZ+1)+' จาก 4"><i style="width:'+pct+'%"></i></div><div class="wzsteps">';
+  for(var i=0;i<4;i++){h+='<div class="wzst'+(i<WZ?" done":i===WZ?" on":"")+'"><div class="b">'+(i<WZ?"✓":(i+1))+'</div>'+names[i]+'</div>'}
   return h+'</div>';
 }
 function wzNav(back,next,label,dis){
@@ -532,7 +549,7 @@ function wzConsent(){
     +'<button class="wzlink" onclick="wzPolicy(1)">📄 อ่านนโยบายความเป็นส่วนตัวฉบับเต็ม ›</button>'
     +'<label class="wzck"><input type="checkbox" id="wz_ok" '+(WZ_OK?"checked":"")+' onchange="WZ_OK=this.checked;draw()"><span><b>จำเป็น:</b> ฉันอ่านและเข้าใจแล้ว ยินยอมให้เก็บและใช้ข้อมูลตามนโยบายข้างต้นเพื่อให้บริการเลขา YES BOSS</span></label>'
     +'<label class="wzck" style="margin-top:8px;background:#fff"><input type="checkbox" id="wz_mk" '+(WZ_MK?"checked":"")+' onchange="WZ_MK=this.checked"><span><b>ไม่บังคับ:</b> ยินดีรับข่าวสาร ฟีเจอร์ใหม่ และสิทธิพิเศษจาก YES BOSS เป็นครั้งคราว (ยกเลิกได้ทุกเมื่อ)</span></label>'
-    +'</div>'+wzNav(null,"WZ=1;draw()","ยินยอม ไปต่อเลย ›",!WZ_OK);
+    +'</div>'+wzNav(null,"WZ=1;draw();window.scrollTo(0,0)","ยินยอม ไปต่อเลย ›",!WZ_OK);
 }
 function wzPolicy(on){
   var o=document.getElementById("pvov");if(o)o.remove();if(!on)return;
@@ -549,7 +566,7 @@ function wzSecretary(){
   h+='<div class="wzf wzcard" style="margin-top:14px"><label style="margin-top:0">ตั้งชื่อให้เลขาของบอส <span style="font-weight:400;color:#85858E">(ไม่บังคับ)</span></label>'
     +'<input id="wz_sn" maxlength="30" placeholder="เช่น บอสซี่ / มะลิ / พี่เลขา" value="'+esc(SNAME)+'" onchange="SNAME=this.value.trim()">'
     +'</div></div>'
-    +wzNav("WZ=0;draw()","SNAME=$(\'#wz_sn\').value.trim();WZ=2;draw()","ไปต่อ ›",false);
+    +wzNav("WZ=0;draw();window.scrollTo(0,0)","SNAME=$(\'#wz_sn\').value.trim();WZ=2;draw();window.scrollTo(0,0)","ไปต่อ ›",false);
   return h;
 }
 /* ═══ 📝 จอที่ 3: ชื่อ + อยากให้ช่วยเรื่องไหนก่อน ═══
@@ -559,39 +576,113 @@ function wzSecretary(){
    ของใหม่: บังคับแค่ "ชื่อ" · ที่เหลือพับเก็บเป็น "บอกเพิ่มอีกนิด (ไม่บังคับ)" · แล้วพาไปสำเร็จจริงเลย */
 var WF_CARDS=[["reminder","⏰","เตือนงาน / นัดหมาย"],["money","💸","จดรายรับ–รายจ่าย"],["brief","🌙","สรุปงานให้ทุกวัน"],["files","📁","เก็บไฟล์เอกสาร"],["fortune","🔮","ดูดวง / ไพ่ / เบอร์มงคล"],["heal","💛","ฮีลใจ / ที่พักใจ"]];
 var WZ_MORE=0;
-function wzPickWf(v){F_WF=v;wzPersist();draw()}
+/* เลือกได้หลายข้อ (เดิมเลือกได้ข้อเดียวแล้วทิ้ง) — เก็บทั้งชุดไว้จัดลำดับการ์ดสอนใช้ทีหลัง
+   ข้อแรกที่เลือกยังเป็น wanted_feature เดิม เพื่อไม่ให้ควิกวิน/สถิติเก่าพัง */
+function wzPickWf(v){var i=F_WFS.indexOf(v);if(i<0)F_WFS.push(v);else F_WFS.splice(i,1);F_WF=F_WFS[0]||"";wzPersist();draw()}
 function wzMore(){wzStash();WZ_MORE=WZ_MORE?0:1;draw()}
+function wzHours(id,label,cur,hint){
+  var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()"><option value="">ไม่บอกก็ได้</option>';
+  for(var q=0;q<24;q++){var lb=(q<10?"0":"")+q+":00";s+='<option value="'+q+'"'+(String(cur)===String(q)?" selected":"")+'>'+lb+'</option>'}
+  return s+'</select>'+(hint?'<p class="wzsub" style="margin:5px 0 0;font-size:12px">'+hint+'</p>':'');
+}
+/* ── ช่องบังคับตอนลงทะเบียน (มติบอส 3 ส.ค.: "อะไรที่เราต้องรู้ ก็บังคับ แต่บางอย่างก็ไม่ต้อง") ──
+   เกณฑ์ที่ใช้เลือก: ข้อไหน "ไม่รู้แล้วเลขาทำงานผิดตั้งแต่วันแรก" = บังคับ
+     ชื่อ      -> ไม่รู้ = เรียกไม่ถูกทุกข้อความ
+     ทำงานอะไร -> ไม่รู้ = ยกตัวอย่าง/เชียร์ฟีเจอร์มั่วทั้งระบบ
+     ประเทศ    -> ไม่รู้ = เตือนผิดเวลา (คนอยู่ต่างประเทศเจ็บทันที)
+     ตื่น/นอน  -> ไม่รู้ = ปลุก 8 โมงเช้าทุกคนเหมือนเดิม
+     อยากให้ช่วยเรื่องไหน -> ไม่รู้ = สอนใช้ผิดเรื่องตั้งแต่วันแรก
+   ที่เหลือไม่บังคับ — ข้ามได้ตอนสมัคร แล้วประตูค่อยตามเก็บทีหลัง */
+var WZ_REQ_P1=[["wz_nm","ชื่อที่ให้เลขาเรียก"],["wz_oc","บอสทำงานแบบไหน"],["d_ctry","ประเทศที่อยู่"]];
+var WZ_REQ_P2=[["wz_wk","เวลาตื่น"],["wz_sl","เวลาเข้านอน"]];
+function wzMissing(page){
+  var need=(page===2?WZ_REQ_P1:WZ_REQ_P2),out=[],i,e;
+  for(i=0;i<need.length;i++){e=$("#"+need[i][0]);if(!e||!String(e.value||"").trim())out.push(need[i][1])}
+  if(page===2&&!F_WFS.length)out.push("เรื่องที่อยากให้ช่วย");
+  return out;
+}
+function wzReq(){return '<span class="wzreq">จำเป็น</span>'}
+/* หน้า 1 ของแฟ้ม = "เรื่องของบอส" · หน้า 2 = "วิธีดูแลบอส" — ใช้ตัวช่วยชุดเดียวกับหน้าแฟ้มในแอป
+   (dSeg/dMulti/dHour/dTa มาจากบล็อกแฟ้ม ไม่ได้เขียนซ้ำ) */
 function wzForm(){
+  if(!DF)dossInit();
   var pr=(DATA&&DATA.profile)||{};
-  var nm=F_NM!==null?F_NM:(pr.display_name||""),ph=F_PH!==null?F_PH:(pr.phone||"");
-  var h='<div class="wz">'+wzHead()
-    +'<div class="wzh1">ให้เลขาเรียกบอสว่าอะไรดี</div><p class="wzsub">ใส่แค่ชื่อก็เริ่มใช้ได้เลย 💕</p>'
-    +'<div class="wzf wzcard">'
-    +'<label style="margin-top:0" for="wz_nm">ชื่อที่ให้เลขาเรียก</label><input id="wz_nm" maxlength="30" placeholder="เช่น บอส, พี่หนึ่ง" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
-    /* 🧠 คำถามนี้เคยถูกซ่อนไว้หลังปุ่ม "บอกเพิ่มอีกนิด" — คน 895 คน/เดือนผ่านฟอร์มนี้ แต่ตอบแค่ 66 คน (7%)
-       ทั้งที่คำตอบเดียวนี้สร้าง fact ได้ 23% ของคลังทั้งระบบ จึงยกขึ้นมาให้เห็น (ยังไม่บังคับกรอกเหมือนเดิม) */
-    +'<label for="wz_bz">บอสทำธุรกิจ/งานอะไรอยู่ <span style="font-weight:400;opacity:.6">(ไม่บังคับ)</span></label><input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
-    +'<p class="wzsub" style="margin:7px 0 0">บอกไว้ประโยคเดียว เลขาจะจำไว้ตลอด แล้วช่วยงานได้ตรงเรื่องบอสขึ้นเยอะ 🧠</p>'
-    +'</div>';
-  h+='<div class="wzh1" style="font-size:17px;margin-top:18px">อยากให้ช่วยเรื่องไหนก่อน</div>'
-    +'<p class="wzsub">เลือกแล้วได้ลองของจริงเลย ไม่ต้องดูตัวอย่าง</p>'
-    +'<div class="wfgrid">';
-  for(var i=0;i<WF_CARDS.length;i++){var c=WF_CARDS[i];
-    h+='<button type="button" class="wfc'+(F_WF===c[0]?" on":"")+'" aria-pressed="'+(F_WF===c[0]?"true":"false")+'" onclick="wzPickWf(\''+c[0]+'\')"><span class="e" aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>';
-  }
-  h+='</div>';
-  /* ข้อมูลที่เหลือ (เบอร์/อายุ/ช่องทางรู้จัก/ธุรกิจ) พับเก็บ — ยังเก็บได้เหมือนเดิมถ้าเขาอยากบอก
-     แต่ไม่ขวางทางคนที่แค่อยากเริ่มใช้ · ช่องทางรู้จักคือข้อมูลที่ทีมมาร์เก็ตติ้งใช้ จึงไม่ตัดทิ้ง */
-  h+='<button type="button" class="wzmore" onclick="wzMore()">'+(WZ_MORE?"▲ ซ่อน":"▾ บอกเพิ่มอีกนิด (ไม่บังคับ — เลขาจะดูแลได้ตรงใจขึ้น)")+'</button>';
-  if(WZ_MORE){
-    var sel=function(id,label,cur,opts){var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()">';for(var q=0;q<opts.length;q++){s+='<option value="'+opts[q][0]+'"'+(cur===opts[q][0]?" selected":"")+'>'+opts[q][1]+'</option>'}return s+'</select>'};
+  var nm=F_NM!==null?F_NM:(pr.display_name||"");
+  var h='<div class="wz">'+wzHead();
+
+  if(WZ===2){
+    h+='<div class="wzh1">ขอรู้จักบอสหน่อย</div>'
+      +'<p class="wzsub">ยิ่งเลขารู้จักบอส ยิ่งช่วยได้ตรงจุด — ข้อที่ขึ้น <b>จำเป็น</b> ขอครบก่อนนะ ที่เหลือข้ามได้</p>';
     h+='<div class="wzf wzcard">'
-      +'<label style="margin-top:0" for="wz_ph">เบอร์มือถือ</label><input id="wz_ph" type="tel" maxlength="12" placeholder="08X-XXX-XXXX" value="'+esc(ph)+'" onchange="wzStash();wzPersist()">'
-      +sel("wz_ag","ช่วงอายุ",F_AG,[["","ไม่บอกก็ได้"],["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50 ขึ้นไป"]])
-      +sel("wz_ac","รู้จัก YES BOSS จากไหน",F_AC,[["","ไม่บอกก็ได้"],["tiktok","TikTok"],["facebook","Facebook"],["instagram","Instagram"],["friend","เพื่อนแนะนำ"],["search","ค้นเจอเอง"],["other","อื่นๆ"]])
+      +'<label style="margin-top:0" for="wz_nm">ชื่อที่ให้เลขาเรียก '+wzReq()+'</label>'
+      +'<input id="wz_nm" maxlength="30" placeholder="เช่น บอส, พี่หนึ่ง" value="'+esc(nm)+'" onchange="wzStash();wzPersist()">'
+      +'<label for="d_call">อยากให้เรียกแบบไหนเป็นพิเศษ <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="d_call" maxlength="30" placeholder="เช่น พี่บีม, เฮีย, คุณหมอ" value="'+esc(DF.call_me||"")+'">'
+      +'<label for="d_birth">วันเกิด <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="d_birth" type="date" value="'+esc(DF.birth_date||"")+'">'
+      +'<label for="d_ctry">ประเทศที่อยู่ '+wzReq()+'</label>'
+      +'<input id="d_ctry" maxlength="40" placeholder="เช่น ไทย" value="'+esc(DF.country||"ไทย")+'">'
+      +'<p class="wzsub" style="margin:6px 0 0">ใช้ตั้งเวลาให้ตรงโซนที่บอสอยู่ เตือนจะได้ไม่เพี้ยน</p>'
+      +'<label for="d_prov">จังหวัด <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="d_prov" maxlength="40" placeholder="เช่น เชียงใหม่" value="'+esc(DF.province||"")+'">'
+      +'<label for="d_city">เมือง / อำเภอ <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="d_city" maxlength="40" placeholder="เช่น หางดง" value="'+esc(DF.city||"")+'">'
       +'</div>';
+    h+='<div class="wzf wzcard">'
+      +'<label style="margin-top:0" for="wz_oc">บอสทำงานแบบไหน '+wzReq()+'</label>'
+      +'<input id="wz_oc" maxlength="80" placeholder="เช่น เจ้าของร้านกาแฟ, ฟรีแลนซ์ออกแบบ, พยาบาล" value="'+esc(F_OC)+'" onchange="wzStash();wzPersist()">'
+      +'<label for="d_org">ชื่อร้าน / บริษัท <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="d_org" maxlength="60" placeholder="เช่น ร้านไม้สักบ้านสวน" value="'+esc(DF.org_name||"")+'">'
+      +'<label for="wz_bz">ทำอะไร ขายอะไร <span class="wzopt">(ไม่บังคับ)</span></label>'
+      +'<input id="wz_bz" maxlength="300" placeholder="เช่น ขายเสื้อผ้าออนไลน์ มีหน้าร้านที่เชียงใหม่" value="'+esc(F_BZ)+'" onchange="wzStash();wzPersist()">'
+      +'<p class="wzsub" style="margin:6px 0 0">บอกไว้ประโยคเดียว เลขาจำตลอด แล้วช่วยได้ตรงเรื่องบอสขึ้นเยอะ 🧠</p>'
+      +'</div>';
+    h+='<div class="wzh1" style="font-size:17px;margin-top:18px">อยากให้ช่วยเรื่องไหนบ้าง '+wzReq()+'</div>'
+      +'<p class="wzsub">เลือกได้หลายข้อ</p><div class="wfgrid">';
+    for(var i=0;i<WF_CARDS.length;i++){var c=WF_CARDS[i];var on=F_WFS.indexOf(c[0])>=0;
+      h+='<button type="button" class="wfc'+(on?" on":"")+'" aria-pressed="'+(on?"true":"false")+'" onclick="wzPickWf(\''+c[0]+'\')"><span class="e" aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>';}
+    h+='</div>';
+    return h+'</div>'+wzNav("wzStash();WZ=1;draw();window.scrollTo(0,0)","wzNext2()","ไปต่อ ›",false);
   }
-  return h+'</div>'+wzNav("wzStash();WZ=1;draw()","wzSave()","เริ่มใช้เลย ›",false);
+
+  /* ── WZ=3 · วิธีดูแลบอส ── */
+  h+='<div class="wzh1">แล้วให้เลขาดูแลบอสยังไงดี</div>'
+    +'<p class="wzsub">อีกนิดเดียวก็เสร็จแล้ว — ข้อที่ขึ้น <b>จำเป็น</b> ขอครบก่อนนะ</p>';
+  h+='<div class="wzf wzcard">'
+    +'<label style="margin-top:0" for="wz_wk">ปกติตื่นประมาณกี่โมง '+wzReq()+'</label>'+wzHourSel("wz_wk",F_WK)
+    +'<label for="wz_sl">เข้านอนประมาณกี่โมง '+wzReq()+'</label>'+wzHourSel("wz_sl",F_SL)
+    +'<p class="wzsub" style="margin:6px 0 0">เลขาจะสรุปงานให้ตอนบอสตื่น และไม่ทักช่วงที่บอสหลับ ⏰</p>'
+    +'</div>';
+  h+='<div class="wzf wzcard">'
+    +'<label style="margin-top:0">ชอบให้ตอบแบบไหน <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("reply_style",[["short","สั้น กระชับ"],["detail","อธิบายละเอียด"]])
+    +'<label>เตือนซ้ำเมื่อไม่กดรับ <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("renudge",[[true,"จิกจนเสร็จ"],[false,"เตือนครั้งเดียวพอ"]])
+    +'<label>จดเงินเข้ากระเป๋าไหนเป็นหลัก <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("default_scope",[["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]])
+    +'</div>';
+  h+='<div class="wzf wzcard">'
+    +'<label style="margin-top:0">สถานะ <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("marital_status",[["single","โสด"],["dating","มีแฟน"],["married","แต่งงาน"],["parent","มีลูก"]])
+    +'<label for="d_like">ของที่ชอบ / ไม่ชอบ <span class="wzopt">(ไม่บังคับ)</span></label>'+dTa("d_like","เช่น ชอบกาแฟดำไม่หวาน ไม่กินผักชี",DF.likes)
+    +'<label>อยากให้เตือนดูแลตัวเองเรื่องไหน <span class="wzopt">(ไม่บังคับ)</span></label>'+dMulti("selfcare",SC_OPTS)
+    +'</div>';
+  h+='<p class="wzsub" style="margin:14px 2px 0">เรื่องคนสำคัญ วันเกิดคนในบ้าน บิลประจำ และเป้าหมายปีนี้ — เพิ่มทีหลังได้ในแฟ้มเจ้านาย 📁</p>';
+  return h+'</div>'+wzNav("wzStash();WZ=2;draw();window.scrollTo(0,0)","wzSave()","เสร็จแล้ว เริ่มใช้เลย ›",false);
+}
+function wzHourSel(id,cur){
+  var h='<select id="'+id+'" onchange="wzStash();wzPersist()"><option value="">— เลือกเวลา —</option>',q;
+  for(q=0;q<24;q++){h+='<option value="'+q+'"'+(String(cur)===String(q)?" selected":"")+'>'+(q<10?"0":"")+q+':00 น.</option>'}
+  return h+'</select>';
+}
+function wzNext2(){
+  wzStash();dStash2();
+  var miss=wzMissing(2);
+  if(miss.length){toast("ขอ "+miss[0]+" ก่อนนะ"+(miss.length>1?" (เหลืออีก "+(miss.length-1)+" ข้อ)":""));return}
+  WZ=3;draw();window.scrollTo(0,0);
+}
+/* เก็บค่าช่องแฟ้มที่อยู่ในจอ wizard ลง DF ก่อนเปลี่ยนหน้า (DOM ชุดเดิมจะถูกทิ้ง) */
+function dStash2(){
+  if(!DF)dossInit();
+  var m={d_call:"call_me",d_birth:"birth_date",d_ctry:"country",d_prov:"province",d_city:"city",
+         d_org:"org_name",d_like:"likes"},k,e;
+  for(k in m){e=$("#"+k);if(e)DF[m[k]]=e.value.trim()}
 }
 function wzStash(){
   var g=function(id){var e=$(id);return e?e.value.trim():null};
@@ -601,17 +692,35 @@ function wzStash(){
   v=g("#wz_bz");if(v!==null)F_BZ=v;
   var a=$("#wz_ag");if(a)F_AG=a.value;
   var c=$("#wz_ac");if(c)F_AC=c.value;
+  v=g("#wz_oc");if(v!==null)F_OC=v;
+  var w=$("#wz_wk");if(w)F_WK=w.value;
+  var s2=$("#wz_sl");if(s2)F_SL=s2.value;
 }
 async function wzSave(){
-  wzStash();
-  if(!F_NM){toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
+  wzStash();dStash2();
+  var miss=wzMissing(3);
+  if(miss.length){toast("ขอ "+miss[0]+" ก่อนนะ"+(miss.length>1?" (เหลืออีก "+(miss.length-1)+" ข้อ)":""));return}
+  if(!F_NM){WZ=2;draw();toast("ใส่ชื่อให้เลขาเรียกหน่อยนะ");return}
   var btn=document.querySelector(".wznext");if(btn){btn.disabled=true;btn.textContent="กำลังบันทึก..."}
   try{
-    await api("onboard.save",{display_name:F_NM,phone:F_PH,age_range:F_AG,wanted_feature:F_WF,acq_channel:F_AC,business_story:F_BZ,character:CH,secretary_name:SNAME,marketing_ok:WZ_MK});
+    /* 2 ก้อน: onboard.save = ยินยอม/สไตล์เลขา/ทดลอง Pro · profile.update = แฟ้มเจ้านาย
+       ต้องเรียงลำดับนี้ เพราะ profile.update จดว่า "ตอบช่องไหนแล้ว" ทับของที่ onboard เขียนไว้ */
+    await api("onboard.save",{display_name:F_NM,phone:F_PH,age_range:F_AG,wanted_feature:F_WF,acq_channel:F_AC,
+      business_story:F_BZ,character:CH,secretary_name:SNAME,marketing_ok:WZ_MK,
+      occupation:F_OC,wanted_features:F_WFS,wake_hour:F_WK,sleep_hour:F_SL});
+    await api("profile.update",{
+      call_me:DF.call_me||"",birth_date:DF.birth_date||"",country:DF.country||"",
+      province:DF.province||"",city:DF.city||"",org_name:DF.org_name||"",occupation:F_OC||"",
+      reply_style:DF.reply_style||"",marital_status:DF.marital_status||"",default_scope:DF.default_scope||"",
+      selfcare:DF.selfcare||[],likes:DF.likes||"",
+      renudge:(DF.renudge===true||DF.renudge==="true")
+    });
     if(DATA&&DATA.profile){DATA.profile.display_name=F_NM;DATA.profile.character=CH}
-    TI=0;WZ=3;draw();window.scrollTo(0,0);
-  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="เริ่มใช้เลย ›"}}
+    DF=null;
+    TI=0;WZ=4;draw();window.scrollTo(0,0);
+  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="เสร็จแล้ว เริ่มใช้เลย ›"}}
 }
+
 /* ═══ 🎯 จอสุดท้าย: "ความสำเร็จครั้งแรก" ของจริง ไม่ใช่ตัวอย่าง ═══
    เดิมจอนี้คือทัวร์ 7 การ์ด + หน้า "พร้อมแล้ว!" แล้วปิดหน้าต่าง
    ลูกค้าออกจาก wizard ไปโดยที่ยังไม่เคยได้อะไรจากเลขาเลยสักอย่าง
@@ -619,55 +728,26 @@ async function wzSave(){
 function wzWin(){
   var sn=esc(SNAME||"เลขา"),nm=esc(F_NM||"บอส");
   var h='<div class="wz">'+wzHead()
-    +'<div style="text-align:center"><img class="wzhero" src="img/p04-cheer-jump.webp" alt=""><div class="wzh1">ยินดีที่ได้รู้จัก คุณ'+nm+' 💕</div></div>';
-  if(F_WF==="reminder"){
-    var tmr=addDays(todayBKK(),1);
-    h+='<p class="wzsub" style="text-align:center">ลองตั้งนัดแรกกันเลย — '+sn+'จะเตือนจริงตามเวลานี้</p>'
-      +'<div class="wzf wzcard">'
-      +'<label style="margin-top:0" for="ob_rt">เตือนเรื่องอะไร</label><input id="ob_rt" maxlength="120" value="เริ่มงาน" placeholder="เช่น ประชุมทีม">'
-      +'<label for="ob_rd">เมื่อไหร่</label><input id="ob_rd" type="datetime-local" value="'+tmr+'T09:00">'
-      +'<button class="wznext" style="width:100%;margin-top:14px" onclick="obWinRem(this)">ตั้งนัดนี้เลย ⏰</button>'
-      +'</div>';
-  }else if(F_WF==="money"){
-    h+='<p class="wzsub" style="text-align:center">ลองจดรายจ่ายแรกดู — จดครั้งเดียว '+sn+'สรุปให้ทั้งเดือน</p>'
-      +'<div class="wzf wzcard">'
-      +'<label style="margin-top:0" for="ob_mc">จ่ายอะไรไป</label><input id="ob_mc" maxlength="40" value="ค่าข้าว" placeholder="เช่น ค่ากาแฟ">'
-      +'<label for="ob_ma">กี่บาท</label><input id="ob_ma" type="number" inputmode="decimal" min="0" step="0.01" placeholder="60">'
-      +'<button class="wznext" style="width:100%;margin-top:14px" onclick="obWinMoney(this)">จดรายการนี้ 💸</button>'
-      +'</div>';
-  }else{
-    // เรื่องที่เหลือทำให้เสร็จในแชตดีกว่า (ไฟล์ต้องส่งไฟล์ / ดวงกับฮีลใจต้องคุย) — ส่งคำสั่งจริงเข้าแชตให้เลย
-    var TRY={files:["📁 ส่งไฟล์แรกเข้าคลัง","มีไฟล์อะไรบ้าง"],fortune:["🔮 เปิดดวงวันนี้","ดูดวงวันนี้"],heal:["💛 ระบายให้ฟังหน่อย","ขอกำลังใจหน่อย"],brief:["🌙 ขอสรุปวันนี้","สรุปวันนี้"]};
-    var t=TRY[F_WF]||["💬 เริ่มคุยกับ"+(SNAME||"เลขา"),"สวัสดี"];
-    h+='<p class="wzsub" style="text-align:center">ลองสั่ง'+sn+'จริงๆ เลย — แตะแล้วเห็นผลในแชตทันที</p>'
-      +'<button class="wznext" style="width:100%;margin-top:6px" onclick="obTry(\''+esc(t[1])+'\')">'+t[0]+'</button>';
-  }
+    +'<div style="text-align:center"><img class="wzhero" src="img/p04-cheer-jump.webp" alt="">'
+    +'<div class="wzh1">ยินดีที่ได้รู้จัก คุณ'+nm+' 💕</div>'
+    +'<p class="wzready">เลขาชื่อ "'+sn+'" พร้อมเริ่มงานวันนี้แล้ว'+(CH==="ขาบอส"?"จ้า":CH==="ค่ะบอส"?"ค่ะ":"ครับ")+'</p>'
+    +'<p class="wzsub" style="margin-top:6px">อยากเริ่มตรงไหนดี'+(CH==="ขาบอส"?"จ๊ะ":CH==="ค่ะบอส"?"คะ":"ครับ")+' 👇</p></div>';
+  /* เดิมตรงนี้มีฟอร์ม "ลองใช้จริงทันที" (ตั้งเตือนใบแรก / จดรายจ่ายใบแรก) ตามฟีเจอร์ที่ลูกค้าเลือก
+     บอสสั่งเอาออก 3 ส.ค. 69 — จอจบให้เหลือแค่ทักทาย + 3 ทางเลือก อ่านง่ายกว่า ไม่รกตา
+     ฟังก์ชัน obWinRem/obWinMoney ถูกถอดออกด้วย (ไม่มีที่เรียกแล้ว) */
   h+='<div id="obdone"></div>';
-  h+='<button class="ttry" style="margin-top:14px" onclick="go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>';
-  h+='<button class="ttry" onclick="WZ=4;TI=0;draw();window.scrollTo(0,0)">ดูของเด็ดทั้งหมด (7 อย่าง) 👀</button>';
-  h+='<button class="ttry" onclick="obFinish()">ข้ามไปคุยในแชตเลย 💬</button>';
+  /* 🧭 3 ทางเลือกหลังลงทะเบียนเสร็จ (บอสจัดลำดับเอง 3 ส.ค.) — แดชบอร์ด · แฟ้ม · คู่มือวิดีโอ
+     ไม่บังคับสักอัน มีทางข้ามไปคุยในแชตอยู่ท้ายสุดเสมอ */
+  h+='<div class="wzpick">';
+  h+= wzPickBtn("go('home')", "📊", "เปิดแดชบอร์ด My YES BOSS", "ดูงาน นัด เงิน ครบในที่เดียว", "");
+  if(DATA&&DATA.beta){   /* 🧪 รอบทดลอง — ลูกค้าทั่วไปยังไม่เห็น 2 ใบนี้ */
+    h+= wzPickBtn("wzClear();go('dossier')", "📁", "กรอกแฟ้มเจ้านาย",
+          "กรอกแล้ว"+sn+"ทำงานได้เต็มประสิทธิภาพ ไม่ต้องถามซ้ำ", "อย่าลืมกรอก", 1);
+    h+= wzPickBtn("obVideo()", "🎬", "คู่มือใช้งานแบบง่าย", "ดูวิดีโอสั้นๆ รู้เรื่องใน 58 วิ", "");
+  }
+  h+='</div>';
+  h+='<button class="ttry" style="margin-top:12px" onclick="obFinish()">ข้ามไปคุยในแชตเลย 💬</button>';
   return h+'</div>';
-}
-async function obWinRem(btn){
-  var tx=$("#ob_rt").value.trim(),dt=$("#ob_rd").value;
-  if(!tx){toast("ใส่เรื่องที่จะเตือนหน่อยนะ");return}
-  if(!dt){toast("เลือกเวลาก่อนนะ");return}
-  btn.disabled=true;btn.textContent="กำลังตั้ง...";
-  try{
-    await api("reminder.add",{text:tx,remind_at:wallUtc(dt.slice(0,10),dt.slice(11,16)).toISOString()});
-    $("#obdone").innerHTML='<div class="wzcard" style="border-color:#7FD4A0;background:#F1FBF5;text-align:center;margin-top:12px"><div style="font-size:15px;font-weight:800;color:#12662C">✅ ตั้งให้แล้ว!</div><div style="font-size:13px;color:#2F6B45;margin-top:4px">ถึงเวลา '+esc(fdate(wallUtc(dt.slice(0,10),dt.slice(11,16)).toISOString()))+' เลขาจะเตือนจริงๆ นะ</div></div>';
-    btn.style.display="none";
-  }catch(e){toast(e.message||"ตั้งไม่สำเร็จ");btn.disabled=false;btn.textContent="ตั้งนัดนี้เลย ⏰"}
-}
-async function obWinMoney(btn){
-  var c=$("#ob_mc").value.trim(),a=Number($("#ob_ma").value);
-  if(!(a>0)){toast("ใส่จำนวนเงินก่อนนะ");return}
-  btn.disabled=true;btn.textContent="กำลังจด...";
-  try{
-    await api("money.add",{amount:a,kind:"expense",scope:"personal",category:c});
-    $("#obdone").innerHTML='<div class="wzcard" style="border-color:#7FD4A0;background:#F1FBF5;text-align:center;margin-top:12px"><div style="font-size:15px;font-weight:800;color:#12662C">✅ จดให้แล้ว!</div><div style="font-size:13px;color:#2F6B45;margin-top:4px">'+esc(c||"รายจ่าย")+' '+a.toLocaleString()+' บาท — ดูสรุปทั้งเดือนได้ในแท็บเงิน</div></div>';
-    btn.style.display="none";
-  }catch(e){toast(e.message||"จดไม่สำเร็จ");btn.disabled=false;btn.textContent="จดรายการนี้ 💸"}
 }
 function wzTour(){
   var n=TOUR.length+1,dots='<div class="tdots">';
@@ -676,7 +756,11 @@ function wzTour(){
     return '<div class="wz">'+wzHead()+dots
       +'<img class="wzhero" src="img/p04-cheer-jump.webp" alt="">'
       +'<div style="text-align:center"><div class="wzh1">พร้อมแล้ว! 🎉</div><p class="wzsub">คุณ'+esc(F_NM||"บอส")+' มี'+esc(SNAME||"เลขา")+'คอยดูแลแล้ว<br>สงสัยอะไร พิมพ์ถามในแชตได้ตลอดเลย</p></div>'
+      /* 📁 กล่องหมายเหตุ + ทางเข้าแฟ้มเจ้านาย (บอสวางคำไว้เอง 3 ส.ค.)
+         เจตนา: ชวนแบบเด่นๆ แต่บอกตรงๆ ว่าไม่บังคับ เริ่มใช้เลยก็ได้
+         -> ปุ่มแฟ้มเป็นปุ่มหลัก แต่ปุ่ม "เริ่มใช้เลย" ต้องอ่านออกชัดว่ากดข้ามได้จริง */
       +'<button class="wznext" style="width:100%;margin-bottom:10px" onclick="obFinish()">เริ่มคุยกับ'+esc(SNAME||"เลขา")+'เลย 💬</button>'
+      +'<button class="ttry" style="margin-bottom:10px" onclick="wzClear();go(\'dossier\')">📁 ไปกรอกแฟ้มเจ้านาย</button>'
       +'<button class="ttry" onclick="go(\'home\')">เปิดแดชบอร์ด My YES BOSS 📊</button>'
       +'</div>'+wzNav("TI="+(TOUR.length-1)+";draw()","obFinish()","เริ่มใช้งาน 💬",false);
   }
@@ -691,7 +775,7 @@ function wzTour(){
     +'<div class="wzcard" style="margin-top:12px">'+pts+'</div>'
     +(f.x?'<button class="ttry" style="margin-top:10px" onclick="obTry(\''+esc(f.x)+'\')">ลองสั่งจริงเลย: “'+esc(f.x)+'”</button>':'')
     +'</div>'
-    +wzNav(TI===0?"WZ=3;draw()":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
+    +wzNav(TI===0?"WZ=4;draw();window.scrollTo(0,0)":"TI--;draw()","TI++;draw()","ไปต่อ ›",false);
 }
 function obTry(t){
   try{
@@ -701,6 +785,42 @@ function obTry(t){
   }catch(e){obTryFb(t)}
 }
 function obTryFb(t){try{navigator.clipboard.writeText(t)}catch(e){}toast('ก๊อปคำสั่ง "'+t+'" ให้แล้ว วางในแชตได้เลย');setTimeout(function(){try{liff.closeWindow()}catch(e){}},900)}
+/* 📌 กล่องหมายเหตุจอ "ลงทะเบียนเสร็จ" — คำที่บอสเขียนเองมา 3 ส.ค.
+   ต้องเด่นพอให้เห็น แต่ห้ามอ่านแล้วรู้สึกว่าถูกบังคับ (บอสย้ำ: "ไม่ได้บังคับให้กรอก")
+   สำนวนต้องตรงกับสไตล์เลขาที่ลูกค้าเลือกเอง เหมือนที่อื่นทั้งระบบ */
+function wzNoteFull(){
+  var me=(CH==="ขาบอส")?"ตัวมัม":(CH==="ค่ะบอส")?"หนู":"ผม";
+  var who=SNAME?esc(SNAME):me, t;
+  if(CH==="ขาบอส"){
+    t='แต่ถ้าบอสอยากให้ '+who+' ทำงานได้<b>เต็มประสิทธิภาพจริงๆ</b> ตามไปกรอกในลิงก์ข้างล่างได้เลยจ้า<br>'
+     +'ตัวมัมพร้อมเป็นเลขาแบบเต็มสูบให้บอสเลย 💅<br>'
+     +'<span class="wznote-sm">ไม่ได้บังคับน้า เริ่มใช้งานเลยก็ได้จ้า</span>';
+  }else if(CH==="ค่ะบอส"){
+    t='แต่ถ้าบอสอยากให้ '+who+' ทำงานได้<b>เต็มประสิทธิภาพจริงๆ</b> ตามไปกรอกในลิงก์ข้างล่างได้เลยนะคะ<br>'
+     +'หนูพร้อมเป็นเลขาแบบเต็มประสิทธิภาพให้บอสค่ะ 💛<br>'
+     +'<span class="wznote-sm">ไม่ได้บังคับนะคะ เริ่มใช้งานเลยก็ได้ค่ะ</span>';
+  }else{
+    t='แต่ถ้าบอสอยากให้ '+who+' ทำงานได้<b>เต็มประสิทธิภาพจริงๆ</b> ตามไปกรอกในลิงก์ข้างล่างได้เลยครับ<br>'
+     +'ผมพร้อมเป็นเลขาแบบเต็มประสิทธิภาพให้บอสครับ 💛<br>'
+     +'<span class="wznote-sm">ไม่ได้บังคับนะครับ เริ่มใช้งานเลยก็ได้</span>';
+  }
+  return '<div class="wznote"><div class="wznote-h">📌 หมายเหตุ</div><div class="wznote-b">'+t+'</div></div>';
+}
+/* ปุ่มทางเลือกแบบมีคำอธิบายใต้หัวข้อ — อ่านแล้วรู้ว่ากดไปเจออะไร ไม่ต้องเดา */
+function wzPickBtn(act, ic, title, sub, badge, hot){
+  /* hot = ใบที่อยากให้เด่นที่สุด — ดอกจันแดงหน้าหัวข้อแบบช่องบังคับ (บอสสั่ง 3 ส.ค. "ห้ามลืม") */
+  return '<button type="button" class="wzpk'+(hot?" hot":"")+'" onclick="'+act+'">'
+    + '<span class="ic" aria-hidden="true">'+ic+'</span>'
+    + '<span class="tx"><b>'+(hot?'<i class="ast" aria-hidden="true">*</i>':'')+title
+    + (badge?'<i class="bd">'+badge+'</i>':'')+'</b><span>'+sub+'</span></span>'
+    + '<span class="ar" aria-hidden="true">›</span></button>';
+}
+/* คู่มือวิดีโอ — ในแอป LINE เปิดด้วย openWindow (external) ไม่งั้นวิดีโอเล่นใน webview ไม่ขึ้นบางเครื่อง */
+var OB_VIDEO="https://eeascfxgfmzlqvirjdua.supabase.co/storage/v1/object/public/assets/tutorial/howto-line.mp4";
+function obVideo(){
+  try{ if(liff&&liff.openWindow){liff.openWindow({url:OB_VIDEO,external:true});return} }catch(e){}
+  window.open(OB_VIDEO,"_blank");
+}
 function obFinish(){wzClear();try{liff.closeWindow()}catch(e){go("home")}}
 
 /* ---------- หน้าหลัก ---------- */
@@ -1504,9 +1624,343 @@ async function unTrash(id){
   }catch(e){toast("กู้คืนไม่สำเร็จ")}
 }
 
+/* ═══════════ 📁 แฟ้มเจ้านาย (186) ═══════════
+   ทำไมไม่ยัดคำถามพวกนี้ไว้ที่ประตูลงทะเบียน: ประตูบังคับทุกคน ยัดเยอะ = ฆ่า activation ทิ้ง
+   (ตัวเลขจริง: คนที่ได้ตั้งเตือน/จดงานในสัปดาห์แรก retention 2 เท่า → ต้องพาไปถึงของใช้ได้เร็วที่สุด)
+   ที่นี่จึงเป็น "ทำเมื่อไหร่ก็ได้ ข้ามได้ทุกข้อ" + มีแถบ % ให้เห็นว่าเลขารู้จักเรามากขึ้นแค่ไหน
+   ⚠️ ทุกช่องต้อง "ล้างค่าได้" — ให้ข้อมูลแล้วต้องถอนคืนได้ทีละช่อง (สิทธิ์ลบตาม PDPA) */
+var DF=null,DBUSY=false;
+var DOSS_CSS='<style>.dsec{margin:18px 0 8px;font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px}.dwhy{font-size:12px;color:var(--muted);margin:-4px 0 8px;line-height:1.5}.dchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}.dchips button{background:var(--field);border:1px solid var(--brand-line);color:var(--ink);border-radius:999px;padding:8px 13px;font-size:13px;font-family:inherit;min-height:38px}.dchips button.on{background:var(--brand-ink);border-color:var(--brand-ink);color:#fff;font-weight:700}.dpct{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:4px}.dpct .n{font-size:26px;font-weight:800;color:var(--brand-ink);line-height:1}.dstep{font-size:13px;font-weight:800;color:var(--brand-ink);margin-bottom:9px}.dintro{background:var(--card);border:1px solid var(--brand-line);border-radius:16px;padding:14px 15px;margin-top:10px;font-size:14px;line-height:1.7;color:var(--ink);display:flex;gap:12px;align-items:center}.dintro img{width:60px;height:76px;object-fit:contain;flex:none}.dintro b{color:var(--brand-ink)}.dintro .dsm{display:block;margin-top:6px;font-size:12.5px;color:var(--muted);line-height:1.55}.dchips button{min-height:38px}label.f.need{color:var(--brand-ink)}label.f.need .dot{display:inline-block;width:6px;height:6px;border-radius:99px;background:var(--brand-ink);margin-left:6px;vertical-align:middle}.dnote{font-size:12.5px;color:var(--muted);text-align:center;margin:16px 0 10px;line-height:1.55}.dnote b{color:var(--brand-ink)}.dnav{display:flex;gap:9px;margin-top:2px}.dnav .btn{flex:1}.dbar{height:8px;background:var(--field);border-radius:99px;overflow:hidden;margin-top:9px}.dbar i{display:block;height:100%;background:var(--brand-ink);border-radius:99px;transition:.4s}.dperson{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--brand-line)}.dperson:last-child{border-bottom:0}.dperson .g{flex:1;min-width:0}.dperson .g b{font-size:14px;color:var(--ink);display:block}.dperson .g span{font-size:12px;color:var(--muted)}.dperson button{border:0;background:none;color:var(--muted);font-size:18px;padding:4px 8px}textarea.dta{width:100%;box-sizing:border-box;border:1px solid var(--brand-line);border-radius:12px;padding:11px 12px;font-size:15px;background:var(--field);color:var(--ink);font-family:inherit;min-height:74px;resize:vertical}</style>';
+var CH_OPTS_REMOVED=0; /* ขายทางไหน — บอสตัดออก 2 ส.ค. */
+var SC_OPTS=[["meal","🍚 กินข้าว"],["water","💧 ดื่มน้ำ"],["exercise","🏃 ออกกำลังกาย"],["eyes","👀 พักสายตา"],["sleep","😴 เข้านอน"]];
+var REL_OPTS=[["spouse","คู่ชีวิต"],["partner","แฟน"],["child","ลูก"],["parent","พ่อ/แม่"],["sibling","พี่น้อง"],["relative","ญาติ"],["friend","เพื่อน"],["colleague","เพื่อนร่วมงาน"],["boss","หัวหน้า"],["customer","ลูกค้า"],["pet","สัตว์เลี้ยง"],["other","คนสำคัญ"]];
+var DOW_OPTS=[[0,"อา"],[1,"จ"],[2,"อ"],[3,"พ"],[4,"พฤ"],[5,"ศ"],[6,"ส"]];
+function dossInit(){
+  var p=DATA.profile||{},k,i;
+  DF={};
+  var keys=["call_me","city","province","country","age_range","language","birth_date","occupation","org_name",
+            "reply_style","marital_status","default_scope","fortune_focus","do_not_remember",
+            "brief_hour","report_hour","quiet_from","quiet_to","work_start","work_end"];
+  for(i=0;i<keys.length;i++){k=keys[i];DF[k]=(p[k]===undefined?null:p[k])}
+  DF.selfcare=dArr(p.selfcare);DF.days_off=dArr(p.days_off);
+  /* 📁 ของเดิมที่ลูกค้าเคยเล่าไว้ในแชต — เติมให้เลย ห้ามให้กรอกซ้ำ (มติบอส 3 ส.ค.) */
+  var dt=(DATA&&DATA.dossier_text)||{},dk;
+  for(dk in dt){if(dt[dk])DF[dk]=dt[dk]}
+  /* renudge ใน DB เป็น boolean แต่ปุ่มส่งกลับมาเป็นสตริงเสมอ — แปลงตั้งแต่โหลด
+     ไม่งั้นคนที่เคยตั้งไว้เปิดหน้ามาเห็น "ยังไม่ได้เลือก" ทั้งที่ค่าจริงมีอยู่ */
+  DF.renudge=(p.renudge===false?"false":"true"); /* ค่าตั้งต้นของระบบคือเปิด — โชว์ให้ตรงกับที่ทำงานอยู่จริง */
+}
+/* ช่องที่ฝั่ง server บอกว่ายังไม่ได้คำตอบจากลูกค้า — ใช้ไฮไลต์ให้เห็นว่าเหลืออะไร
+   ค่า default ที่ระบบใส่ให้ (สรุปเช้า 8 โมง ฯลฯ) นับเป็น "ยังไม่ตอบ" ตามกฎฝั่ง server */
+function dNeed(f){var m=(DATA&&DATA.profile_missing)||[];return m.indexOf(f)>=0}
+function dLb(f,txt){return '<label class="f'+(dNeed(f)?' need':'')+'">'+txt+(dNeed(f)?'<i class="dot"></i>':'')+'</label>'}
+function dArr(v){if(!v)return[];if(typeof v==="string"){try{v=JSON.parse(v)}catch(e){return[]}}return Array.isArray(v)?v.slice():[]}
+function dSet(k,v){if(!DF)dossInit();DF[k]=(DF[k]===v?null:v);draw()}
+function dTog(k,v){if(!DF)dossInit();var a=DF[k]||[],i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);DF[k]=a;draw()}
+/* seg เลือกได้ค่าเดียว (กดซ้ำ = ล้างค่า — ทางถอนข้อมูลที่ให้ไปแล้ว ตามสิทธิ์ PDPA) */
+function dSeg(k,opts){
+  var h='<div class="dchips">',i;
+  for(i=0;i<opts.length;i++){var on=String(DF[k])===String(opts[i][0]);
+    h+='<button type="button" aria-pressed="'+(on?"true":"false")+'" class="'+(on?"on":"")+'" onclick="dSet(\''+k+'\',\''+opts[i][0]+'\')">'+opts[i][1]+'</button>'}
+  return h+'</div>';
+}
+function dMulti(k,opts){
+  var cur=DF[k]||[],h='<div class="dchips">',i;
+  for(i=0;i<opts.length;i++){var on=cur.indexOf(opts[i][0])>=0;
+    h+='<button type="button" aria-pressed="'+(on?"true":"false")+'" class="'+(on?"on":"")+'" onclick="dTog(\''+k+'\',\''+opts[i][0]+'\')">'+opts[i][1]+'</button>'}
+  return h+'</div>';
+}
+function dDays(){
+  var cur=DF.days_off||[],h='<div class="dchips">',i;
+  for(i=0;i<DOW_OPTS.length;i++){var on=cur.indexOf(DOW_OPTS[i][0])>=0;
+    h+='<button type="button" aria-pressed="'+(on?"true":"false")+'" class="'+(on?"on":"")+'" onclick="dTog(\'days_off\','+DOW_OPTS[i][0]+')">'+DOW_OPTS[i][1]+'</button>'}
+  return h+'</div>';
+}
+/* select ชั่วโมงที่ "ว่างได้" (ต่างจาก hourSel เดิมที่บังคับมีค่า) */
+function dHour(id,cur){
+  var h='<select id="'+id+'"><option value="">— ไม่บอกก็ได้ —</option>',i;
+  for(i=0;i<24;i++){h+='<option value="'+i+'"'+(String(cur)===String(i)?" selected":"")+'>'+(i<10?"0":"")+i+':00 น.</option>'}
+  return h+'</select>';
+}
+function dNum(id,cur,from,to,suffix){
+  var h='<select id="'+id+'"><option value="">— ไม่บอกก็ได้ —</option>',i;
+  for(i=from;i<=to;i++){h+='<option value="'+i+'"'+(String(cur)===String(i)?" selected":"")+'>'+i+(suffix||"")+'</option>'}
+  return h+'</select>';
+}
+function dTa(id,ph,val){return '<textarea class="dta" id="'+id+'" maxlength="240" placeholder="'+ph+'">'+esc(val||"")+'</textarea>'}
+/* 🔒 สวิตช์เดียวจบ: true = ต้องกรอกครบทุกช่องถึงจะบันทึกได้
+   ตั้ง false ไว้โดยตั้งใจ — บังคับกรอกครบแล้วคนที่ติดข้อเดียว (เช่นไม่อยากบอกสถานะ)
+   จะกดออกทั้งหน้า เราได้ 0 ช่อง ซึ่งแย่กว่าปล่อยข้ามแล้วได้ 25 จาก 32 ช่อง
+   วิธีดันให้กรอกครบที่ใช้แทน: แบ่ง 2 หน้าให้เห็นปลายทาง · บอกทุกหมวดว่าได้อะไร ·
+   นับช่องว่างค้างให้เห็น · จบแล้วเลขาทวงต่อในแชตวันละข้อ */
+var DOSS_REQUIRE_ALL=false;
+var DPAGE=1;
+/* ช่องพิมพ์ทั้งหมด: id ในหน้า -> คีย์ใน DF · ใช้ทั้งตอนสลับหน้าและตอนบันทึก
+   ⚠️ สลับหน้า = DOM ชุดเดิมถูกทิ้ง ต้องกวาดค่าลง DF ก่อนทุกครั้ง ไม่งั้นที่พิมพ์ไว้หายเกลี้ยง */
+var DTXT={
+  1:{d_call:"call_me",d_birth:"birth_date",d_city:"city",d_prov:"province",d_ctry:"country",
+     d_oc:"occupation",d_org:"org_name",d_bz:"business_story",d_pain:"work_pain",d_rout:"routine_work"},
+  2:{d_gw:"goal_work",d_gl:"goal_life",d_like:"likes",d_ff:"fortune_focus",d_no:"do_not_remember"}
+};
+var DSEL={1:{d_ws:"work_start",d_we:"work_end"},2:{d_bh:"brief_hour",d_rh:"report_hour",d_qf:"quiet_from",d_qt:"quiet_to"}};
+function dStash(){
+  if(!DF)return;
+  var m=DTXT[DPAGE]||{},k;
+  for(k in m){var e=$("#"+k);if(e)DF[m[k]]=e.value.trim()}
+  var m2=DSEL[DPAGE]||{};
+  for(k in m2){var e2=$("#"+k);if(e2)DF[m2[k]]=(e2.value===""?null:Number(e2.value))}
+}
+function dGo(n){dStash();DPAGE=n;draw();window.scrollTo(0,0)}
+/* นับช่องที่ยังว่างในหน้านั้น — ใช้ดันให้กรอกต่อ (ไม่ได้บล็อก) */
+function dBlanks(page){
+  var need=(page===1)
+    ?["call_me","birth_date","city","province","country","occupation","org_name","business_story","work_pain","routine_work","work_start","work_end","age_range","language"]
+    :["brief_hour","report_hour","quiet_from","quiet_to","reply_style","renudge","marital_status","goal_work","goal_life","likes","fortune_focus","default_scope","do_not_remember"];
+  var n=0,i;
+  for(i=0;i<need.length;i++){var v=DF[need[i]];if(v===null||v===undefined||v==="")n++}
+  if(page===1&&!(DF.days_off||[]).length)n++;
+  if(page===2&&!(DF.selfcare||[]).length)n++;
+  if(page===2&&!((DATA.people||[]).length))n++;
+  return n;
+}
+/* หางเสียงแบบ "นะคะ/นะครับ/นะจ๊ะ" — ต่อ pt() ตรงๆ ไม่ได้ จะได้ "นะค่ะ" ซึ่งเขียนผิด */
+function naPt(){var c=(DATA&&DATA.profile&&DATA.profile.character)||"";return c==="ค่ะบอส"?"นะคะ":c==="ขาบอส"?"นะจ๊ะ":"นะครับ"}
+function dHead(){
+  var pct=Number(DATA.profile_pct||0);
+  var h='<h1>📁 แฟ้มเจ้านาย</h1>';
+  h+='<div class="dpct"><div class="dstep">หน้า '+DPAGE+' จาก 2 · '+(DPAGE===1?"เรื่องของบอส":"วิธีดูแลบอส")+'</div>'
+    +'<div class="dbar"><i style="width:'+(DPAGE===1?50:100)+'%"></i></div>'
+    +'<div class="l" style="margin-top:8px">เลขารู้จักบอสแล้ว <b>'+pct+'%</b></div></div>';
+  if(DPAGE===1){
+    h+=dIntro();
+    h+='<div class="l" style="margin:8px 2px 0">กดปุ่มที่เลือกไว้ซ้ำอีกครั้ง = ล้างค่านั้นทิ้ง</div>';
+  }
+  return h;
+}
+/* 💬 คำเปิดหน้าแฟ้ม — บอสวางอารมณ์ไว้ 2 ส.ค.: "เลขาเพิ่งเข้างานวันแรก ขอฟังเรื่องบอส"
+   ไม่ใช่คำอธิบายฟอร์ม แต่เป็นเลขาแนะนำตัว → คนตอบเพราะอยากเล่า ไม่ใช่เพราะถูกสั่งให้กรอก
+   ต้องมีครบ 3 สำนวนตามสไตล์เลขาที่ลูกค้าเลือกเอง (ครับ / ค่ะ / แซ่บ) ห้ามใช้สำนวนเดียวทุกคน
+   และยังบอกตรงๆ ว่า "ยาวหน่อย" + "จะได้ไม่ถามย้ำ" ตามที่บอสสั่ง — คนทนฟอร์มยาวได้
+   ถ้ารู้ว่ายาวแค่ไหนและได้อะไรกลับ ที่ทำให้เลิกกลางคันคือไม่รู้ทั้งสองอย่าง */
+function dIntro(){
+  var c=(DATA&&DATA.profile&&DATA.profile.character)||"";
+  var sn=(DATA&&DATA.profile&&DATA.profile.secretary_name)||"";
+  var me=(c==="ขาบอส")?"ตัวมัม":(c==="ค่ะบอส")?"หนู":"ผม";
+  var who=sn?esc(sn):me; /* ลูกค้าตั้งชื่อเลขาไว้ = เรียกชื่อตัวเองในประโยคเปิด อบอุ่นกว่าสรรพนามลอยๆ */
+  var t;
+  if(c==="ขาบอส"){
+    t='วันนี้วันแรกที่ '+who+' ได้มาเป็นเลขาส่วนตัวของบอสแล้วจ้า 💅<br>'
+     +'เล่าเรื่องบอสให้ฟังหน่อย เราจะได้ทำงานด้วยกันแบบ<b>เริ่ดปัง</b>ตั้งแต่วันแรก<br>'
+     +'<span class="dsm">อาจจะยาวหน่อยจ้า แต่ตัวมัมจะได้ไม่ต้องถามย้ำหลายรอบ</span>';
+  }else if(c==="ค่ะบอส"){
+    t='วันนี้เป็นวันแรกที่ '+who+' ได้มาเป็นเลขาส่วนตัวของบอสเลยค่ะ 🌸<br>'
+     +'เล่าเรื่องบอสให้ฟังหน่อยนะคะ เราจะได้<b>ทำงานเข้าขากัน</b>ตั้งแต่วันแรก<br>'
+     +'<span class="dsm">อาจจะยาวหน่อยนะคะ แต่หนูจะได้ไม่ต้องคอยถามย้ำหลายรอบ</span>';
+  }else{
+    t='วันนี้เป็นวันแรกที่ '+who+' ได้มาเป็นเลขาส่วนตัวของบอสครับ 🙌<br>'
+     +'เล่าเรื่องบอสให้ฟังหน่อยครับ เราจะได้<b>ทำงานเข้าขากัน</b>ตั้งแต่วันแรก<br>'
+     +'<span class="dsm">อาจจะยาวหน่อยครับ แต่ผมจะได้ไม่ต้องคอยถามย้ำหลายรอบ</span>';
+  }
+  return '<div class="dintro"><img src="img/p08-clipboard-write.webp" alt=""><div>'+t+'</div></div>';
+}
+function dFoot(){
+  var left=dBlanks(DPAGE);
+  /* ถ้อยคำตรงนี้ตั้งใจ "ชวนให้เติม" ไม่ใช่ "บอกว่าข้ามได้" (บอสสั่ง 2 ส.ค. ไม่เอาคำชวนให้ข้าม)
+     ยังไม่บล็อกเหมือนเดิม — แค่เลิกโฆษณาทางออกให้ถึงมือ */
+  var h='<div class="dnote">'+(left?('ยังว่างอีก <b>'+left+'</b> ช่องในหน้านี้ — เติมให้ครบ เลขาจะดูแลบอสได้แม่นขึ้นอีกเยอะ 💛')
+    :'หน้านี้กรอกครบแล้ว 🎉')+'</div>';
+  h+='<div class="dnav">';
+  if(DPAGE===1){
+    /* บอสสั่ง 2 ส.ค.: ไม่เอาปุ่ม "ไว้ก่อน" — ทางออกยังมีที่แถบเมนูล่าง (ไม่ได้กลืนใครไว้)
+       แต่ไม่ยื่นทางออกให้ถึงมือ เพราะจุดประสงค์ของหน้านี้คือให้กรอกจนจบ */
+    h+='<button class="btn" style="flex:1" onclick="dNext()">ถัดไป — วิธีดูแลบอส ›</button>';
+  }else{
+    h+='<button class="btn ghost" onclick="dGo(1)">‹ ย้อนกลับ</button>'
+      +'<button class="btn" style="flex:2" onclick="saveDossier()">บันทึกแฟ้ม</button>';
+  }
+  return h+'</div>';
+}
+async function dNext(){
+  dStash();
+  if(DOSS_REQUIRE_ALL&&dBlanks(1)>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+dBlanks(1)+" ช่อง");return}
+  /* บันทึกหน้า 1 ทันทีที่กดถัดไป — ถ้าลูกค้าปิดแอปกลางคัน ของที่กรอกไว้ต้องไม่หาย */
+  try{await api("profile.update",dPayload())}catch(e){}
+  dGo(2);
+}
+function vDossier(){
+  if(!DF)dossInit();
+  var pr=DATA.profile||{},ppl=DATA.people||[];
+  var h=DOSS_CSS+dHead();
+
+  if(DPAGE===1){
+    /* ── A ตัวตน ── */
+    h+='<div class="dsec">🧑 บอสเป็นใคร</div><div class="dwhy">เรียกให้ถูกปาก และรู้ว่าบอสอยู่ที่ไหน</div>';
+    h+='<div class="card">';
+    h+=dLb('call_me','อยากให้เลขาเรียกว่าอะไร')+'<input id="d_call" maxlength="30" value="'+esc(DF.call_me||"")+'" placeholder="เช่น พี่บีม, เฮีย, คุณหมอ">';
+    h+=dLb('birth_date','วันเกิด')+'<input id="d_birth" type="date" value="'+esc(DF.birth_date||pr.birth_date||"")+'">';
+    h+='<div class="l" style="margin-top:4px">ไว้อวยพร + ดูดวง/เลขมงคล</div>';
+    h+=dLb('city','เมือง / อำเภอ')+'<input id="d_city" maxlength="40" value="'+esc(DF.city||"")+'" placeholder="เช่น หางดง">';
+    h+=dLb('province','จังหวัด')+'<input id="d_prov" maxlength="40" value="'+esc(DF.province||"")+'" placeholder="เช่น เชียงใหม่">';
+    h+=dLb('country','ประเทศ')+'<input id="d_ctry" maxlength="40" value="'+esc(DF.country||"")+'" placeholder="เช่น ไทย">';
+    h+='<div class="l" style="margin-top:4px">ใช้ตอบเรื่องอากาศ/วันหยุด และตั้งเวลาให้ตรงโซนที่บอสอยู่</div>';
+    h+=dLb('language','ภาษาที่อยากให้ตอบ')+dSeg("language",[["th","ไทย"],["en","อังกฤษ"],["mix","ผสมได้"]]);
+    h+=dLb('age_range','ช่วงอายุ')+dSeg("age_range",[["<20","ต่ำกว่า 20"],["20-29","20–29"],["30-39","30–39"],["40-49","40–49"],["50+","50+"]]);
+    h+='</div>';
+
+    /* ── B งาน ── */
+    h+='<div class="dsec">💼 งาน / ธุรกิจ</div><div class="dwhy">หมวดที่ทำให้เลขาเลิกตอบกว้างๆ — ยกตัวอย่างตรงงานบอส และเสนอเวลาที่บอสว่างจริง</div>';
+    h+='<div class="card">';
+    h+=dLb('occupation','บอสทำงานแบบไหน')+'<input id="d_oc" maxlength="80" value="'+esc(DF.occupation||"")+'" placeholder="เช่น เจ้าของร้านกาแฟ, ฟรีแลนซ์ออกแบบ, พยาบาล">';
+    h+=dLb('org_name','ชื่อร้าน / บริษัท / ที่ทำงาน')+'<input id="d_org" maxlength="60" value="'+esc(DF.org_name||"")+'" placeholder="เช่น ร้านไม้สักบ้านสวน">';
+    h+='<label class="f">ทำอะไร ขายอะไร (เล่าสั้นๆ)</label>'+dTa("d_bz","เช่น ขายเฟอร์นิเจอร์ไม้สัก ส่งทั่วประเทศ รับสั่งทำตามแบบ",DF.business_story);
+    h+='<div class="l" style="margin-top:4px">เล่าไว้ครั้งเดียว เลขาจำตลอด 🧠</div>';
+    h+=dLb('work_start','เวลาทำงานปกติ — เริ่ม')+dHour("d_ws",DF.work_start);
+    h+='<label class="f">เวลาทำงานปกติ — เลิก</label>'+dHour("d_we",DF.work_end);
+    h+='<label class="f">วันหยุดประจำ</label>'+dDays();
+    h+='<div class="l" style="margin-top:4px">เวลาบอสสั่ง "จัดตารางให้หน่อย" เลขาจะไม่ยัดงานนอกเวลานี้</div>';
+    h+='<label class="f">เรื่องที่ปวดหัวที่สุดในงานตอนนี้</label>'+dTa("d_pain","เช่น ลูกค้าทักมาเยอะจนตอบไม่ทัน ของหายบ่อย",DF.work_pain);
+    h+='<label class="f">งานที่ทำซ้ำทุกสัปดาห์ / ทุกเดือน</label>'+dTa("d_rout","เช่น ทุกจันทร์เช็คสต็อก ทุกสิ้นเดือนสรุปยอดส่งบัญชี",DF.routine_work);
+    h+='</div>';
+
+  }else{
+    /* ── C จังหวะชีวิต ── */
+    h+='<div class="dsec">⏰ จังหวะชีวิต & วิธีทัก</div><div class="dwhy">ของที่ขาดหนักสุด — เดิมระบบตั้งสรุปเช้า 8 โมง เย็น 2 ทุ่ม ให้ทุกคนเท่ากันหมด</div>';
+    h+='<div class="card">';
+    h+=dLb('brief_hour',icn("sun",13)+' สรุปเช้ากี่โมง')+dHour("d_bh",DF.brief_hour);
+    h+=dLb('report_hour',icn("moon",13)+' สรุปเย็นกี่โมง')+dHour("d_rh",DF.report_hour);
+    h+=dLb('quiet_from','🔕 ห้ามทักตั้งแต่กี่โมง')+dHour("d_qf",DF.quiet_from);
+    h+='<label class="f">🔕 ถึงกี่โมง</label>'+dHour("d_qt",DF.quiet_to);
+    h+='<div class="l" style="margin-top:4px">ช่วงนี้เลขาจะไม่เสนอเวลานัด/เวลาเตือนให้เลย</div>';
+    h+=dLb('reply_style','ชอบให้ตอบแบบไหน')+dSeg("reply_style",[["short","สั้น กระชับ"],["detail","อธิบายละเอียด"]]);
+    h+='<label class="f">🔁 เตือนซ้ำเมื่อไม่กดรับ</label>'+dSeg("renudge",[[true,"จิกจนเสร็จ"],[false,"เตือนครั้งเดียวพอ"]]);
+    h+='</div>';
+
+    /* ── D ส่วนตัว + คนสำคัญ ── */
+    h+='<div class="dsec">💗 เรื่องส่วนตัว & คนสำคัญ</div><div class="dwhy">ใส่วันเกิดคนสำคัญไว้ เลขาจะเตือนล่วงหน้า 3 วัน แล้วย้ำอีกทีเช้าวันจริง 🎂</div>';
+    h+='<div class="card">';
+    h+=dLb('marital_status','สถานะ')+dSeg("marital_status",[["single","โสด"],["dating","มีแฟน"],["married","แต่งงานแล้ว"],["parent","มีลูก"]]);
+    h+='<label class="f" style="margin-bottom:2px">คนสำคัญของบอส ('+ppl.length+'/20)</label>';
+    h+='<div class="l" style="margin:0 0 6px">ใส่สัตว์เลี้ยงได้ด้วย — เลือกความสัมพันธ์เป็น "สัตว์เลี้ยง"</div>';
+    if(ppl.length){
+      var pi;for(pi=0;pi<ppl.length;pi++){var pp=ppl[pi];
+        h+='<div class="dperson"><div class="g"><b>'+esc(pp.name)+'</b><span>'+esc(dRelTh(pp.relation))+(pp.birth_date?' · 🎂 '+esc(dMd(pp.birth_date)):' · ยังไม่ได้ใส่วันเกิด')+(pp.note?' · '+esc(pp.note):'')+'</span></div>'
+          /* ⚠️ esc() ไม่หนี ' — ชื่อที่มีอะพอสทรอฟี (O'Brien) จะทะลุออกจากสตริงใน onclick
+             ใช้ split/join แทน regex เพราะ backslash ในบล็อกนี้ถูกก๊อปดิบไปไฟล์ static (build-liff.sh) แล้วความหมายเพี้ยน */
+          +'<button type="button" aria-label="ลบ '+esc(pp.name)+'" onclick="delPerson('+pp.id+',\''+esc(String(pp.name).split("\'").join(""))+'\')">🗑</button></div>';
+      }
+    }else{h+='<div class="l">ยังไม่มีใครในแฟ้ม — เพิ่มแม่ พ่อ แฟน ลูก สัตว์เลี้ยง หรือลูกค้าคนสำคัญได้เลย</div>'}
+    h+='<div style="margin-top:10px"><input id="d_pname" maxlength="40" placeholder="ชื่อ/ชื่อเล่น เช่น แม่, น้ำหวาน">'
+      +'<label class="f">ความสัมพันธ์</label><select id="d_prel">';
+    var ri;for(ri=0;ri<REL_OPTS.length;ri++){h+='<option value="'+REL_OPTS[ri][0]+'">'+REL_OPTS[ri][1]+'</option>'}
+    h+='</select><label class="f">วันเกิด (ไม่รู้ปีก็ใส่ปีไหนก็ได้)</label><input id="d_pbd" type="date">'
+      +'<label class="f">โน้ตสั้นๆ (ไม่บังคับ)</label><input id="d_pnote" maxlength="200" placeholder="เช่น ชอบดอกไม้ แพ้อาหารทะเล">'
+      +'<button class="btn ghost" style="width:100%;margin-top:10px" onclick="addPerson()">+ เพิ่มคนสำคัญ</button></div>';
+    h+='<label class="f">เป้าหมายเรื่องงานปีนี้</label>'+dTa("d_gw","เช่น เปิดสาขา 2 ให้ได้ภายในปีนี้",DF.goal_work);
+    h+='<label class="f">เป้าหมายส่วนตัวปีนี้</label>'+dTa("d_gl","เช่น ลดน้ำหนัก 8 โล พาแม่ไปเที่ยวญี่ปุ่น",DF.goal_life);
+    h+='<label class="f">ของที่ชอบ / ไม่ชอบ</label>'+dTa("d_like","เช่น ชอบกาแฟดำไม่หวาน ไม่กินผักชี",DF.likes);
+    h+=dLb('selfcare','อยากให้เตือนดูแลตัวเองเรื่องไหน')+dMulti("selfcare",SC_OPTS);
+    h+='<label class="f">สนใจดูดวงเรื่องไหนเป็นพิเศษ</label><input id="d_ff" maxlength="40" value="'+esc(DF.fortune_focus||"")+'" placeholder="เช่น การเงิน, ความรัก — ไม่สนใจก็เว้นว่าง">';
+    h+='</div>';
+
+    /* ── F เงิน ── */
+    h+='<div class="dsec">💰 เงิน</div><div class="dwhy">ใส่บิลประจำไว้ครั้งเดียว = เลขาตั้งเตือนซ้ำทุกเดือนให้เลย ไม่ต้องมาจำเอง</div>';
+    h+='<div class="card">';
+    h+=dLb('default_scope','จดเงินเข้ากระเป๋าไหนเป็นหลัก')+dSeg("default_scope",[["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]]);
+    h+='<div class="l" style="margin-top:4px">ตั้งไว้แล้วเลขาเลิกถามซ้ำทุกครั้งที่จดเงิน</div>';
+    h+='<label class="f" style="margin-top:16px">💳 บิลประจำ — เพิ่มแล้วได้นัดเตือนทุกเดือนทันที</label>';
+    h+='<input id="d_bt" maxlength="60" placeholder="เช่น ค่าเช่าร้าน, ค่าน้ำค่าไฟ, ผ่อนรถ">';
+    h+='<label class="f">จ่ายวันที่</label>'+dNum("d_bd","",1,28,"");
+    h+='<label class="f">จำนวนเงิน (ไม่บังคับ)</label><input id="d_ba" type="number" inputmode="numeric" placeholder="เช่น 12000">';
+    h+='<button class="btn ghost" style="width:100%;margin-top:10px" onclick="addBill()">+ ตั้งเตือนบิลนี้ทุกเดือน</button>';
+    h+='</div>';
+
+    /* ── G ขอบเขต ── */
+    h+='<div class="dsec">🔒 ขอบเขต</div><div class="dwhy">บอกไว้ได้เลยว่าเรื่องไหนไม่อยากให้เลขาจำหรือหยิบมาพูด</div>';
+    h+='<div class="card">';
+    h+='<label class="f">เรื่องที่ห้ามจำ / ห้ามพูดถึง</label>'+dTa("d_no","เช่น เรื่องคดีความ เรื่องสุขภาพของแม่",DF.do_not_remember);
+    h+='</div>';
+  }
+
+  h+=dFoot();
+  h+='<div class="foot">ข้อมูลในแฟ้มนี้ลบได้ทุกเมื่อ — ล้างทีละช่อง หรือลบทั้งบัญชีจากหน้าโปรไฟล์</div>';
+  return h;
+}
+function dRelTh(r){var i;for(i=0;i<REL_OPTS.length;i++){if(REL_OPTS[i][0]===r)return REL_OPTS[i][1]}return "คนสำคัญ"}
+function dMd(d){var p=String(d||"").split("-");return p.length===3?(p[2]+"/"+p[1]):""}
+function dVal(id){var e=$(id);return e?e.value.trim():""}
+function dValN(id){var e=$(id);return(e&&e.value!=="")?Number(e.value):null}
+/* payload ชุดเดียวใช้ทั้งตอนกด "ถัดไป" (เซฟหน้า 1 กันของหาย) และตอนกด "บันทึกแฟ้ม"
+   ต้องอ่านจาก DF ล้วน ไม่แตะ DOM — เพราะตอนบันทึก ช่องของหน้า 1 ไม่อยู่บนจอแล้ว */
+function dPayload(){
+  return {
+    call_me:DF.call_me||"",occupation:DF.occupation||"",org_name:DF.org_name||"",
+    city:DF.city||"",province:DF.province||"",country:DF.country||"",
+    fortune_focus:DF.fortune_focus||"",do_not_remember:DF.do_not_remember||"",
+    birth_date:DF.birth_date||"",
+    age_range:DF.age_range||"",language:DF.language||"",
+    reply_style:DF.reply_style||"",marital_status:DF.marital_status||"",default_scope:DF.default_scope||"",
+    selfcare:DF.selfcare||[],days_off:DF.days_off||[],
+    brief_hour:DF.brief_hour,report_hour:DF.report_hour,quiet_from:DF.quiet_from,quiet_to:DF.quiet_to,
+    work_start:DF.work_start,work_end:DF.work_end,
+    renudge:(DF.renudge===true||DF.renudge==="true"),
+    /* คำตอบปลายเปิด -> เข้าคลังความจำ (ฝั่ง server สกัดเป็น fact ให้ คนละ attribute จึงไม่ทับกัน) */
+    business_story:DF.business_story||"",work_pain:DF.work_pain||"",routine_work:DF.routine_work||"",
+    goal_work:DF.goal_work||"",goal_life:DF.goal_life||"",likes:DF.likes||""
+  };
+}
+async function saveDossier(){
+  if(DBUSY)return;
+  dStash();
+  if(DOSS_REQUIRE_ALL){
+    var miss=dBlanks(1)+dBlanks(2);
+    if(miss>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+miss+" ช่อง");return}
+  }
+  DBUSY=true;
+  try{
+    var res=await api("profile.update",dPayload());
+    var left=dBlanks(1)+dBlanks(2);
+    DF=null;DPAGE=1;await reload();
+    /* ยังว่างอยู่ = ชวนกลับมาเติมแบบนุ่มๆ ไม่ใช่บล็อก (ทางถอนต้องมีเสมอ) */
+    toast(left>0
+      ? ("บันทึกแล้ว 🙌 เลขารู้จักบอส "+(res&&res.profile_pct!=null?res.profile_pct:"?")+"% — ยังว่างอีก "+left+" ช่อง กลับมาเติมได้ทุกเมื่อ")
+      : ("บันทึกครบทุกช่องแล้ว 🎉 เลขารู้จักบอส "+(res&&res.profile_pct!=null?res.profile_pct:"100")+"% แล้ว"));
+    go("me");
+  }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที")}
+  DBUSY=false;
+}
+async function addPerson(){
+  var nm=dVal("#d_pname");
+  if(!nm){toast("ใส่ชื่อคนที่อยากให้เลขาจำหน่อยนะ");return}
+  var r=await api("people.save",{name:nm,relation:dVal("#d_prel")||"other",birth_date:dVal("#d_pbd"),note:dVal("#d_pnote")}).catch(function(e){return{error:e.message}});
+  if(r&&r.error==="cap"){toast("แฟ้มเต็ม 20 คนแล้ว ลบคนที่ไม่ใช้ก่อนนะ");return}
+  if(r&&r.error){toast("เพิ่มไม่สำเร็จ ลองใหม่อีกที");return}
+  DF=null;await reload();toast("จำ "+nm+" ไว้แล้ว 💛");
+}
+async function delPerson(id,nm){
+  var ok=await dlg({title:"ลบ "+nm+" ออกจากแฟ้ม?",okText:"ลบ",body:"เลขาจะเลิกจำและเลิกเตือนวันเกิดของคนนี้"});
+  if(!ok)return;
+  await api("people.del",{id:id});DF=null;await reload();toast("ลบแล้ว");
+}
+async function addBill(){
+  var t=dVal("#d_bt"),d=dValN("#d_bd");
+  if(!t){toast("ใส่ชื่อบิลหน่อยนะ เช่น ค่าเช่าร้าน");return}
+  if(!d){toast("เลือกวันที่ที่ต้องจ่ายด้วยนะ");return}
+  var r=await api("bill.add",{title:t,day:d,amount:dValN("#d_ba")}).catch(function(e){return{error:e.message}});
+  if(r&&r.error){toast("ตั้งเตือนไม่สำเร็จ ลองใหม่อีกที");return}
+  var e1=$("#d_bt");if(e1)e1.value="";var e2=$("#d_ba");if(e2)e2.value="";
+  DF=null;await reload();toast("ตั้งเตือนทุกวันที่ "+d+" ให้แล้ว ⏰");
+}
+
 function vMe(){
   var pr=DATA.profile||{};
+  var pct=Number(DATA.profile_pct||0);
   var h='<h1>โปรไฟล์ & เลขา</h1>';
+  /* 📁 ทางเข้าแฟ้มเจ้านาย — วางบนสุดของหน้าโปรไฟล์ (ที่เดียวที่คนเข้ามาหา "ตั้งค่าตัวเอง") */
+  /* 🧪 รอบทดลอง (บอสสั่ง 3 ส.ค. "ลองปรับแค่ในไลน์ของเราก่อน") — ลูกค้าทั่วไปยังไม่เห็นปุ่มนี้ */
+  if(DATA.beta){
+    h+='<button class="btn ghost" style="width:100%;justify-content:space-between;text-align:left;margin-bottom:14px" onclick="go(\'dossier\')">'
+      +'<span>📁 แฟ้มเจ้านาย — ให้เลขารู้จักบอสมากขึ้น</span><span class="pill">'+pct+'%</span></button>';
+  }
   h+='<div class="card">';
   h+='<label class="f">ชื่อที่ให้เลขาเรียก</label><input id="pf_name" value="'+esc(pr.display_name||"")+'" placeholder="เช่น บอส, พี่หนึ่ง">';
   h+='<label class="f">สไตล์เลขา</label><div class="seg" id="pf_char">';
