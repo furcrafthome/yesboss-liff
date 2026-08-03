@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>เทสนาฬิกาปลุก — YES BOSS</title>
 <style>
-  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
+  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; }
   body { margin:0; padding:32px 22px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
@@ -15,44 +15,31 @@
   p  { font-size:15px; color:var(--gray); margin:0 0 28px; max-width:320px; }
   button { width:100%; max-width:320px; border:0; border-radius:14px; padding:20px; font-size:18px;
            font-weight:700; background:var(--pink); color:#fff; font-family:inherit; box-shadow:0 4px 14px rgba(232,119,155,.3); }
-  button.alt { background:#fff; color:var(--pink); border:2px solid var(--soft); box-shadow:none; font-size:16px; padding:16px; }
   .big { font-size:52px; margin-bottom:6px; }
   .verdict { font-size:22px; font-weight:700; margin-bottom:10px; }
   .ok  { color:#B8437A; }
   .bad { color:var(--gray); }
-  .hint { font-size:14px; color:var(--gray); max-width:300px; margin-bottom:22px; }
+  .hint { font-size:15px; color:var(--gray); max-width:300px; }
   .step { display:none; flex-direction:column; align-items:center; width:100%; }
   .step.on { display:flex; }
 </style>
 </head>
 <body>
 
-<!-- ขั้นที่ 1: ปุ่มเดียวจบ -->
 <div class="step on" id="s1">
   <div class="big">⏰</div>
   <h1>แตะปุ่มนี้ทีเดียว</h1>
-  <p>ถ้ามีแอปอะไรเด้งขึ้นมา ให้ปิดแล้วกลับมาที่หน้านี้ ผมจะบอกผลให้เอง</p>
+  <p>ถ้าแอปนาฬิกาเด้งขึ้นมา ให้ปิดแล้วกลับมาหน้านี้<br>ไม่ต้องทำอะไรในแอปนาฬิกา</p>
   <button onclick="go()">แตะที่นี่</button>
 </div>
 
-<!-- ขั้นที่ 2: ผลลัพธ์ -->
 <div class="step" id="s2">
   <div class="big" id="icon"></div>
   <div class="verdict" id="verdict"></div>
   <div class="hint" id="hint"></div>
-  <button class="alt" id="retry" style="display:none" onclick="openSafari()">ลองอีกทางนึง</button>
 </div>
 
 <script>
-var ua = navigator.userAgent;
-var inLine = /Line\//i.test(ua);
-
-function show(id) {
-  var all = document.querySelectorAll('.step');
-  for (var i = 0; i < all.length; i++) all[i].className = 'step';
-  document.getElementById(id).className = 'step on';
-}
-
 function go() {
   var left = false;
   function onLeave() { left = true; }
@@ -67,32 +54,23 @@ function go() {
     verdict(left || document.hidden);
   }, 1800);
 
-  try { window.location.href = 'shortcuts://'; } catch (e) { verdict(false); }
+  try { window.location.href = 'clock-alarm://'; } catch (e) { verdict(false); }
 }
 
 function verdict(worked) {
-  show('s2');
+  document.getElementById('s1').className = 'step';
+  document.getElementById('s2').className = 'step on';
   if (worked) {
     document.getElementById('icon').textContent = '💗';
     document.getElementById('verdict').className = 'verdict ok';
-    document.getElementById('verdict').textContent = 'ใช้ได้! ทำต่อได้เลย';
-    document.getElementById('hint').textContent =
-      (inLine ? 'เด้งออกจาก LINE ได้ตรงๆ ' : 'เด้งออกได้ ') + 'บอกผมว่า "ได้" พอครับ';
+    document.getElementById('verdict').textContent = 'เยี่ยม! ทางนี้แหละ';
+    document.getElementById('hint').textContent = 'บอกผมว่า "เด้ง" พอครับ';
   } else {
-    document.getElementById('icon').textContent = '🤔';
+    document.getElementById('icon').textContent = '🙂';
     document.getElementById('verdict').className = 'verdict bad';
-    document.getElementById('verdict').textContent = 'ยังไม่เด้ง';
-    if (inLine) {
-      document.getElementById('hint').textContent = 'ลองอีกทางนึงก่อน กดปุ่มข้างล่างแล้วแตะปุ่มชมพูซ้ำอีกที';
-      document.getElementById('retry').style.display = 'block';
-    } else {
-      document.getElementById('hint').textContent = 'ทางนี้ไปไม่ได้ บอกผมว่า "ไม่ได้" พอครับ ผมจะเสนอทางอื่นให้';
-    }
+    document.getElementById('verdict').textContent = 'ไม่เด้ง ก็ไม่เป็นไร';
+    document.getElementById('hint').textContent = 'บอกผมว่า "ไม่เด้ง" พอครับ เรายังมีอีกทางที่ใช้ได้แน่';
   }
-}
-
-function openSafari() {
-  window.location.href = 'https://app.yesboss.club/alarm-test.html?openExternalBrowser=1';
 }
 </script>
 </body>
