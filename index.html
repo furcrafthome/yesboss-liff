@@ -1758,8 +1758,24 @@ function dTa(id,ph,val){return '<textarea class="dta" id="'+id+'" maxlength="240
    จะกดออกทั้งหน้า เราได้ 0 ช่อง ซึ่งแย่กว่าปล่อยข้ามแล้วได้ 25 จาก 32 ช่อง
    วิธีดันให้กรอกครบที่ใช้แทน: แบ่ง 2 หน้าให้เห็นปลายทาง · บอกทุกหมวดว่าได้อะไร ·
    นับช่องว่างค้างให้เห็น · จบแล้วเลขาทวงต่อในแชตวันละข้อ */
-/* บังคับกรอกครบไหม — เซิร์ฟเวอร์บอกมา ห้ามหน้าเว็บตัดสินเอง ไม่งั้นฟอร์มกับประตูเถียงกัน */
+/* บังคับกรอกไหม + บังคับช่องไหนบ้าง — เซิร์ฟเวอร์บอกมาทั้งคู่
+   ห้ามหน้าเว็บตัดสินเอง ไม่งั้นฟอร์มกับประตูเถียงกัน แล้วลูกค้ากดบันทึกผ่านแต่กลับมาโดนบล็อกซ้ำ */
 function dReqAll(){return !!(DATA&&DATA.profile_required)}
+var DREQ_TH={display_name:"ชื่อที่ให้เลขาเรียก",occupation:"บอสทำงานแบบไหน",country:"ประเทศที่อยู่",
+  birth_date:"วันเกิด",work_start:"เวลาเริ่มงาน",brief_hour:"เวลาสรุปตอนเช้า",report_hour:"เวลาสรุปตอนเย็น",
+  quiet_from:"เวลาเริ่มห้ามรบกวน",default_scope:"กระเป๋าเงินหลัก"};
+/* ช่องบังคับที่ยังว่างอยู่ตอนนี้ (ดูจากค่าในฟอร์มก่อน ถ้าไม่มีค่อยดูจากที่เซิร์ฟเวอร์ตอบมา) */
+function dMissReq(){
+  dKeep();
+  var fs=(DATA&&DATA.profile_req_fields)||[],out=[],i,f,v;
+  for(i=0;i<fs.length;i++){
+    f=fs[i];
+    if(f==="display_name")continue; /* ตั้งไปแล้วตั้งแต่จอลงทะเบียน ไม่มีช่องนี้ในแฟ้ม */
+    v=(DF&&DF[f]!==undefined)?DF[f]:((DATA&&DATA.profile)||{})[f];
+    if(v===null||v===undefined||v==="")out.push(DREQ_TH[f]||f);
+  }
+  return out;
+}
 var DPAGE=1;
 /* ช่องพิมพ์ทั้งหมด: id ในหน้า -> คีย์ใน DF · ใช้ทั้งตอนสลับหน้าและตอนบันทึก
    ⚠️ สลับหน้า = DOM ชุดเดิมถูกทิ้ง ต้องกวาดค่าลง DF ก่อนทุกครั้ง ไม่งั้นที่พิมพ์ไว้หายเกลี้ยง */
@@ -1848,7 +1864,7 @@ function dFoot(){
 }
 async function dNext(){
   dStash();
-  if(dReqAll()&&dBlanks(1)>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+dBlanks(1)+" ช่อง");return}
+  if(dReqAll()){var mq1=dMissReq();if(mq1.length){toast("ขอ "+mq1[0]+" ก่อนนะ"+(mq1.length>1?" (เหลืออีก "+(mq1.length-1)+" ข้อ)":""));return}}
   /* บันทึกหน้า 1 ทันทีที่กดถัดไป — ถ้าลูกค้าปิดแอปกลางคัน ของที่กรอกไว้ต้องไม่หาย */
   try{await api("profile.update",dPayload())}catch(e){}
   dGo(2);
@@ -1978,8 +1994,8 @@ async function saveDossier(){
   if(DBUSY)return;
   dStash();
   if(dReqAll()){
-    var miss=dBlanks(1)+dBlanks(2);
-    if(miss>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+miss+" ช่อง");return}
+    var mq=dMissReq();
+    if(mq.length){toast("ขอ "+mq[0]+" ก่อนนะ"+(mq.length>1?" (เหลืออีก "+(mq.length-1)+" ข้อ)":""));return}
   }
   DBUSY=true;
   try{
