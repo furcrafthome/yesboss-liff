@@ -3,98 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>เทสตั้งนาฬิกาปลุก — YES BOSS</title>
+<title>เทสนาฬิกาปลุก — YES BOSS</title>
 <style>
   :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { margin:0; padding:18px 16px 40px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
-         background:var(--bg); color:#2B2B2E; line-height:1.55; }
-  h1 { font-size:19px; margin:0 0 4px; }
-  .sub { font-size:13px; color:var(--gray); margin:0 0 16px; }
-  .env { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:13px; margin-bottom:18px; }
-  .env b { color:var(--pink); }
-  .env .ua { font-size:10px; color:#9A9AA0; word-break:break-all; margin-top:6px; display:block; }
-  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
-  .card h2 { font-size:15px; margin:0 0 2px; }
-  .card p { font-size:12.5px; color:var(--gray); margin:0 0 10px; }
-  button { width:100%; border:0; border-radius:10px; padding:13px; font-size:15px; font-weight:600;
-           background:var(--pink); color:#fff; font-family:inherit; }
-  button.alt { background:#fff; color:var(--pink); border:1.5px solid var(--soft); }
-  .result { margin-top:10px; font-size:13px; font-weight:600; padding:9px 11px; border-radius:8px; display:none; }
-  .result.ok   { display:block; background:#FDF0F5; color:#B8437A; }
-  .result.bad  { display:block; background:#F4F4F6; color:#6E6E73; }
-  .foot { margin-top:22px; font-size:12px; color:var(--gray); }
-  #log { width:100%; height:110px; margin-top:8px; font-size:11px; font-family:ui-monospace,Menlo,monospace;
-         border:1px solid var(--line); border-radius:8px; padding:8px; background:#fff; color:#555; }
+  html,body { height:100%; }
+  body { margin:0; padding:32px 22px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+         background:var(--bg); color:#2B2B2E; line-height:1.6;
+         display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+  h1 { font-size:22px; margin:0 0 10px; }
+  p  { font-size:15px; color:var(--gray); margin:0 0 28px; max-width:320px; }
+  button { width:100%; max-width:320px; border:0; border-radius:14px; padding:20px; font-size:18px;
+           font-weight:700; background:var(--pink); color:#fff; font-family:inherit; box-shadow:0 4px 14px rgba(232,119,155,.3); }
+  button.alt { background:#fff; color:var(--pink); border:2px solid var(--soft); box-shadow:none; font-size:16px; padding:16px; }
+  .big { font-size:52px; margin-bottom:6px; }
+  .verdict { font-size:22px; font-weight:700; margin-bottom:10px; }
+  .ok  { color:#B8437A; }
+  .bad { color:var(--gray); }
+  .hint { font-size:14px; color:var(--gray); max-width:300px; margin-bottom:22px; }
+  .step { display:none; flex-direction:column; align-items:center; width:100%; }
+  .step.on { display:flex; }
 </style>
 </head>
 <body>
 
-<h1>⏰ เทส "ตั้งนาฬิกาปลุก"</h1>
-<p class="sub">กดทีละปุ่มจากบนลงล่าง แล้วดูว่าเด้งออกไปแอปอื่นไหม<br>กดแล้วถ้าเด้งออก ให้กลับมาที่หน้านี้ต่อ</p>
-
-<div class="env">
-  เปิดจาก: <b id="where">…</b><br>
-  เครื่อง: <b id="os">…</b>
-  <span class="ua" id="ua"></span>
+<!-- ขั้นที่ 1: ปุ่มเดียวจบ -->
+<div class="step on" id="s1">
+  <div class="big">⏰</div>
+  <h1>แตะปุ่มนี้ทีเดียว</h1>
+  <p>ถ้ามีแอปอะไรเด้งขึ้นมา ให้ปิดแล้วกลับมาที่หน้านี้ ผมจะบอกผลให้เอง</p>
+  <button onclick="go()">แตะที่นี่</button>
 </div>
 
-<div class="card">
-  <h2>1️⃣ เปิดแอปทางลัด (Shortcuts)</h2>
-  <p>ด่านสำคัญที่สุด — เช็คว่า LINE ยอมปล่อยลิงก์ออกไปแอปอื่นไหม ถ้าด่านนี้ไม่ผ่าน วิธีนี้ใช้กับ iPhone ไม่ได้เลย</p>
-  <button onclick="tryGo('shortcuts://','r1')">กดเปิดแอปทางลัด</button>
-  <div class="result" id="r1"></div>
-</div>
-
-<div class="card">
-  <h2>2️⃣ เปิดแอปนาฬิกาตรงๆ</h2>
-  <p>ลองทางลับที่ Apple ไม่ประกาศไว้ ถ้าติดคือได้ของฟรี ถ้าไม่ติดก็ไม่เสียหาย</p>
-  <button class="alt" onclick="tryGo('clock-alarm://','r2')">กดเปิดแอปนาฬิกา</button>
-  <div class="result" id="r2"></div>
-</div>
-
-<div class="card">
-  <h2>3️⃣ สั่งตั้งปลุก 07:00 ของจริง</h2>
-  <p>อันนี้จะทำงานก็ต่อเมื่อติดตั้งทางลัดชื่อ <b>ตั้งปลุก</b> ไว้ในเครื่องแล้ว<br>ยังไม่ได้ติดตั้ง = กดแล้วมันจะแค่เปิดแอปทางลัดเฉยๆ ถือว่าปกติ</p>
-  <button class="alt" onclick="tryGo('shortcuts://run-shortcut?name=' + encodeURIComponent('ตั้งปลุก') + '&input=text&text=07:00','r3')">กดสั่งตั้งปลุก 07:00</button>
-  <div class="result" id="r3"></div>
-</div>
-
-<div class="card">
-  <h2>4️⃣ เฉพาะ Android</h2>
-  <p>ถ้าเปิดจาก iPhone ข้ามข้อนี้ได้เลย</p>
-  <button class="alt" onclick="tryGo('intent://alarm#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=7;i.android.intent.extra.alarm.MINUTES=0;S.android.intent.extra.alarm.MESSAGE=YES%20BOSS;end','r4')">กดตั้งปลุกบน Android</button>
-  <div class="result" id="r4"></div>
-</div>
-
-<div class="foot">
-  📋 กดเสร็จทุกปุ่มแล้ว ก๊อปข้อความข้างล่างนี้ส่งกลับมาได้เลย
-  <textarea id="log" readonly></textarea>
-  <button class="alt" style="margin-top:8px" onclick="copyLog()">คัดลอกผล</button>
+<!-- ขั้นที่ 2: ผลลัพธ์ -->
+<div class="step" id="s2">
+  <div class="big" id="icon"></div>
+  <div class="verdict" id="verdict"></div>
+  <div class="hint" id="hint"></div>
+  <button class="alt" id="retry" style="display:none" onclick="openSafari()">ลองอีกทางนึง</button>
 </div>
 
 <script>
 var ua = navigator.userAgent;
 var inLine = /Line\//i.test(ua);
-var isIOS  = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-var isAnd  = /Android/i.test(ua);
 
-document.getElementById('where').textContent = inLine ? 'ในแอป LINE' : 'เบราว์เซอร์ปกติ (Safari/Chrome)';
-document.getElementById('os').textContent = isIOS ? 'iPhone / iPad' : isAnd ? 'Android' : 'อื่นๆ';
-document.getElementById('ua').textContent = ua;
+function show(id) {
+  var all = document.querySelectorAll('.step');
+  for (var i = 0; i < all.length; i++) all[i].className = 'step';
+  document.getElementById(id).className = 'step on';
+}
 
-var lines = [
-  'เปิดจาก: ' + (inLine ? 'ในแอป LINE' : 'เบราว์เซอร์ปกติ'),
-  'เครื่อง: ' + (isIOS ? 'iOS' : isAnd ? 'Android' : 'other')
-];
-function note(t) { lines.push(t); document.getElementById('log').value = lines.join('\n'); }
-note('--- ผลการกด ---');
-
-var names = { r1:'1 เปิดแอปทางลัด', r2:'2 เปิดแอปนาฬิกา', r3:'3 สั่งตั้งปลุก', r4:'4 Android' };
-
-// จับว่าเด้งออกไปแอปอื่นจริงไหม: ถ้าระบบสลับแอป หน้านี้จะถูกซ่อน/เสีย focus ภายในไม่กี่ร้อย ms
-function tryGo(url, id) {
-  var box = document.getElementById(id);
+function go() {
   var left = false;
   function onLeave() { left = true; }
   document.addEventListener('visibilitychange', onLeave);
@@ -105,25 +64,35 @@ function tryGo(url, id) {
     document.removeEventListener('visibilitychange', onLeave);
     window.removeEventListener('pagehide', onLeave);
     window.removeEventListener('blur', onLeave);
-    if (left || document.hidden) {
-      box.className = 'result ok';
-      box.textContent = '✅ เด้งออกไปแอปอื่นได้';
-      note(names[id] + ' = ✅ เด้งออกได้');
-    } else {
-      box.className = 'result bad';
-      box.textContent = '❌ ไม่มีอะไรเกิดขึ้น (โดนบล็อก หรือไม่มีแอปนั้น)';
-      note(names[id] + ' = ❌ ไม่เด้ง');
-    }
-  }, 1600);
+    verdict(left || document.hidden);
+  }, 1800);
 
-  try { window.location.href = url; } catch (e) { note(names[id] + ' = error ' + e.message); }
+  try { window.location.href = 'shortcuts://'; } catch (e) { verdict(false); }
 }
 
-function copyLog() {
-  var el = document.getElementById('log');
-  el.removeAttribute('readonly'); el.select(); el.setSelectionRange(0, 99999);
-  try { document.execCommand('copy'); alert('คัดลอกแล้ว ส่งกลับมาได้เลย'); } catch (e) { alert('ก๊อปเองได้เลยค่ะ'); }
-  el.setAttribute('readonly', '');
+function verdict(worked) {
+  show('s2');
+  if (worked) {
+    document.getElementById('icon').textContent = '💗';
+    document.getElementById('verdict').className = 'verdict ok';
+    document.getElementById('verdict').textContent = 'ใช้ได้! ทำต่อได้เลย';
+    document.getElementById('hint').textContent =
+      (inLine ? 'เด้งออกจาก LINE ได้ตรงๆ ' : 'เด้งออกได้ ') + 'บอกผมว่า "ได้" พอครับ';
+  } else {
+    document.getElementById('icon').textContent = '🤔';
+    document.getElementById('verdict').className = 'verdict bad';
+    document.getElementById('verdict').textContent = 'ยังไม่เด้ง';
+    if (inLine) {
+      document.getElementById('hint').textContent = 'ลองอีกทางนึงก่อน กดปุ่มข้างล่างแล้วแตะปุ่มชมพูซ้ำอีกที';
+      document.getElementById('retry').style.display = 'block';
+    } else {
+      document.getElementById('hint').textContent = 'ทางนี้ไปไม่ได้ บอกผมว่า "ไม่ได้" พอครับ ผมจะเสนอทางอื่นให้';
+    }
+  }
+}
+
+function openSafari() {
+  window.location.href = 'https://app.yesboss.club/alarm-test.html?openExternalBrowser=1';
 }
 </script>
 </body>
