@@ -1758,7 +1758,8 @@ function dTa(id,ph,val){return '<textarea class="dta" id="'+id+'" maxlength="240
    จะกดออกทั้งหน้า เราได้ 0 ช่อง ซึ่งแย่กว่าปล่อยข้ามแล้วได้ 25 จาก 32 ช่อง
    วิธีดันให้กรอกครบที่ใช้แทน: แบ่ง 2 หน้าให้เห็นปลายทาง · บอกทุกหมวดว่าได้อะไร ·
    นับช่องว่างค้างให้เห็น · จบแล้วเลขาทวงต่อในแชตวันละข้อ */
-var DOSS_REQUIRE_ALL=false;
+/* บังคับกรอกครบไหม — เซิร์ฟเวอร์บอกมา ห้ามหน้าเว็บตัดสินเอง ไม่งั้นฟอร์มกับประตูเถียงกัน */
+function dReqAll(){return !!(DATA&&DATA.profile_required)}
 var DPAGE=1;
 /* ช่องพิมพ์ทั้งหมด: id ในหน้า -> คีย์ใน DF · ใช้ทั้งตอนสลับหน้าและตอนบันทึก
    ⚠️ สลับหน้า = DOM ชุดเดิมถูกทิ้ง ต้องกวาดค่าลง DF ก่อนทุกครั้ง ไม่งั้นที่พิมพ์ไว้หายเกลี้ยง */
@@ -1847,7 +1848,7 @@ function dFoot(){
 }
 async function dNext(){
   dStash();
-  if(DOSS_REQUIRE_ALL&&dBlanks(1)>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+dBlanks(1)+" ช่อง");return}
+  if(dReqAll()&&dBlanks(1)>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+dBlanks(1)+" ช่อง");return}
   /* บันทึกหน้า 1 ทันทีที่กดถัดไป — ถ้าลูกค้าปิดแอปกลางคัน ของที่กรอกไว้ต้องไม่หาย */
   try{await api("profile.update",dPayload())}catch(e){}
   dGo(2);
@@ -1976,7 +1977,7 @@ function dPayload(){
 async function saveDossier(){
   if(DBUSY)return;
   dStash();
-  if(DOSS_REQUIRE_ALL){
+  if(dReqAll()){
     var miss=dBlanks(1)+dBlanks(2);
     if(miss>0){toast("กรอกให้ครบก่อนนะ ยังว่างอีก "+miss+" ช่อง");return}
   }
