@@ -583,7 +583,13 @@ var WF_CARDS=[["reminder","⏰","เตือนงาน / นัดหมา�
 var WZ_MORE=0;
 /* เลือกได้หลายข้อ (เดิมเลือกได้ข้อเดียวแล้วทิ้ง) — เก็บทั้งชุดไว้จัดลำดับการ์ดสอนใช้ทีหลัง
    ข้อแรกที่เลือกยังเป็น wanted_feature เดิม เพื่อไม่ให้ควิกวิน/สถิติเก่าพัง */
-function wzPickWf(v){var i=F_WFS.indexOf(v);if(i<0)F_WFS.push(v);else F_WFS.splice(i,1);F_WF=F_WFS[0]||"";wzPersist();draw()}
+/* 🩹 4 ส.ค.: ช่องเลือกฟีเจอร์เป็นช่องบังคับและอยู่ล่างสุด = ทุกคนต้องกดหลังกรอกช่องบนเสร็จ
+   เดิมกดแล้ว draw() ทับทันทีโดยไม่เก็บของที่พิมพ์ไว้ -> วันเกิด/เมือง/จังหวัด/ชื่อร้าน/คำเรียก หายเกลี้ยง
+   และ "ประเทศ" เด้งกลับเป็น "ไทย" เงียบๆ (ค่าเรนเดอร์คือ DF.country||"ไทย")
+   = ลูกค้าต่างประเทศโดนตั้งโซนเวลาไทย เตือนผิดเวลาทุกใบตั้งแต่วันแรก
+   ของจริง: 3 คนแรกที่ผ่านวิซาร์ดใหม่ มี call_me/city/province/org_name = null ครบทั้ง 3 คน
+   ขณะที่ช่องที่มี onchange (ชื่อ/อาชีพ) บันทึกได้ครบทั้ง 3 คน */
+function wzPickWf(v){wzStash();dStash2();var i=F_WFS.indexOf(v);if(i<0)F_WFS.push(v);else F_WFS.splice(i,1);F_WF=F_WFS[0]||"";wzPersist();draw()}
 function wzMore(){wzStash();WZ_MORE=WZ_MORE?0:1;draw()}
 function wzHours(id,label,cur,hint){
   var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()"><option value="">ไม่บอกก็ได้</option>';
@@ -1765,12 +1771,17 @@ var DREQ_TH={display_name:"ชื่อที่ให้เลขาเรี�
   birth_date:"วันเกิด",work_start:"เวลาเริ่มงาน",brief_hour:"เวลาสรุปตอนเช้า",report_hour:"เวลาสรุปตอนเย็น",
   quiet_from:"เวลาเริ่มห้ามรบกวน",default_scope:"กระเป๋าเงินหลัก"};
 /* ช่องบังคับที่ยังว่างอยู่ตอนนี้ (ดูจากค่าในฟอร์มก่อน ถ้าไม่มีค่อยดูจากที่เซิร์ฟเวอร์ตอบมา) */
-function dMissReq(){
+/* ช่องบังคับอยู่หน้าไหน — ถ้าไม่กรองตามหน้า กด "ถัดไป" ที่หน้า 1 จะโดนขอช่องที่อยู่หน้า 2
+   ซึ่งเข้าไปกรอกไม่ได้ = ติดตายที่หน้า 1 ตลอดชีวิต ปลดประตูไม่ได้เลย */
+var DREQ_PAGE={birth_date:1,occupation:1,country:1,work_start:1,
+  brief_hour:2,report_hour:2,quiet_from:2,default_scope:2};
+function dMissReq(page){
   dKeep();
   var fs=(DATA&&DATA.profile_req_fields)||[],out=[],i,f,v;
   for(i=0;i<fs.length;i++){
     f=fs[i];
     if(f==="display_name")continue; /* ตั้งไปแล้วตั้งแต่จอลงทะเบียน ไม่มีช่องนี้ในแฟ้ม */
+    if(page&&DREQ_PAGE[f]&&DREQ_PAGE[f]!==page)continue; /* ช่องของอีกหน้า ยังไม่ถึงคิวขอ */
     v=(DF&&DF[f]!==undefined)?DF[f]:((DATA&&DATA.profile)||{})[f];
     if(v===null||v===undefined||v==="")out.push(DREQ_TH[f]||f);
   }
@@ -1864,7 +1875,7 @@ function dFoot(){
 }
 async function dNext(){
   dStash();
-  if(dReqAll()){var mq1=dMissReq();if(mq1.length){toast("ขอ "+mq1[0]+" ก่อนนะ"+(mq1.length>1?" (เหลืออีก "+(mq1.length-1)+" ข้อ)":""));return}}
+  if(dReqAll()){var mq1=dMissReq(1);if(mq1.length){toast("ขอ "+mq1[0]+" ก่อนนะ"+(mq1.length>1?" (เหลืออีก "+(mq1.length-1)+" ข้อ)":""));return}}
   /* บันทึกหน้า 1 ทันทีที่กดถัดไป — ถ้าลูกค้าปิดแอปกลางคัน ของที่กรอกไว้ต้องไม่หาย */
   try{await api("profile.update",dPayload())}catch(e){}
   dGo(2);
