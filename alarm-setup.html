@@ -59,13 +59,30 @@
 </ol>
 
 <div class="box">
-  <h2>ทดสอบเลย</h2>
-  <p>กดแล้วควรมีนาฬิกาปลุก 07:00 โผล่ในแอปนาฬิกา</p>
-  <button onclick="go()">ตั้งปลุก 7 โมงเช้า</button>
+  <h2 id="boxTitle">ทดสอบเลย</h2>
+  <p id="boxHint">กดแล้วควรมีนาฬิกาปลุก 07:00 โผล่ในแอปนาฬิกา</p>
+  <button id="goBtn" onclick="go()">ตั้งปลุก 7 โมงเช้า</button>
   <div class="res" id="res"></div>
 </div>
 
 <script>
+// มาจากหน้าตั้งปลุก (กดปุ่ม "ตั้งค่าครั้งแรก") = พกเวลาที่ตั้งใจจะตั้งมาด้วย
+// ตั้งค่าเสร็จให้กดตั้งใบนั้นได้เลย ไม่ต้องย้อนไปหาข้อความในแชท
+var P = new URLSearchParams(location.search);
+var raw = (P.get("t") || "").trim();
+var mm = raw.replace(":", "").match(/^(\d{1,2})(\d{2})$/);
+var HH = mm ? parseInt(mm[1], 10) : 7;
+var MI = mm ? parseInt(mm[2], 10) : 0;
+var hasTime = !!mm && HH >= 0 && HH <= 23 && MI >= 0 && MI <= 59;
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+var TIME = pad(HH) + ":" + pad(MI);
+
+if (hasTime) {
+  document.getElementById("boxTitle").textContent = "ทำเสร็จแล้วกดตรงนี้";
+  document.getElementById("boxHint").textContent = "ตั้งปลุก " + TIME + " ตามที่ค้างไว้";
+  document.getElementById("goBtn").textContent = "ตั้งปลุก " + TIME;
+}
+
 function go() {
   var left = false;
   function onLeave() { left = true; }

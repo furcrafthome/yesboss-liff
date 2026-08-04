@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ตั้งนาฬิกาปลุก — YES BOSS</title>
+<style>
+  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body { margin:0; padding:30px 22px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+         background:var(--bg); color:#2B2B2E; line-height:1.6;
+         display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+  .time { font-size:52px; font-weight:800; letter-spacing:-1px; margin:0; }
+  .msg  { font-size:17px; color:var(--gray); margin:6px 0 4px; max-width:320px; word-break:break-word; }
+  .day  { font-size:14px; color:var(--pink); font-weight:600; margin-bottom:30px; }
+  button { width:100%; max-width:320px; border:0; border-radius:14px; padding:19px; font-size:18px;
+           font-weight:700; background:var(--pink); color:#fff; font-family:inherit;
+           box-shadow:0 4px 14px rgba(232,119,155,.3); }
+  button.alt { background:#fff; color:var(--pink); border:2px solid var(--soft); box-shadow:none;
+               font-size:15px; padding:14px; margin-top:12px; }
+  .note { font-size:13px; color:var(--gray); max-width:300px; margin-top:20px; }
+  .bad  { font-size:16px; color:var(--gray); max-width:300px; }
+  .step { display:none; flex-direction:column; align-items:center; width:100%; }
+  .step.on { display:flex; }
+  a { color:var(--pink); }
+</style>
+</head>
+<body>
+
+<!-- พร้อมตั้ง -->
+<div class="step" id="ready">
+  <div style="font-size:46px">⏰</div>
+  <p class="time" id="t">--:--</p>
+  <p class="msg" id="m"></p>
+  <p class="day" id="d"></p>
+  <button onclick="setAlarm()">ตั้งปลุกในเครื่อง</button>
+  <button class="alt" id="setupBtn" style="display:none" onclick="goSetup()">กดแล้วไม่ขึ้น? ตั้งค่าครั้งแรกที่นี่</button>
+  <p class="note" id="note"></p>
+</div>
+
+<!-- ลิงก์เสีย -->
+<div class="step" id="bad">
+  <div style="font-size:46px">🤔</div>
+  <p class="bad">ลิงก์นี้ไม่สมบูรณ์<br>กลับไปกดปุ่มในแชทใหม่อีกทีนะคะ</p>
+</div>
+
+<script>
+var P = new URLSearchParams(location.search);
+var raw = (P.get("t") || "").trim();                    // "0730" หรือ "07:30"
+var label = (P.get("msg") || "YES BOSS").slice(0, 60);
+var m = raw.replace(":", "").match(/^(\d{1,2})(\d{2})$/);
+var H = m ? parseInt(m[1], 10) : NaN;
+var M = m ? parseInt(m[2], 10) : NaN;
+var ok = m && H >= 0 && H <= 23 && M >= 0 && M <= 59;
+
+var ua = navigator.userAgent;
+var isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+var isAnd = /Android/i.test(ua);
+
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+if (!ok) {
+  document.getElementById("bad").className = "step on";
+} else {
+  document.getElementById("ready").className = "step on";
+  document.getElementById("t").textContent = pad(H) + ":" + pad(M);
+  document.getElementById("m").textContent = label;
+
+  // ปลุกวันนี้หรือพรุ่งนี้ — บอกให้ชัด ไม่งั้นลูกค้าไม่รู้ว่าปลุกรอบไหน
+  var now = new Date();
+  var target = new Date(); target.setHours(H, M, 0, 0);
+  document.getElementById("d").textContent = target > now ? "ปลุกวันนี้" : "ปลุกพรุ่งนี้";
+
+  document.getElementById("note").textContent = isAnd
+    ? "กดแล้วแอปนาฬิกาจะเปิดขึ้นมาพร้อมเวลานี้ กดยืนยันอีกทีเป็นอันเสร็จ"
+    : isIOS
+      ? "ครั้งแรกต้องตั้งค่าสักครู่ ครั้งต่อไปกดปุ่มเดียวจบ"
+      : "เปิดลิงก์นี้จากมือถือนะคะ";
+
+  if (isIOS) document.getElementById("setupBtn").style.display = "block";
+}
+
+function setAlarm() {
+  if (isAnd) {
+    // Android เปิดทางไว้ให้ตรงๆ: ยิงเข้าแอปนาฬิกาพร้อมเวลา ไม่ต้องติดตั้งอะไรเพิ่ม
+    location.href = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
+      ";i.android.intent.extra.alarm.HOUR=" + H +
+      ";i.android.intent.extra.alarm.MINUTES=" + M +
+      ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
+      ";B.android.intent.extra.alarm.SKIP_UI=false;end";
+    return;
+  }
+  // iPhone: Apple ไม่เปิดทางเข้าแอปนาฬิกา ต้องผ่านทางลัดที่ลูกค้าติดตั้งไว้ครั้งเดียว
+  // ถ้ายังไม่มีทางลัด กดแล้วจะแค่เปิดแอปทางลัดเฉยๆ -> ปุ่มตั้งค่าข้างล่างรออยู่แล้ว
+  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
+}
+
+// พาไปตั้งค่าครั้งแรก แล้วส่งเวลาติดไปด้วย — ตั้งค่าเสร็จจะได้กดตั้งปลุกใบเดิมต่อได้เลย
+// ไม่ต้องกลับไปหาข้อความในแชทใหม่ (จุดที่คนหลุดหายบ่อยที่สุด)
+function goSetup() {
+  location.href = "/alarm-setup.html?t=" + encodeURIComponent(raw) + "&msg=" + encodeURIComponent(label);
+}
+</script>
+</body>
+</html>
