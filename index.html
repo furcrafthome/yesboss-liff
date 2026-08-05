@@ -1030,7 +1030,10 @@ function agenda(){
   });
   ((DATA.tasks&&DATA.tasks.open)||[]).forEach(function(t){
     var due=t.due_date?String(t.due_date).slice(0,10):null;
-    var it={type:"task",id:t.id,text:t.task_text,due:due,sort:due?Date.parse(due+"T23:59:59Z"):Infinity};
+    /* ⚠️ ต้องพก task_text/priority/project ติดมาด้วย — ลิสต์ "งานที่ยังไม่ได้ตั้งกำหนด" (B.none)
+     วาดด้วยตัววาดที่อ่าน t.task_text ตรงๆ ถ้าใส่แต่ t.text จะได้แถวเปล่าทั้งลิสต์
+     (บอสแจ้ง 5 ส.ค.: เพิ่มงานใหม่แล้วมองไม่เห็นตัวหนังสือ — งานใหม่ไม่มีกำหนดจึงตกมาที่ B.none เสมอ) */
+var it={type:"task",id:t.id,text:t.task_text,task_text:t.task_text,priority:t.priority,project:t.project,due:due,sort:due?Date.parse(due+"T23:59:59Z"):Infinity};
     if(!due)B.none.push(it);
     else if(due<today)B.late.push(it);
     else if(due===today)B.today.push(it);
