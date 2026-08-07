@@ -32,7 +32,9 @@
     if (key) { try { history.replaceState(null,'',location.pathname); } catch(e) {} }
     const _tk = /(?:^|\|)ticket=([0-9a-f-]{36})/i.exec(_hash);
     let openTicket = _tk ? _tk[1] : null;
-    let tickets = null, ticketView = null, ticketBusy = false; let data; let active = (_tk ? 'tickets' : 'executive'); let selectedUser = null; const q = new URLSearchParams(location.search); let rangeStart=q.get('start')||''; let rangeEnd=q.get('end')||'';
+    let tickets = null, ticketView = null, ticketBusy = false; let leads = null, leadsFilter='all', leadBusy=false; let data;
+    // 📚 คลังความรู้: kbDraft เก็บสิ่งที่บอสพิมพ์ค้างไว้ (หน้านี้ re-render ทั้งจอทุกครั้ง ถ้าไม่เก็บ พิมพ์ไปแล้วหาย)
+    let kb=null, kbSel=null, kbBusy=false, kbErr='', kbDraft={}, kbRevs=null, kbPrev=null, kbVars={}, kbAt=''; let active = (_tk ? 'tickets' : 'executive'); let selectedUser = null; const q = new URLSearchParams(location.search); let rangeStart=q.get('start')||''; let rangeEnd=q.get('end')||'';
     const esc = (v) => String(v ?? '—').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     const number = (v) => formatNumber(v); const money = (v) => formatMoneyTHB(v);
     const list = (items, make, emptyText='ยังไม่มีข้อมูล') => items?.length ? `<ul class="list">${items.map(make).join('')}</ul>` : `<div class="empty">${emptyText}</div>`;
@@ -47,7 +49,22 @@
     /* ═══ 🎫 ตั๋วแจ้งปัญหา — ฝั่งทีมงาน (auth ด้วย dash key เดียวกับหน้านี้) ═══
        ที่ขาดไปตอนแรก: ลูกค้าแจ้งได้ แต่ทีมงานตอบกลับไม่ได้ = ตั๋วค้าง "รอทีมงานดู" ตลอดกาล */
     const TK_ST = {open:['🟠','รอเราดู'],in_progress:['🔧','กำลังแก้'],waiting_user:['💬','รอลูกค้าตอบ'],resolved:['✅','แก้แล้ว'],closed:['⚪️','ปิดแล้ว']};
-    const TK_CAT = {bug:'🐞 บั๊ก',money:'💸 เงิน',reminder:'⏰ เตือน/นัด',account:'👤 บัญชี',billing:'💳 จ่ายเงิน',other:'💬 อื่นๆ'};
+    const TK_CAT = {bug:'🐞 บั๊ก',money:'💸 เงิน',reminder:'⏰ เตือน/นัด',account:'👤 บัญชี',billing:'💳 จ่ายเงิน',other:'💬 อื่นๆ',sales_course:'🎓 อยากเรียน',sales_biz:'🏢 อยากได้ระบบ'};
+    // 💬 แชทจริงของลูกค้าคนนี้ — หัวข้อตั๋วสั้นเกินจะรู้ว่าเกิดอะไรขึ้น ของจริงอยู่ในบทสนทนา
+    //    เรียงเก่า -> ใหม่ อ่านไล่ลงเหมือนเปิดห้องแชตดูเอง
+    function tkChat(c){
+      if(!Array.isArray(c)||!c.length) return '<article class="card"><div class="metric-label">แชทจริงของลูกค้า</div><div class="empty">ไม่มีบทสนทนาเก็บไว้</div></article>';
+      const rows = c.map(function(m){
+        var t=''; try{ t = m.created_at ? new Date(m.created_at).toLocaleString('th-TH',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : ''; }catch(e){}
+        var h = '<div style="margin:0 0 16px">';
+        h += '<div style="font-size:11px;color:var(--muted);margin-bottom:3px">'+esc(t)+(m.intent?' · '+esc(m.intent):'')+'</div>';
+        if(m.user_text) h += '<div style="background:var(--rose-soft);border-radius:var(--radius);padding:9px 12px;white-space:pre-wrap;word-break:break-word">'+esc(m.user_text)+'</div>';
+        if(m.bot_reply) h += '<div style="border-left:3px solid var(--rose);padding:7px 12px;margin-top:6px;white-space:pre-wrap;word-break:break-word;color:var(--muted)">'+esc(m.bot_reply)+'</div>';
+        return h+'</div>';
+      }).join('');
+      return '<article class="card"><div class="metric-label">แชทจริงของลูกค้า — '+c.length+' ตา (เก่า → ใหม่)</div>'+
+             '<div style="max-height:60vh;overflow:auto;margin-top:10px">'+rows+'</div></article>';
+    }
     async function staffApi(action, payload){
       const r = await fetch(`${API}?staff=1`,{method:'POST',headers:{'Content-Type':'application/json'},referrerPolicy:'no-referrer',
         body:JSON.stringify({key, action, payload: payload||{}})});
@@ -55,6 +72,167 @@
       return await r.json();
     }
     async function loadTickets(){ try{ tickets=(await staffApi('ticket.list',{status:'open'})).rows||[] }catch(e){ tickets=[] } render(); }
+    // 🎯 รายชื่อคนสนใจ (จากการ์ดของบีม) — คุยกับเขาได้จากหน้านี้เลย ไม่ต้องเปิดตั๋วทีละใบ
+    const SRV_LBL={want:{self:'ผู้ช่วยไว้ใช้เอง',biz:'ระบบให้ธุรกิจตัวเอง',agency:'รับทำให้คนอื่น',unsure:'ยังไม่รู้'},
+                   format:{live:'เรียนสด',self:'ดูวิดีโอเอง',unsure:'ยังไม่แน่ใจ'},
+                   time:{weeknight:'ค่ำวันธรรมดา',weekend:'เสาร์-อาทิตย์',weekday:'กลางวันวันธรรมดา'}};
+    async function loadLeads(){ try{ leads=(await staffApi('leads.list',{choice:leadsFilter})).rows||[] }catch(e){ leads=[] } render(); }
+    async function msgLead(uid,tid){
+      const el=document.querySelector('#lead-msg-'+uid); const body=(el&&el.value||'').trim();
+      if(!body){ alert('พิมพ์ข้อความก่อนนะ'); return }
+      if(!tid){ alert('คนนี้ยังไม่มีตั๋ว ส่งจากหน้านี้ไม่ได้'); return }
+      if(leadBusy) return; leadBusy=true; render();
+      try{ await staffApi('ticket.reply',{id:tid,body}); alert('ส่งเข้าไลน์เขาแล้ว 💛'); await loadLeads(); }
+      catch(e){ alert('ส่งไม่สำเร็จ: '+e.message) }
+      finally{ leadBusy=false; render() }
+    }
+    function leadsPanel(){
+      if(leads===null) return '<div class="empty">กำลังโหลดรายชื่อ…</div>';
+      const f=(id,label)=>`<button class="btn ${leadsFilter===id?'primary':''}" data-lead-filter="${id}">${label}</button>`;
+      const head=`<div class="section-head"><div><h2>คนที่สนใจ</h2>
+        <p>จากการ์ดที่ยิงไป · พิมพ์ในกล่องแล้วกดส่ง = เข้าไลน์เขาทันที และเขาตอบกลับในแชตได้เลย</p></div></div>
+        <div class="actions" style="margin-bottom:12px">${f('all','ทั้งหมด')}${f('biz','🏢 อยากได้ระบบ')}${f('course','🎓 อยากเรียน')}${f('later','ไว้ก่อน')}</div>`;
+      if(!leads.length) return head+'<div class="empty">ยังไม่มีใครกดในกลุ่มนี้</div>';
+      const rows=leads.map(function(l){
+        const sv=l.survey||{};
+        const chips=Object.keys(SRV_LBL).filter(function(k){return sv[k]}).map(function(k){
+          return '<span class="pill neutral">'+esc((SRV_LBL[k]||{})[sv[k]]||sv[k])+'</span>'}).join(' ');
+        const when=l.created_at?new Date(l.created_at).toLocaleString('th-TH',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+        return '<article class="card" style="margin-bottom:10px">'+
+          '<div class="row" style="align-items:flex-start"><div>'+
+            '<b style="font-size:16px;user-select:all">'+esc(l.lineName||l.told||'(ไม่บอกชื่อ)')+'</b>'+
+            (l.lineName&&l.told&&l.lineName!==l.told?' <small style="color:var(--muted)">(บอกว่า '+esc(l.told)+')</small>':'')+
+            '<div style="margin-top:4px">'+
+              (l.choice==='biz'?'<span class="pill warn">🏢 อยากได้ระบบ</span>':l.choice==='course'?'<span class="pill ok">🎓 อยากเรียน</span>':'<span class="pill neutral">ไว้ก่อน</span>')+
+              ' <span class="pill '+(l.plan!=='free'?'ok':'neutral')+'">'+esc(String(l.plan).toUpperCase())+'</span> '+chips+
+              (l.waitingUs?' <span class="pill danger">⏳ เขาตอบแล้ว เรายังไม่ตอบ</span>':'')+
+            '</div>'+
+            (l.biz_note?'<div style="margin-top:8px;padding:9px 12px;background:var(--rose-soft);border-radius:var(--radius);white-space:pre-wrap">'+esc(l.biz_note)+'</div>':'')+
+          '</div><small style="color:var(--muted);white-space:nowrap">'+esc(when)+'</small></div>'+
+          '<div style="margin-top:10px;display:flex;gap:8px;align-items:flex-end">'+
+            '<textarea id="lead-msg-'+esc(l.user_id)+'" rows="2" placeholder="พิมพ์คุยกับเขาได้เลย…" style="flex:1;width:100%"></textarea>'+
+            '<button class="btn primary" data-lead-send="'+esc(l.user_id)+'" data-lead-tk="'+esc(l.ticketId||'')+'"'+(leadBusy?' disabled':'')+'>ส่ง</button>'+
+            (l.ticketId?'<button class="btn" data-tkopen="'+esc(l.ticketId)+'">ดูแชตเต็ม</button>':'')+
+          '</div></article>';
+      }).join('');
+      return head+rows;
+    }
+    /* 📚 คลังความรู้ของเลขา — 203-knowledge-documents.sql
+       ข้อความ ราคา/ยกเลิก-คืนเงิน/ความเป็นส่วนตัว/วิธีผูกปฏิทิน เดิมฝังใน index.ts (แก้ทีต้อง deploy ทั้งระบบ)
+       ตอนนี้แก้จากหน้านี้ได้เลย มีผลกับข้อความถัดไปที่ลูกค้าพิมพ์เข้ามา
+       ⚠️ ไปคนละประตูกับแท็บอื่น: ฟังก์ชัน knowledge-admin (ไม่ใช่ webhook) — บอทล่มก็ยังแก้ข้อความได้ และกลับกัน */
+    const KB_API = API.replace(/\/webhook$/, '/knowledge-admin');
+    async function kbApi(action, payload){
+      const r = await fetch(KB_API,{method:'POST',headers:{'Content-Type':'application/json'},referrerPolicy:'no-referrer',
+        body:JSON.stringify({key, action, payload: payload||{}})});
+      let j=null; try{ j=await r.json() }catch(e){}
+      if(!r.ok) throw new Error(j&&j.detail?j.detail:(r.status===401?'dash key ไม่ถูกต้อง':(j&&j.error)||('เชื่อมต่อไม่ได้ ('+r.status+')')));
+      return j;
+    }
+    async function loadKb(){
+      try{ const j=await kbApi('kb.list'); kb=j.rows||[]; kbVars=j.placeholders||{}; kbErr=''; }
+      catch(e){ kb=[]; kbErr=e.message } render();
+    }
+    // 🗓️ ช่วงเวลาที่ใบมีผล (207): input เป็นเวลาเครื่องบอส -> ส่งขึ้นเป็น ISO ให้ DB
+    const kbToInput=(iso)=>{ if(!iso) return ''; const d=new Date(iso); return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16) };
+    const kbFromInput=(v)=> v?new Date(v).toISOString():null;
+    function kbWhen(d){ // ใบนี้กำลังใช้อยู่ไหม
+      const now=Date.now();
+      if(d.effective_from && Date.parse(d.effective_from)>now) return {t:'warn',s:'รอถึงเวลา '+kbToInput(d.effective_from).replace('T',' ')};
+      if(d.effective_until && Date.parse(d.effective_until)<=now) return {t:'neutral',s:'หมดเวลาแล้ว'};
+      if(d.effective_until) return {t:'ok',s:'ใช้ถึง '+kbToInput(d.effective_until).replace('T',' ')};
+      return null;
+    }
+    async function kbSaveDoc(slug){
+      const el=document.querySelector('#kb-body'); if(!el) return;
+      const body=el.value;
+      const cur=(kb||[]).find(d=>d.slug===slug);
+      const ef=kbFromInput((document.querySelector('#kb-from')||{}).value);
+      const eu=kbFromInput((document.querySelector('#kb-until')||{}).value);
+      const sameWhen = ef===(cur.effective_from?new Date(cur.effective_from).toISOString():null)
+                    && eu===(cur.effective_until?new Date(cur.effective_until).toISOString():null);
+      if(cur && body===cur.body && sameWhen){ alert('ยังไม่ได้แก้อะไรเลย'); return }
+      if(ef && eu && Date.parse(eu)<=Date.parse(ef)){ alert('ช่วงเวลากลับหัว — "ใช้ถึง" ต้องหลัง "เริ่มใช้"'); return }
+      const whenNote = ef && Date.parse(ef)>Date.now() ? '\n\n🗓️ ใบนี้จะเริ่มใช้ '+kbToInput(ef).replace('T',' ')+' (ก่อนหน้านั้นเลขายังไม่เห็นใบนี้)' : '';
+      if(!confirm('บันทึกแล้วเลขาจะใช้ข้อความนี้ตอบลูกค้า "ข้อความถัดไป" ทันที\n(ของเดิมถูกเก็บเป็นเวอร์ชันย้อนกลับได้)'+whenNote+'\n\nยืนยันบันทึกใบ "'+(cur?cur.title:slug)+'" ไหม')) return;
+      if(kbBusy) return; kbBusy=true; render();
+      try{ await kbApi('kb.save',{slug,body,effective_from:ef,effective_until:eu}); kbDraft={}; kbRevs=null; kbPrev=null; await loadKb(); alert('บันทึกแล้ว 💛'); }
+      catch(e){ alert('บันทึกไม่สำเร็จ: '+e.message) }
+      finally{ kbBusy=false; render() }
+    }
+    async function kbToggle(slug,field,value){
+      if(field==='in_prompt' && !value && !confirm('เอาใบนี้ออกจากสมองเลขาชั่วคราว?\nเลขาจะ "ไม่รู้เรื่องนี้เลย" จนกว่าจะเปิดกลับ')) return;
+      if(kbBusy) return; kbBusy=true; render();
+      try{ await kbApi('kb.toggle',{slug,field,value}); kbPrev=null; await loadKb(); }
+      catch(e){ alert('เปลี่ยนไม่สำเร็จ: '+e.message) }
+      finally{ kbBusy=false; render() }
+    }
+    async function kbLoadRevs(slug){
+      kbRevs={loading:true}; render();
+      try{ kbRevs=(await kbApi('kb.revisions',{slug})).rows||[] }catch(e){ kbRevs=[]; alert('อ่านเวอร์ชันเก่าไม่ได้: '+e.message) } render();
+    }
+    async function kbRestore(slug,id,ver){
+      if(!confirm('ย้อนใบนี้กลับไปเวอร์ชัน '+ver+' ?\n(ของปัจจุบันถูกเก็บไว้ ย้อนกลับมาได้อีก)')) return;
+      if(kbBusy) return; kbBusy=true; render();
+      try{ await kbApi('kb.restore',{slug,revision_id:id}); kbDraft={}; kbRevs=null; kbPrev=null; await loadKb(); alert('ย้อนเวอร์ชันแล้ว'); }
+      catch(e){ alert('ย้อนไม่สำเร็จ: '+e.message) }
+      finally{ kbBusy=false; render() }
+    }
+    async function kbLoadPreview(variant,at){
+      kbPrev={loading:true,variant}; render();
+      try{ kbPrev=await kbApi('kb.preview',{variant,at:at||null}) }catch(e){ kbPrev={error:e.message} } render();
+    }
+    function kbPanel(){
+      if(kbErr) return '<div class="empty">เปิดคลังความรู้ไม่ได้: '+esc(kbErr)+'<br><small>ถ้าเพิ่งขึ้นระบบใหม่ อาจยังไม่ได้ deploy ฟังก์ชัน knowledge-admin</small></div>';
+      if(kb===null) return '<div class="empty">กำลังโหลดคลังความรู้…</div>';
+      if(!kb.length) return '<div class="empty">ยังไม่มีใบความรู้ — รัน 203-knowledge-documents.sql ก่อน</div>';
+      const CAT={pricing:'💗 ราคา',policy:'📄 นโยบาย',howto:'🧭 วิธีใช้',faq:'❓ คำถามบ่อย',capability:'✅ ความสามารถ'};
+      const AUD={all:'ทุกคน',founding_open:'เฉพาะคนที่ยังได้ราคาผู้ก่อตั้ง',founding_closed:'คนใหม่/ราคาปกติ'};
+      const sel=kbSel?kb.find(d=>d.slug===kbSel):null;
+      const rows=kb.map(d=>{ const w=kbWhen(d); return `<li class="row" style="align-items:start">
+        <div style="min-width:0"><button class="user-btn" data-kbsel="${esc(d.slug)}">${esc(d.title)}</button>
+          <small style="display:block">${esc(CAT[d.category]||d.category)} · ${esc(AUD[d.audience]||d.audience)} · ${number(d.body.length)} ตัวอักษร · เวอร์ชัน ${number(d.version)} · แก้ล่าสุด ${esc((d.updated_at||'').slice(0,10))} โดย ${esc(d.updated_by||'—')}</small></div>
+        <div style="display:flex;gap:6px;white-space:nowrap;flex-wrap:wrap;justify-content:end">
+          <span class="pill ${d.in_prompt&&d.is_active?'ok':'warn'}">${d.in_prompt&&d.is_active?'เลขาใช้อยู่':'ปิดอยู่'}</span>
+          ${w?`<span class="pill ${w.t}">🗓️ ${esc(w.s)}</span>`:''}
+        </div></li>`}).join('');
+      const varChips=Object.keys(kbVars||{}).map(k=>`<button class="btn" data-kbvar="${esc(k)}" title="ค่าจริงตอนนี้: ${esc(kbVars[k])}" style="padding:4px 8px;font-size:12px">{{${esc(k)}}} = ${esc(kbVars[k])}</button>`).join(' ');
+      const editor=!sel?'<div class="empty">เลือกใบที่จะแก้จากรายการด้านซ้าย</div>':`
+        <div class="section-head" style="margin:0 0 8px"><div><h2 style="font-size:16px">${esc(sel.title)}</h2>
+          <p>${esc(CAT[sel.category]||sel.category)} · ใช้กับ: ${esc(AUD[sel.audience]||sel.audience)} · ท่อนค้นหา ${number(sel.chunks)} ท่อน</p></div></div>
+        ${sel.note?`<div class="notice">⚠️ ${esc(sel.note)}</div>`:''}
+        <textarea id="kb-body" spellcheck="false" style="width:100%;min-height:340px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:10px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap">${esc(kbDraft[sel.slug]!==undefined?kbDraft[sel.slug]:sel.body)}</textarea>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:10px">
+          <label style="font-size:12px;color:var(--muted);font-weight:700">🗓️ เริ่มใช้เมื่อ<br><input type="datetime-local" id="kb-from" value="${esc(kbToInput(sel.effective_from))}" style="border:1px solid var(--line);border-radius:8px;padding:7px;margin-top:3px"></label>
+          <label style="font-size:12px;color:var(--muted);font-weight:700">ใช้ถึง<br><input type="datetime-local" id="kb-until" value="${esc(kbToInput(sel.effective_until))}" style="border:1px solid var(--line);border-radius:8px;padding:7px;margin-top:3px"></label>
+          <small style="color:var(--muted);flex:1;min-width:220px">เว้นว่าง = ใช้ตลอดไป · ตั้งล่วงหน้าได้ เช่น เขียนใบราคาใหม่ทิ้งไว้ให้สลับเองคืน 4 ก.ย. (เวลาเครื่องนี้)</small>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <small style="color:var(--muted)">แตะปุ่มตัวแปรเพื่อแทรก — ห้ามพิมพ์ตัวเลขราคาเอง (ระบบรับเงินอ่านเลขจากโค้ด)<br>${varChips}</small>
+          <div style="display:flex;gap:8px;align-items:start">
+            <button class="btn" data-kbrevs="${esc(sel.slug)}">📜 เวอร์ชันเก่า</button>
+            <button class="btn" data-kbtoggle="${esc(sel.slug)}" data-kbfield="in_prompt" data-kbval="${sel.in_prompt?'0':'1'}">${sel.in_prompt?'🚫 เอาออกจากสมองเลขา':'✅ ใส่กลับเข้าสมองเลขา'}</button>
+            <button class="btn primary" data-kbsave="${esc(sel.slug)}" ${kbBusy?'disabled':''}>${kbBusy?'กำลังบันทึก…':'💾 บันทึก'}</button>
+          </div>
+        </div>
+        ${kbRevs?`<article class="card" style="margin-top:12px"><div class="metric-label">เวอร์ชันเก่าของใบนี้</div>${
+          kbRevs.loading?'<div class="empty">กำลังโหลด…</div>':(kbRevs.length?`<ul class="list">${kbRevs.map(r=>`<li class="row"><span>เวอร์ชัน ${number(r.version)} <small>· ${esc((r.saved_at||'').replace('T',' ').slice(0,16))} · ${number((r.body||'').length)} ตัวอักษร · โดย ${esc(r.saved_by||'—')}</small></span><button class="btn" data-kbrestore="${esc(r.id)}" data-kbrver="${number(r.version)}" data-kbrslug="${esc(sel.slug)}">⏪ ย้อนกลับใบนี้</button></li>`).join('')}</ul>`:'<div class="empty">ยังไม่เคยแก้ใบนี้เลย</div>')
+        }</article>`:''}`;
+      const prev=!kbPrev?'':`<article class="card" style="margin-top:12px"><div class="section-head" style="margin:0 0 6px"><div><h2 style="font-size:16px">👀 สิ่งที่เลขาอ่านจริง</h2><p>${kbPrev.error?'':'ก้อนนี้ถูกยัดเข้าสมองทุกครั้งที่ลูกค้าคุย · ตัวแปรถูกแทนค่าจริงแล้ว'}</p></div></div>${
+        kbPrev.loading?'<div class="empty">กำลังโหลด…</div>':kbPrev.error?`<div class="empty">${esc(kbPrev.error)}</div>`:
+        `${kbPrev.hasPricing===false?'<div class="notice" style="border-left-color:var(--red);background:var(--red-bg);color:#7a2430">⚠️ ช่วงเวลานี้ "ไม่มีใบราคาเลย" — เลขาจะตกกลับไปใช้ข้อความราคาเดิมที่ฝังในโค้ดทั้งก้อน (ไม่เงียบ แต่จะไม่ใช่ข้อความที่แก้ไว้)</div>':''}
+         ${kbPrev.hidden&&kbPrev.hidden.length?`<div class="notice">🗓️ ช่วงเวลานี้ไม่เห็น ${kbPrev.hidden.length} ใบ: ${esc(kbPrev.hidden.join(', '))}</div>`:''}
+         <small style="color:var(--muted)">${number(kbPrev.docs)} ใบ · ${number(kbPrev.chars)} ตัวอักษร (~${number(Math.round(kbPrev.chars/3))} token ต่อ 1 ข้อความ) · ณ เวลา ${esc(kbToInput(kbPrev.at).replace('T',' '))}</small>
+         <pre style="white-space:pre-wrap;word-break:break-word;font:13px/1.7 -apple-system,BlinkMacSystemFont,'Sukhumvit Set','Noto Sans Thai',sans-serif;background:#faf8f9;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;max-height:50vh;overflow:auto">${esc(kbPrev.text)}</pre>`}</article>`;
+      return `<div class="actions" style="margin-bottom:12px;flex-wrap:wrap">
+          <button class="btn" data-kbprev="founding_open">👀 ดูก้อนที่เลขาอ่าน (คนที่ได้ราคาผู้ก่อตั้ง)</button>
+          <button class="btn" data-kbprev="founding_closed">👀 ดูก้อนที่เลขาอ่าน (คนใหม่/ราคาปกติ)</button>
+          <label style="font-size:12px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:5px">ณ เวลา<input type="datetime-local" id="kb-at" value="${esc(kbAt)}" style="border:1px solid var(--line);border-radius:8px;padding:7px"></label>
+          <button class="btn" id="kb-reload">รีเฟรช</button>
+        </div>
+        <div class="split" style="grid-template-columns:.85fr 1.15fr"><article class="card"><div class="metric-label">ใบความรู้ทั้งหมด</div><ul class="list">${rows}</ul></article>
+        <article class="card">${editor}</article></div>${prev}`;
+    }
     async function openTicketView(id){ ticketView={loading:true}; render(); try{ ticketView=await staffApi('ticket.get',{id}) }catch(e){ ticketView={error:e.message} } render(); }
     function closeTicketView(){ ticketView=null; openTicket=null; render(); }
     async function replyTicket(id){
@@ -83,8 +261,10 @@
         </div>`).join('');
         return `<button class="btn" id="tkback">‹ กลับไปคิวตั๋ว</button>
           <div class="section-head" style="margin-top:12px"><div><h2>${esc(t.subject||'(ไม่มีหัวข้อ)')}</h2>
-          <p>${st[0]} ${esc(st[1])} · ${esc(TK_CAT[t.category]||t.category)} · ${esc(ticketView.who||'(ไม่บอกชื่อ)')} · ${esc(String(ticketView.plan||'free').toUpperCase())}</p></div></div>
+          <p>${st[0]} ${esc(st[1])} · ${esc(TK_CAT[t.category]||t.category)} · ${esc(ticketView.lineName||ticketView.who||'(ไม่บอกชื่อ)')}${ticketView.lineName&&ticketView.who&&ticketView.lineName!==ticketView.who?' <span style="opacity:.65">(บอกว่า '+esc(ticketView.who)+')</span>':''} · ${esc(String(ticketView.plan||'free').toUpperCase())}</p></div></div>
+          ${ticketView.lineName?`<article class="card" style="padding:10px 14px"><div class="metric-label">ชื่อบนไลน์ — ใช้ค้นใน LINE OA Manager</div><div style="font-size:16px;font-weight:700;user-select:all">${esc(ticketView.lineName)}</div></article>`:''}
           <article class="card">${msgs||'<div class="empty">ยังไม่มีข้อความ</div>'}</article>
+          ${tkChat(ticketView.chat)}
           <article class="card"><div class="metric-label">ตอบลูกค้า (ส่งเข้า LINE ทันที)</div>
             <textarea id="tkreply" rows="4" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid #ccc;font-family:inherit;font-size:15px" placeholder="พิมพ์คำตอบ…"></textarea>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
@@ -100,7 +280,7 @@
         <ul class="list">${tickets.map(t=>{const st=TK_ST[t.status]||['•',t.status];
         return `<li><button class="btn" style="width:100%;text-align:left" data-tkopen="${esc(t.id)}">
           <b>${st[0]} ${esc(t.subject||'(ไม่มีหัวข้อ)')}</b><br>
-          <small>${esc(st[1])} · ${esc(TK_CAT[t.category]||t.category)} · ${esc(t.who)}${t.priority==='high'?' · 🔥 Pro':''}${t.last_reply_by==='user'?' · <b>ลูกค้าตอบแล้ว</b>':''}</small>
+          <small>${esc(st[1])} · ${esc(TK_CAT[t.category]||t.category)} · ${esc(t.who)}${t.priority==='high'?(String(t.category||'').startsWith('sales_')?' · 🔥 ดีลใหญ่':' · 🔥 Pro'):''}${t.last_reply_by==='user'?' · <b>ลูกค้าตอบแล้ว</b>':''}</small>
         </button></li>`}).join('')}</ul>`;
     }
     function cohortBlocks(){
@@ -143,6 +323,29 @@
     let memState = { user:'', q:'', loading:false, error:'', data:null };
     const memDate = (s) => s ? new Date(s).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'2-digit',month:'short',year:'2-digit'}) : '—';
     const memBar = (sim, passed) => `<div style="height:6px;background:#f1edef;border-radius:3px;overflow:hidden;margin-top:5px"><i style="display:block;height:100%;width:${sim==null?0:Math.max(0,Math.min(100,Math.round(Number(sim)*100)))}%;background:${passed?'var(--green)':'var(--muted)'}"></i></div>`;
+    // 🧠 ฟีดความจำล่าสุดทั้งระบบ + ปุ่มลบ (บอสสั่ง 5 ส.ค. หลังเจอเลขาท่องขยะใส่ลูกค้า)
+    //    ของเดิมดูได้ทีละคน = กว่าจะรู้ว่ามีขยะก็ตอนลูกค้าบ่นแล้ว
+    let memFeed = null, memBusy = false;
+    async function loadMemFeed(){
+      if(demoMode){ memFeed=[]; render(); return }
+      memBusy=true; render();
+      try{
+        const r=await fetch(`${API}?dash=${encodeURIComponent(key)}&mem_recent=1`,{cache:'no-store',referrerPolicy:'no-referrer'});
+        if(!r.ok) throw new Error('โหลดไม่สำเร็จ ('+r.status+')');
+        memFeed=(await r.json()).facts||[];
+      }catch(e){ memFeed=[]; toast&&toast(e.message) }
+      memBusy=false; render();
+    }
+    async function delFact(id, el){
+      if(!confirm('ลบความจำใบนี้? (ลบแล้วกู้คืนได้ ไม่ได้ทำลายถาวร)')) return;
+      try{
+        const r=await fetch(`${API}?dash=${encodeURIComponent(key)}&mem_del=${encodeURIComponent(id)}`,{cache:'no-store',referrerPolicy:'no-referrer'});
+        if(!r.ok) throw new Error('ลบไม่สำเร็จ ('+r.status+')');
+        if(memFeed) memFeed=memFeed.filter(f=>String(f.id)!==String(id));
+        if(memState.data&&memState.data.facts) memState.data.facts=memState.data.facts.filter(f=>String(f.id)!==String(id));
+        render();
+      }catch(e){ alert(e.message) }
+    }
     async function loadMemory(userId, q){
       if(demoMode){ memState={...memState,error:'โหมดตัวอย่างไม่ต่อข้อมูลจริง',data:null}; render(); return }
       if(!userId){ memState={...memState,error:'เลือกลูกค้าก่อน',data:null}; render(); return }
@@ -155,6 +358,25 @@
       }catch(e){ memState={...memState,loading:false,error:e.message||'เปิดคลังไม่สำเร็จ'} }
       render();
     }
+    function memFeedBlock(){
+      const head='<article class="card" style="margin-bottom:12px"><div class="section-head" style="margin:0 0 6px"><div>'
+        +'<h2 style="font-size:16px">🆕 ความจำที่เพิ่งเข้าคลัง (ทั้งระบบ)</h2>'
+        +'<p>เรียงใหม่สุด 80 ใบ — ไล่ดูตรงนี้จะเห็นของที่ไม่ควรจำภายในไม่กี่วินาที</p></div>'
+        +'<button class="btn" id="mem-feed-reload">โหลดใหม่</button></div>';
+      if(memBusy) return head+'<div class="empty">กำลังโหลด…</div></article>';
+      if(memFeed===null) return head+'<div class="empty">กด "โหลดใหม่" เพื่อดูของที่เพิ่งเข้าคลัง</div></article>';
+      if(!memFeed.length) return head+'<div class="empty">ยังไม่มีความจำใหม่</div></article>';
+      return head+'<ul class="list">'+memFeed.map(f=>
+        '<li style="padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:start">'
+        +'<div style="flex:1;min-width:0">'
+        +'<div><b>'+esc(f.fact_text)+'</b></div>'
+        +'<small style="color:var(--muted)">'+esc(f.owner||'—')+' · '+esc(f.fact_type||'other')
+        +(f.attribute?' · '+esc(f.attribute):'')+' · '+memDate(f.created_at)+'</small>'
+        +(f.source_quote?'<div style="color:var(--muted);font-size:12px;margin-top:3px">ที่มา: «'+esc(f.source_quote)+'»</div>':'')
+        +'</div>'
+        +'<button class="btn" data-delfact="'+esc(f.id)+'" title="ลบความจำใบนี้" style="flex:0 0 auto;color:var(--red);border-color:var(--red)">🗑</button>'
+        +'</li>').join('')+'</ul></article>';
+    }
     function memoryPanel(d){
       const users=[...(d.users||[])].sort((a,b)=>(Number(b.facts_active)||0)-(Number(a.facts_active)||0));
       const picker=`<article class="card"><div class="metric-label">เลือกลูกค้า แล้วลองถามแทนเขา</div>
@@ -164,10 +386,10 @@
           <button class="btn primary" id="mem-go">ลองค้น</button>
         </div>
         <div class="metric-note">คำถามนี้จะวิ่งผ่านตัวค้นตัวเดียวกับที่ลูกค้าใช้จริง · ตั้งแต่ 2 ส.ค. 69 ความจำถูกส่งเข้าให้เลขาทั้งคลัง คะแนนเหลือหน้าที่แค่ "จัดอันดับ" ว่าใบไหนเกี่ยวสุด · ไม่แตะข้อมูลลูกค้า อ่านอย่างเดียว</div></article>`;
-      if(memState.loading) return picker+'<div class="empty">กำลังเปิดคลัง…</div>';
-      if(memState.error) return picker+`<div class="notice">${esc(memState.error)}</div>`;
+      if(memState.loading) return memFeedBlock()+picker+'<div class="empty">กำลังเปิดคลัง…</div>';
+      if(memState.error) return memFeedBlock()+picker+`<div class="notice">${esc(memState.error)}</div>`;
       const m=memState.data;
-      if(!m) return picker+'<div class="empty">เลือกลูกค้าเพื่อดูว่าเลขาจำอะไรของเขาไว้บ้าง</div>';
+      if(!m) return memFeedBlock()+picker+'<div class="empty">เลือกลูกค้าเพื่อดูว่าเลขาจำอะไรของเขาไว้บ้าง</div>';
       const facts=Array.isArray(m.facts)?m.facts:[];
       const pb=m.probe;
       const probeBlock = !pb ? '' : pb.error ? `<div class="notice">ค้นไม่สำเร็จ (${esc(pb.error)})</div>` : `
@@ -185,7 +407,7 @@
           ${pb.block?`<pre style="white-space:pre-wrap;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:#faf8f9;border:1px solid var(--line);border-radius:11px;padding:13px;margin-top:9px;overflow-x:auto">${esc(pb.block)}</pre>`:'<div class="empty">ไม่มี — ลูกค้าคนนี้ยังไม่มีความจำในคลังเลย เลขาจึงตอบคำถามนี้โดยไม่มีความจำประกอบ</div>'}
           ${pb.proactive?`<div class="metric-note">🔔 ใบนี้คะแนนถึง ${m.thresholds.proactive} ด้วย จึงจะถูกยกไปแปะบนการ์ดยืนยันนัด/งานด้วย: «${esc(pb.proactive.fact_text)}»</div>`:''}
         </article>`;
-      return picker+`
+      return memFeedBlock()+picker+`
         <div class="metrics" style="margin-top:12px">
           ${metric('จำไว้ตอนนี้',`${number(m.facts_active)} ใบ`,`เพดานแพ็ก ${esc(m.plan)} = ${number(m.fact_cap)} ใบ`)}
           ${metric('เก็บไว้ทั้งหมด',`${number(facts.length)} ใบ`,'รวมใบที่ถูกแทนที่/ลบไปแล้ว')}
@@ -206,8 +428,9 @@
     function render(){
       const d = data; const h = d.health; const ht = healthTone(h.overall); const rangeLabel=d.range?.start&&d.range?.end?`${d.range.start} ถึง ${d.range.end}`:'30 วันล่าสุด';
       app.innerHTML = `<header class="top"><div class="brand"><div class="mark">YB</div><div><div class="eyebrow">${demoMode ? 'DEMO · ข้อมูลตัวอย่าง' : 'Private admin · aggregate only'}</div><h1>YES BOSS Dashboard</h1><div class="updated">อัปเดตล่าสุด ${esc(d.ts || '—')} · ${demoMode ? 'ไม่เชื่อมต่อ production' : 'รีเฟรชทุก 5 นาที'}</div></div></div><div class="actions"><button class="btn" id="blur">ซ่อนข้อมูล</button><button class="btn" id="forget" title="ลบกุญแจที่จำไว้ในเครื่องนี้">ลืมเครื่องนี้</button><button class="btn primary" id="refresh">${demoMode ? 'โหลด demo ใหม่' : 'รีเฟรช'}</button></div></header><div class="range-filter"><b>ช่วงข้อมูล</b><label>จาก <input type="date" id="range-start" value="${esc(rangeStart)}"></label><label>ถึง <input type="date" id="range-end" value="${esc(rangeEnd)}"></label><button class="btn primary" id="apply-range">ดูช่วงนี้</button><button class="btn" id="clear-range">30 วันล่าสุด</button><small id="range-error"></small></div>
-        <nav class="tabs" aria-label="Dashboard navigation">${tab('tickets','🎫 ตั๋ว')}${tab('executive','ผู้บริหาร')}${tab('funnel','Funnel')}${tab('overview','ภาพรวม')}${tab('growth','ผู้ใช้')}${tab('revenue','รายได้')}${tab('engagement','การใช้งาน')}${tab('memory','🧠 ความจำ')}${tab('operations','ระบบ')}${tab('quality','คุณภาพข้อมูล')}</nav>
+        <nav class="tabs" aria-label="Dashboard navigation">${tab('tickets','🎫 ตั๋ว')}${tab('leads','🎯 คนสนใจ')}${tab('executive','ผู้บริหาร')}${tab('funnel','Funnel')}${tab('overview','ภาพรวม')}${tab('growth','ผู้ใช้')}${tab('revenue','รายได้')}${tab('engagement','การใช้งาน')}${tab('memory','🧠 ความจำ')}${tab('knowledge','📚 คลังความรู้')}${tab('operations','ระบบ')}${tab('quality','คุณภาพข้อมูล')}</nav>
         <section class="panel ${active==='tickets'?'active':''}" id="tickets">${active==='tickets'?ticketPanel():''}</section>
+        <section class="panel ${active==='leads'?'active':''}" id="leads">${active==='leads'?leadsPanel():''}</section>
         <section class="panel ${active==='executive'?'active':''}" id="executive"><div class="section-head"><div><h2>สรุปผู้บริหาร</h2><p>${esc(rangeLabel)} เทียบกับช่วงก่อนหน้าที่มีความยาวเท่ากัน</p></div></div><div class="metrics">${metric('รายได้',money(d.executive.current.revenue_thb),delta(d.executive.current.revenue_thb,d.executive.previous.revenue_thb))}${metric('ลูกค้าใหม่',number(d.executive.current.new_users),delta(d.executive.current.new_users,d.executive.previous.new_users))}${metric('ผู้ใช้ active',number(d.executive.current.active_users),delta(d.executive.current.active_users,d.executive.previous.active_users))}${metric('ผู้จ่ายเงินใหม่',number(d.executive.current.new_paid_users),delta(d.executive.current.new_paid_users,d.executive.previous.new_paid_users))}</div><div class="notice">อ่านภาพเร็ว: ดูแนวโน้มรายได้ ผู้ใช้ใหม่ Active และผู้จ่ายเงินใหม่เทียบกับช่วงก่อน ก่อนตัดสินใจเรื่องการตลาดหรือผลิตภัณฑ์</div></section>
         <section class="panel ${active==='funnel'?'active':''}" id="funnel"><div class="section-head"><div><h2>Funnel ลูกค้า</h2><p>กลุ่มที่สมัครในช่วง ${esc(rangeLabel)} และความคืบหน้าในแต่ละขั้น</p></div></div><div class="metrics">${metric('สมัคร',number(d.funnel.registered))}${metric('ยินยอม PDPA',number(d.funnel.consented),`${d.funnel.registered?Math.round(d.funnel.consented/d.funnel.registered*100):0}% ของผู้สมัคร`)}${metric('Onboard สำเร็จ',number(d.funnel.onboarded),`${d.funnel.registered?Math.round(d.funnel.onboarded/d.funnel.registered*100):0}% ของผู้สมัคร`)}${metric('ส่งข้อความแล้ว',number(d.funnel.messaged),`${d.funnel.registered?Math.round(d.funnel.messaged/d.funnel.registered*100):0}% ของผู้สมัคร`)}</div><article class="card" style="margin-top:12px"><div class="metric-label">ประสิทธิภาพตามช่องทาง</div>${list(d.funnel.by_channel,x=>`<li class="row"><span>${esc(x.channel)} <small>· onboard ${number(x.onboarded)}</small></span><b>สมัคร ${number(x.registered)} · จ่าย ${number(x.paid)}</b></li>`,'ยังไม่มีผู้สมัครในช่วงนี้')}</article>${cohortBlocks()}</section>
         <section class="panel ${active==='overview'?'active':''}" id="overview">
@@ -221,21 +444,57 @@
         <section class="panel ${active==='engagement'?'active':''}" id="engagement"><div class="section-head"><div><h2>การใช้งานและคุณค่าที่ลูกค้าได้</h2><p>ดูว่าผู้ใช้ใช้เลขาในงานใดมากที่สุด</p></div></div><div class="metrics six">${metric('ตั้งเตือน',number(d.engagement.reminders_7d),'7 วัน')}${metric('ส่งเตือนสำเร็จ',number(d.engagement.reminders_sent_7d),'7 วัน')}${metric('งานที่สร้าง',number(d.engagement.tasks_created_7d),'7 วัน')}${metric('งานเสร็จ',number(d.engagement.tasks_done_7d),'7 วัน')}${metric('รายการเงิน',number(d.engagement.expenses_7d),'7 วัน')}${metric('ไฟล์ / ความจำ',`${number(d.engagement.documents_7d)} / ${number(d.engagement.facts_7d)}`,'เพิ่มใหม่ 7 วัน')}</div><div class="split"><article class="card"><div class="metric-label">Intent ที่ถูกใช้มากสุด · 7 วัน</div>${list(d.engagement.intents,x=>`<li class="row"><span>${esc(x.intent)}</span><b>${number(x.count)}</b></li>`,'ยังไม่มี intent')}</article><article class="card"><div class="metric-label">งานที่ต้องตาม</div><ul class="list"><li class="row"><span>งานเปิดอยู่</span><b>${number(d.tasks.open)}</b></li><li class="row"><span>งานเลยกำหนด</span><b>${number(d.tasks.overdue)}</b></li><li class="row"><span>งานติดขัด</span><b>${number(d.tasks.blocked)}</b></li><li class="row"><span>Reminder รอส่ง</span><b>${number(d.reminders.pending)}</b></li></ul></article></div></section>
         <section class="panel ${active==='operations'?'active':''}" id="operations"><div class="section-head"><div><h2>การปฏิบัติการและต้นทุน AI</h2><p>ตรวจความเสถียร ก่อนกระทบลูกค้า</p></div></div><div class="metrics">${metric('AI calls',number(d.ai.calls_7d),'7 วัน')}${metric('ค่า AI วันนี้',formatUsd(d.ai.cost_today_usd))}${metric('ค่า AI 7 วัน',formatUsd(d.ai.cost_7d_usd))}${metric('สัญญาณลูกค้าติดขัด',number(d.support.frustration_signals_24h),'24 ชั่วโมง')}</div><div class="split"><article class="card"><div class="metric-label">ต้นทุนตาม intent · 7 วัน</div>${list(d.ai.by_intent,x=>`<li class="row"><span>${esc(x.intent)} <small>· ${number(x.calls)} calls</small></span><b>${formatUsd(x.usd)}</b></li>`,'ยังไม่มีข้อมูลต้นทุน')}</article><article class="card"><div class="metric-label">เสียงจากลูกค้า</div><ul class="list"><li class="row"><span>รีวิวใหม่ 30 วัน</span><b>${number(d.support.reviews_30d)}</b></li><li class="row"><span>คะแนนเฉลี่ย</span><b>${d.support.average_rating ?? '—'}</b></li><li class="row"><span>frustration signals 24 ชม.</span><b>${number(d.support.frustration_signals_24h)}</b></li></ul></article></div></section>
         <section class="panel ${active==='memory'?'active':''}" id="memory"><div class="section-head"><div><h2>🧠 คลังความจำของเลขา</h2><p>เปิดดูว่าเลขาจำอะไรของลูกค้าไว้จริง และคำถามหนึ่งคำถามดึงอะไรขึ้นมาได้บ้าง</p></div></div>${active==='memory'?memoryPanel(d):''}</section>
+        <section class="panel ${active==='knowledge'?'active':''}" id="knowledge"><div class="section-head"><div><h2>📚 คลังความรู้ของเลขา</h2><p>ข้อความเรื่องราคา · ยกเลิก/คืนเงิน · ความเป็นส่วนตัว · วิธีผูกปฏิทิน — แก้ที่นี่แล้วมีผลทันที ไม่ต้อง deploy</p></div></div>${active==='knowledge'?kbPanel():''}</section>
         <section class="panel ${active==='quality'?'active':''}" id="quality"><div class="section-head"><div><h2>PDPA และคุณภาพข้อมูล</h2><p>รายชื่อในแท็บผู้ใช้แสดงเฉพาะ dashboard admin ที่มี key และจะซ่อนชื่อผู้ที่ยังไม่ consent</p></div></div><div class="metrics">${metric('ยังไม่ consent',number(d.data_health.unconsented))}${metric('PDPA legacy pending',number(d.data_health.pdpa_pending))}${metric('ไฟล์ไม่มี hash',number(d.data_health.docs_without_hash),'ควรตรวจ dedup')}${metric('events ที่รับ 7 วัน',number(d.data_health.events_7d))}</div><div class="notice">แดชบอร์ดนี้ตั้งใจแสดงเฉพาะข้อมูลรวม เพื่อป้องกัน PII หากต้องตรวจเคสลูกค้ารายบุคคล ให้ใช้เครื่องมือ support ที่มีการยืนยันตัวตนและบันทึก audit แยกต่างหาก</div></section>${userDetail(selectedUser)}`;
-      document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{active=b.dataset.tab;render();if(active==='tickets'&&tickets===null)loadTickets()});
+      document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{active=b.dataset.tab;render();if(active==='tickets'&&tickets===null)loadTickets();if(active==='leads'&&leads===null)loadLeads();if(active==='knowledge'&&kb===null)loadKb()});
+      // 📚 สายปุ่มคลังความรู้ (วาดใหม่ทุก render จึงต้องต่อใหม่ทุกครั้ง เหมือนแท็บอื่น)
+      document.querySelectorAll('[data-kbsel]').forEach(b=>b.onclick=()=>{kbSel=b.dataset.kbsel;kbRevs=null;render()});
+      document.querySelectorAll('[data-kbsave]').forEach(b=>b.onclick=()=>kbSaveDoc(b.dataset.kbsave));
+      document.querySelectorAll('[data-kbtoggle]').forEach(b=>b.onclick=()=>kbToggle(b.dataset.kbtoggle,b.dataset.kbfield,b.dataset.kbval==='1'));
+      document.querySelectorAll('[data-kbrevs]').forEach(b=>b.onclick=()=>kbLoadRevs(b.dataset.kbrevs));
+      document.querySelectorAll('[data-kbrestore]').forEach(b=>b.onclick=()=>kbRestore(b.dataset.kbrslug,Number(b.dataset.kbrestore),b.dataset.kbrver));
+      document.querySelectorAll('[data-kbprev]').forEach(b=>b.onclick=()=>kbLoadPreview(b.dataset.kbprev,kbAt?new Date(kbAt).toISOString():null));
+      const _kat=document.querySelector('#kb-at'); if(_kat)_kat.onchange=()=>{kbAt=_kat.value};
+      document.querySelector('#kb-reload')?.addEventListener('click',()=>{kb=null;kbDraft={};kbRevs=null;render();loadKb()});
+      const _kbb=document.querySelector('#kb-body');
+      if(_kbb){ _kbb.oninput=()=>{ if(kbSel) kbDraft[kbSel]=_kbb.value };
+        // แทรกตัวแปรตรงตำแหน่งเคอร์เซอร์ (ไม่ re-render ทั้งจอ จะได้ไม่เด้งตำแหน่งพิมพ์)
+        document.querySelectorAll('[data-kbvar]').forEach(b=>b.onclick=()=>{const t='{{'+b.dataset.kbvar+'}}';const s=_kbb.selectionStart||0,e=_kbb.selectionEnd||0;_kbb.value=_kbb.value.slice(0,s)+t+_kbb.value.slice(e);_kbb.focus();_kbb.selectionStart=_kbb.selectionEnd=s+t.length;if(kbSel)kbDraft[kbSel]=_kbb.value}); }
       // 🎫 สายปุ่มฝั่งตั๋ว (วาดใหม่ทุก render จึงต้องต่อใหม่ทุกครั้ง)
       document.querySelectorAll('[data-tkopen]').forEach(b=>b.onclick=()=>openTicketView(b.dataset.tkopen));
+      document.querySelectorAll('[data-lead-filter]').forEach(b=>b.onclick=()=>{leadsFilter=b.dataset.leadFilter;leads=null;render();loadLeads()});
+      document.querySelectorAll('[data-lead-send]').forEach(b=>b.onclick=()=>msgLead(b.dataset.leadSend,b.dataset.leadTk));
       // 🧠 สายปุ่มแท็บความจำ (วาดใหม่ทุก render เหมือนฝั่งตั๋ว)
       const _mu=document.querySelector('#mem-user'), _mq=document.querySelector('#mem-q'), _mg=document.querySelector('#mem-go');
       if(_mu)_mu.onchange=()=>{ memState={...memState,user:_mu.value,q:'',data:null,error:''}; if(_mu.value)loadMemory(_mu.value,''); else render(); };
       if(_mg)_mg.onclick=()=>loadMemory(_mu?_mu.value:'', _mq?_mq.value.trim():'');
       if(_mq){ _mq.oninput=()=>{ memState.q=_mq.value }; _mq.onkeydown=(e)=>{ if(e.key==='Enter'&&_mg)_mg.click() } }
+      const _mfr=document.querySelector('#mem-feed-reload'); if(_mfr)_mfr.onclick=loadMemFeed;
+      document.querySelectorAll('[data-delfact]').forEach(b=>b.onclick=()=>delFact(b.dataset.delfact,b));
       const _bk=document.querySelector('#tkback'); if(_bk)_bk.onclick=closeTicketView;
       const _sd=document.querySelector('#tksend'); if(_sd)_sd.onclick=()=>replyTicket(ticketView.ticket.id);
       document.querySelectorAll('[data-tkst]').forEach(b=>b.onclick=()=>setTicketStatus(ticketView.ticket.id,b.dataset.tkst)); document.querySelectorAll('[data-user]').forEach(b=>b.onclick=()=>openUser(d,Number(b.dataset.user))); document.querySelector('#refresh').onclick=load; document.querySelector('#apply-range').onclick=()=>{const r=dashboardRangeParams(document.querySelector('#range-start').value,document.querySelector('#range-end').value);if(!r){document.querySelector('#range-error').textContent='เลือกวันเริ่มและวันสิ้นสุดให้ถูกต้อง (สูงสุด 367 วัน)';return}rangeStart=r.start;rangeEnd=r.end;load()}; document.querySelector('#clear-range').onclick=()=>{rangeStart='';rangeEnd='';load()}; document.querySelector('#blur').onclick=()=>privacy.style.display='flex'; document.querySelector('#forget')?.addEventListener('click',()=>{try{localStorage.removeItem('yb_dash_key')}catch(e){};location.href=location.pathname}); document.querySelector('#close-user')?.addEventListener('click',()=>{selectedUser=null;render()}); document.querySelector('#close-user-button')?.addEventListener('click',()=>{selectedUser=null;render()});
     }
     function showKeyForm(message='ต้องใช้ลิงก์ admin ที่มี dashboard key เพื่อเปิดข้อมูล') { app.innerHTML=`<div class="error"><div class="mark" style="margin:0 auto 12px">YB</div><h2>Admin Dashboard</h2><p>${message}</p><input id="key" class="key-input" placeholder="วาง dash key หรือ URL dashboard"><button class="btn primary" id="open">เปิดแดชบอร์ด</button></div>`; document.querySelector('#open').onclick=()=>{const input=document.querySelector('#key').value.trim();try{const u=new URL(input); key=decodeURIComponent(u.hash.slice(1)||u.searchParams.get('dash')||'')}catch{key=input}if(key){try{localStorage.setItem('yb_dash_key',key)}catch(e){}load()}}; }
-    async function load(){ if(demoMode){data=normalizeDashboardPayload(demoDashboardPayload());render();return} if(!key){showKeyForm();return} app.classList.add('loading'); try{const params=new URLSearchParams({dash:key,json:'1'});if(rangeStart&&rangeEnd){params.set('start',rangeStart);params.set('end',rangeEnd)}const r=await fetch(`${API}?${params}`,{cache:'no-store',referrerPolicy:'no-referrer'});if(!r.ok)throw new Error(r.status===404?'ลิงก์ไม่ถูกต้อง หรือถูกหมุน key แล้ว':'เชื่อมต่อข้อมูลไม่ได้');data=normalizeDashboardPayload(await r.json());render();if(openTicket){openTicketView(openTicket)}else if(active==='tickets'){loadTickets()}}catch(e){showKeyForm(esc(e.message||'โหลดข้อมูลไม่สำเร็จ'))}finally{app.classList.remove('loading')}}
+    /* 🔁 cold start: edge function ที่หลับอยู่ + dashboard_stats ที่หนัก (~6 วิเมื่อเย็น) ทำให้คำขอแรก
+       ตอบ 5xx ได้ แล้วคำขอถัดไปขึ้นปกติ — บอสเจออาการ "เปิดเช้ามาไม่ขึ้น ต้อง refresh เอง" (5 ส.ค.)
+       ลองซ้ำเองให้ ไม่ต้องให้คนไปกด refresh · ลองเฉพาะ 5xx กับ network error เท่านั้น
+       404 = key ผิด/ถูกหมุน เป็นความผิดถาวร ต้องเด้งให้เห็นทันที ลองซ้ำไปก็ไม่มีประโยชน์ */
+    const COLD_RETRIES = 2, COLD_WAIT_MS = 1500;
+    const sleepMs = (ms) => new Promise(r => setTimeout(r, ms));
+    async function fetchWarm(url, opts, onRetry){
+      let lastErr = null;
+      for (let i = 0; i <= COLD_RETRIES; i++){
+        try{
+          const r = await fetch(url, opts);
+          if (r.status < 500) return r;
+          lastErr = new Error('เชื่อมต่อข้อมูลไม่ได้ (' + r.status + ')');
+        }catch(e){ lastErr = e; }
+        if (i < COLD_RETRIES){ if (onRetry) onRetry(i + 1); await sleepMs(COLD_WAIT_MS); }
+      }
+      throw lastErr || new Error('เชื่อมต่อข้อมูลไม่ได้');
+    }
+    async function load(){ if(demoMode){data=normalizeDashboardPayload(demoDashboardPayload());render();return} if(!key){showKeyForm();return} app.classList.add('loading'); try{const params=new URLSearchParams({dash:key,json:'1'});if(rangeStart&&rangeEnd){params.set('start',rangeStart);params.set('end',rangeEnd)}const r=await fetchWarm(`${API}?${params}`,{cache:'no-store',referrerPolicy:'no-referrer'},(n)=>{try{app.innerHTML='<div class="empty">กำลังปลุกระบบ… ลองใหม่ครั้งที่ '+n+'</div>'}catch(_e){}});if(!r.ok)throw new Error(r.status===404?'ลิงก์ไม่ถูกต้อง หรือถูกหมุน key แล้ว':'เชื่อมต่อข้อมูลไม่ได้');data=normalizeDashboardPayload(await r.json());render();if(openTicket){openTicketView(openTicket)}else if(active==='tickets'){loadTickets()}}catch(e){showKeyForm(esc(e.message||'โหลดข้อมูลไม่สำเร็จ'))}finally{app.classList.remove('loading')}}
     privacy.onclick=()=>privacy.style.display='none'; document.addEventListener('visibilitychange',()=>{privacy.style.display=document.hidden?'flex':'none'}); setInterval(()=>{if(!document.hidden)load()},300000); load();
   </script>
 </body>
