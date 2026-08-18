@@ -272,7 +272,21 @@ up:'<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>',
 down:'<path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>'};
 function icn(n,s){return '<svg class="ik" width="'+(s||18)+'" height="'+(s||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||"")+'</svg>'}
 
-var MOOD_TH={stressed:["😣","เครียด","#db6d28"],sad:["😢","เศร้า","#6e7bdb"],angry:["😠","โกรธ","#f85149"],anxious:["😰","กังวล","#d29922"],tired:["😮‍💨","เหนื่อยล้า","#8b949e"],lonely:["🥺","เหงา","#a371f7"],ok:["🙂","เฉยๆ","#3fb950"],happy:["😄","สดใส","#2ea043"]};
+var MOOD_TH={stressed:["😣","เครียด","#E08D5A"],sad:["😢","เศร้า","#7C8BD9"],angry:["😠","โกรธ","#E36D6D"],anxious:["😰","กังวล","#D9A73E"],tired:["😮‍💨","เหนื่อยล้า","#9AA0A8"],lonely:["🥺","เหงา","#B08AD9"],ok:["🙂","เฉยๆ","#A89DAA"],happy:["😄","สดใส","#E8779B"]};
+/* 🙂 หน้าอารมณ์วาดเอง (SVG) แทนอีโมจิ — บอสสั่ง 18 ส.ค. "เอาอันอื่นที่ไม่ใช่อีโมจิ" · สไตล์เดียวทั้งแอป */
+var MOOD_FACE={
+ stressed:'<path d="M11 13.5l4.5 3-4.5 3M25 13.5l-4.5 3 4.5 3"/><path d="M12 25.5c2-1.8 4 1.8 6 0s4 1.8 6 0"/>',
+ sad:'<circle cx="12.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><circle cx="23.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><path d="M13 26c2.5-2.8 7.5-2.8 10 0"/><path d="M26.6 19.2c1.6 2.4 1.6 4-.1 4.2-1.5.2-1.8-1.9.1-4.2z" fill="CU" stroke="none"/>',
+ angry:'<path d="M10 12l5 2.2M26 12l-5 2.2"/><circle cx="13" cy="17" r="1.9" fill="CU" stroke="none"/><circle cx="23" cy="17" r="1.9" fill="CU" stroke="none"/><path d="M13 26c2.5-2.6 7.5-2.6 10 0"/>',
+ anxious:'<circle cx="12.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><circle cx="23.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><path d="M12 24.5c2-1.6 4 1.6 6 0s4 1.6 6 0"/><path d="M28.6 10.6c1.4 2 1.4 3.4-.1 3.6-1.3.2-1.6-1.7.1-3.6z" fill="CU" stroke="none"/>',
+ tired:'<path d="M10.5 15.5c1.5 1.6 3.5 1.6 5 0M20.5 15.5c1.5 1.6 3.5 1.6 5 0"/><path d="M15.5 25h5"/>',
+ lonely:'<circle cx="12.5" cy="16" r="2.3" fill="CU" stroke="none"/><circle cx="23.5" cy="16" r="2.3" fill="CU" stroke="none"/><circle cx="18" cy="25" r="1.5" fill="CU" stroke="none"/><ellipse cx="9.5" cy="20.5" rx="2" ry="1.1" fill="CU" opacity=".35" stroke="none"/><ellipse cx="26.5" cy="20.5" rx="2" ry="1.1" fill="CU" opacity=".35" stroke="none"/>',
+ ok:'<circle cx="12.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><circle cx="23.5" cy="15.5" r="1.9" fill="CU" stroke="none"/><path d="M13.5 24.5h9"/>',
+ happy:'<path d="M10.5 15.5c1.5-2.2 3.5-2.2 5 0M20.5 15.5c1.5-2.2 3.5-2.2 5 0"/><path d="M12 22.5c3 3.6 9 3.6 12 0"/><ellipse cx="9.3" cy="19.5" rx="1.9" ry="1" fill="CU" opacity=".35" stroke="none"/><ellipse cx="26.7" cy="19.5" rx="1.9" ry="1" fill="CU" opacity=".35" stroke="none"/>',
+ calm:'<path d="M10.5 16c1.5 1.4 3.5 1.4 5 0M20.5 16c1.5 1.4 3.5 1.4 5 0"/><path d="M14 24c2 1.8 6 1.8 8 0"/>'
+};
+function moodFace(k,sz){var mt=MOOD_TH[k];var c=mt?mt[2]:"#B85C7E";var f=(MOOD_FACE[k]||MOOD_FACE.ok).replace(/CU/g,c);
+ return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 36 36" style="vertical-align:-3px" aria-hidden="true"><circle cx="18" cy="18" r="15.2" fill="'+c+'22" stroke="'+c+'" stroke-width="2.4"/><g fill="none" stroke="'+c+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+f+'</g></svg>'}
 var SCOPE_TH={company:icn("briefcase",13),family:icn("home",13),personal:icn("user",13)};
 var CHAR_LB={"ครับบอส":"สุภาพ (ครับ)","ค่ะบอส":"สุภาพ (ค่ะ)","ขาบอส":"สดใส (ขา)"};
 function $(s){return document.querySelector(s)}
@@ -998,7 +1012,7 @@ function vHome(){
     +'<div style="border-top:1px solid #EDEDF2;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>'
     +'</div></div></div>';
   h+=taskCard+calCard+moneyCard;
-  var me=lastMood?(MOOD_TH[lastMood.mood]||["🙂"])[0]:"🤍";
+  var me=lastMood?moodFace(MOOD_TH[lastMood.mood]?lastMood.mood:"ok",18):"🤍";
   h+='<div class="stats" style="margin:4px 0 0">';
   h+='<button type="button" class="st" onclick="fortune()" style="cursor:pointer;width:100%;text-align:left;font-family:inherit"><div class="ico" style="background:#F3F3F7;color:#E0466E">'+icn("sparkles",22)+'</div><div><div style="font-size:14.5px;font-weight:800">ดวงวันนี้</div><div class="cap">เช็คก่อนเริ่มวัน</div></div></button>';
   h+='<button type="button" class="st" onclick="vent()" style="cursor:pointer;width:100%;text-align:left;font-family:inherit"><div class="ico" style="background:#F3F3F7">'+me+'</div><div><div style="font-size:14.5px;font-weight:800">ระบายกับเลขา</div><div class="cap">อยู่เป็นเพื่อนเสมอ</div></div></button>';
@@ -1537,14 +1551,14 @@ function vHeal(){
     +'<button type="button" class="hlbtn ghost" onclick="openHealRoom()">'+icn("battery",17)+' เข้าห้องพักใจ →</button>'
     +'</div>';
   h+='<h2>วันนี้รู้สึกยังไง?</h2><div class="card"><div class="moods" id="moodpick">';
-  for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+MOOD_TH[key][0]+'</span>'+MOOD_TH[key][1]+'</button>'}
+  for(var key in MOOD_TH){h+='<button data-m="'+key+'" onclick="pickMood(this,\''+key+'\')"><span class="e">'+moodFace(key,30)+'</span>'+MOOD_TH[key][1]+'</button>'}
   h+='</div><input id="mnote" placeholder="อยากบันทึกอะไรไหม (ไม่ใส่ก็ได้)"><button class="btn" style="width:100%;margin-top:10px" onclick="saveMood()">บันทึกความรู้สึก</button></div>';
   h+=moodTrend();
   h+='<h2>บันทึกอารมณ์ล่าสุด</h2>';
   var ms=DATA.mood||[];
   if(!ms.length){h+='<div class="empty">ยังไม่มีบันทึก — เริ่มเช็คอินความรู้สึกวันนี้ได้เลย 🤍</div>'}
   for(var i=0;i<Math.min(ms.length,25);i++){var m=ms[i];var mt=MOOD_TH[m.mood]||["🙂","—"];
-    h+='<div class="rowitem"><div style="font-size:22px">'+mt[0]+'</div><div class="grow"><div class="t">'+esc(mt[1])+(m.source==="comfort"?'<span class="pill">จากแชต</span>':m.source==="heal"?'<span class="pill">🔋 ห้องพักใจ</span>':'')+'</div><div class="m">'+esc(m.note||"")+' · '+fdate(m.created_at)+'</div></div></div>';
+    h+='<div class="rowitem"><div>'+moodFace(MOOD_TH[m.mood]?m.mood:"ok",26)+'</div><div class="grow"><div class="t">'+esc(mt[1])+(m.source==="comfort"?'<span class="pill">จากแชต</span>':m.source==="heal"?'<span class="pill">🔋 ห้องพักใจ</span>':'')+'</div><div class="m">'+esc(m.note||"")+' · '+fdate(m.created_at)+'</div></div></div>';
   }
   h+='<div class="foot">🔒 อยากลบบันทึกฮีลใจทั้งหมด ทำได้ที่แท็บโปรไฟล์ (ลบข้อมูล)</div>';
   return h;
@@ -1555,7 +1569,7 @@ function moodTrend(){
   var cnt={},tot=0;
   for(var i=0;i<ms.length;i++){cnt[ms[i].mood]=(cnt[ms[i].mood]||0)+1;tot++}
   var bar='<div class="bar">',leg="";
-  for(var key in MOOD_TH){if(cnt[key]){var pct=Math.round(cnt[key]/tot*100);bar+='<span style="width:'+pct+'%;background:'+MOOD_TH[key][2]+'"></span>';leg+='<span class="pill">'+MOOD_TH[key][0]+' '+cnt[key]+'</span>'}}
+  for(var key in MOOD_TH){if(cnt[key]){var pct=Math.round(cnt[key]/tot*100);bar+='<span style="width:'+pct+'%;background:'+MOOD_TH[key][2]+'"></span>';leg+='<span class="pill">'+moodFace(key,14)+' '+cnt[key]+'</span>'}}
   bar+='</div>';
   return '<h2>อารมณ์ 14 วันล่าสุด ('+tot+' ครั้ง)</h2><div class="card">'+bar+'<div style="margin-top:6px">'+leg+'</div></div>';
 }
@@ -2207,10 +2221,10 @@ function hrHome(){EMO=[196,110,148];render(
   '<h1>ตอนนี้ใจเป็นยังไง'+kb()+'บอส<span class="soft">เลือกตามจริงได้เลย ไม่ต้องฝืน — ใช้เวลาแค่ 2-3 นาที แล้วค่อยกลับไปลุยต่อ</span></h1>'+
   '<div class="hmid"><img class="hbossy" src="img/p10-heart.webp" alt=""></div>'+
   '<div class="hmoods">'+
-    '<div class="hmood" data-k="anger"><span class="e">😤</span><span class="n">โมโห / หัวร้อน</span></div>'+
-    '<div class="hmood" data-k="stress"><span class="e">😵‍💫</span><span class="n">เครียด / คิดวนไม่หยุด</span></div>'+
-    '<div class="hmood" data-k="sad"><span class="e">😞</span><span class="n">เหนื่อยใจ / ท้อ</span></div>'+
-    '<div class="hmood" data-k="rest"><span class="e">☕</span><span class="n">ขอพักแป๊บ</span></div>'+
+    '<div class="hmood" data-k="anger"><span class="e">'+moodFace("angry",34)+'</span><span class="n">โมโห / หัวร้อน</span></div>'+
+    '<div class="hmood" data-k="stress"><span class="e">'+moodFace("stressed",34)+'</span><span class="n">เครียด / คิดวนไม่หยุด</span></div>'+
+    '<div class="hmood" data-k="sad"><span class="e">'+moodFace("tired",34)+'</span><span class="n">เหนื่อยใจ / ท้อ</span></div>'+
+    '<div class="hmood" data-k="rest"><span class="e">'+moodFace("calm",34)+'</span><span class="n">ขอพักแป๊บ</span></div>'+
   '</div>'+
   '<div class="hfoot">สิ่งที่พิมพ์ระบายในห้องนี้ไม่ถูกบันทึก · เก็บเฉพาะผลว่ารอบนี้ช่วยได้ไหม</div>');
   setBatt(8);$h("hrblbl").textContent="พลังใจ";
