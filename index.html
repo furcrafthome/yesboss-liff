@@ -174,58 +174,58 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
 .att .thumb img{width:100%;height:100%;object-fit:cover}
 .att .thumb button{position:absolute;top:0;right:0;background:rgba(0,0,0,.6);color:#fff;border:none;width:24px;height:24px;font-size:14px;border-radius:0 0 0 8px;min-width:24px;min-height:24px}
 /* 🔋 การ์ดฮีโร่ทางเข้าห้องพักใจ — ใหญ่ เด่น ชวนกด */
-.hlhero{position:relative;overflow:hidden;background:linear-gradient(150deg,#8A4560,#3A1A2C 70%);border-radius:22px;padding:24px 18px 20px;margin-top:12px;text-align:center;cursor:pointer;box-shadow:0 10px 30px rgba(90,30,55,.35)}
-.hlhero:before{content:"";position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:280px;height:280px;background:radial-gradient(circle,rgba(255,170,200,.38),transparent 65%);pointer-events:none}
+.hlhero{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:24px 18px 20px;margin-top:12px;text-align:center;cursor:pointer;box-shadow:0 2.5px 0 var(--paper1),0 5px 0 var(--paper2),0 11px 18px var(--shadow)}
+.hlhero:before{content:"";position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:280px;height:280px;background:radial-gradient(circle,rgba(252,224,234,.65),transparent 65%);pointer-events:none}
 .hlhero img{width:104px;position:relative;animation:hlfloat 2.6s ease-in-out infinite}
 @keyframes hlfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.hlhero .hlt{font-size:24px;font-weight:800;color:#fff;margin-top:4px;position:relative}
-.hlhero .hls{font-size:13.5px;color:#F8D8E4;line-height:1.65;margin-top:6px;position:relative}
-.hlhero .hlbtn{position:relative;display:block;width:100%;border:0;border-radius:99px;margin-top:16px;padding:16px;font-size:17px;font-weight:800;color:#7A2E4E;background:#fff;animation:hlpulse 1.8s ease-in-out infinite;cursor:pointer}
-@keyframes hlpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.5);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(255,255,255,0);transform:scale(1.02)}}
-.hlhero .hlbtn.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.55);animation:none;font-weight:700}
+.hlhero .hlt{font-size:24px;font-weight:800;color:var(--ink-strong);margin-top:4px;position:relative}
+.hlhero .hls{font-size:13.5px;color:var(--muted);line-height:1.65;margin-top:6px;position:relative}
+.hlhero .hlbtn{position:relative;display:block;width:100%;border:0;border-radius:99px;margin-top:16px;padding:16px;font-size:17px;font-weight:800;color:#fff;background:var(--brand-ink);animation:hlpulse 1.8s ease-in-out infinite;cursor:pointer}
+@keyframes hlpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,42,94,.35);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(201,42,94,0);transform:scale(1.02)}}
+.hlhero .hlbtn.ghost{background:var(--brand-soft);color:var(--brand-ink);animation:none;font-weight:700}
 /* ---------- 🔋 ห้องพักใจ (โลกอีกใบ: มืด สงบ — จงใจต่างจากธีมหลัก) ---------- */
-#healroom{position:fixed;inset:0;z-index:50;background:#241019;display:none;color:#FBEFF4}
+#healroom{position:fixed;inset:0;z-index:50;background:#FAF3F6;display:none;color:#44434A}
 #healroom .hwrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
 #hrscene{position:absolute;inset:0;transition:background 1.4s ease;z-index:0}
 #healroom .hbrow{display:flex;align-items:center;gap:12px}
-#healroom .hbatt{flex:1;height:30px;border:3px solid rgba(255,255,255,.55);border-radius:10px;position:relative;padding:3px;background:rgba(0,0,0,.28)}
-#healroom .hbatt:after{content:"";position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:6px;height:14px;background:rgba(255,255,255,.55);border-radius:0 3px 3px 0}
+#healroom .hbatt{flex:1;height:30px;border:3px solid #E5C8D4;border-radius:10px;position:relative;padding:3px;background:#F3E3EA}
+#healroom .hbatt:after{content:"";position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:6px;height:14px;background:#E5C8D4;border-radius:0 3px 3px 0}
 #hrfill{height:100%;border-radius:5px;width:8%;transition:width .9s cubic-bezier(.4,1.3,.5,1),background .9s ease,box-shadow .9s ease}
 #hrpct{font-size:18px;font-weight:800;min-width:52px;text-align:right}
-#hrblbl{font-size:12px;color:#F0CFDD;opacity:.85;margin-top:6px;height:16px}
+#hrblbl{font-size:12px;color:#6E6E73;opacity:.9;margin-top:6px;height:16px}
 #healroom .bolt.on{display:inline-block;animation:hrflash 1s infinite}
 @keyframes hrflash{50%{opacity:.3}}
 #hrstage{flex:1;display:flex;flex-direction:column;margin-top:12px;min-height:0;overflow-y:auto}
 #healroom .hinner{display:flex;flex-direction:column;flex:1;min-height:0}
 #healroom .hfade{animation:hrfade .5s ease}
 @keyframes hrfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-#healroom .htag{font-size:12px;letter-spacing:.6px;color:#E9C6D6;display:flex;align-items:center;gap:9px}
-#healroom .hback{background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:15px;flex:none;font-family:inherit}
-#healroom h1{font-size:21px;font-weight:800;line-height:1.35;margin-top:10px;color:#fff;letter-spacing:0}
+#healroom .htag{font-size:12px;letter-spacing:.6px;color:#8A4560;display:flex;align-items:center;gap:9px}
+#healroom .hback{background:#F6E9EE;border:none;color:#8A4560;border-radius:50%;width:30px;height:30px;font-size:15px;flex:none;font-family:inherit}
+#healroom h1{font-size:21px;font-weight:800;line-height:1.35;margin-top:10px;color:#23232B;letter-spacing:0}
 #healroom h1 .soft{display:block;font-weight:600;font-size:14.5px;opacity:.82;margin-top:9px;line-height:1.7}
 #healroom .hmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100px}
 #healroom .hero{font-size:62px;animation:hrbob 4.5s ease-in-out infinite}
 #healroom .hbossy{width:118px;animation:hrbob 4.5s ease-in-out infinite;filter:drop-shadow(0 10px 26px rgba(122,162,255,.4))}
 @keyframes hrbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-#healroom .hbtn{background:#fff;color:#7A2E4E;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;width:100%;transition:transform .15s;margin-top:9px;flex:none}
+#healroom .hbtn{background:#C92A5E;color:#fff;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;width:100%;transition:transform .15s;margin-top:9px;flex:none}
 #healroom .hbtn:active{transform:scale(.97)}
-#healroom .hbtn.ghost{background:rgba(255,255,255,.15);color:#fff}
+#healroom .hbtn.ghost{background:#F6E9EE;color:#8A4560}
 #healroom .hbtn:disabled{opacity:.45}
 #healroom .hmoods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
-#healroom .hmood{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:18px 12px;transition:transform .15s;text-align:center}
+#healroom .hmood{background:#fff;border:1px solid #F0DCE4;border-radius:20px;padding:18px 12px;transition:transform .15s;text-align:center;box-shadow:0 2px 0 #F6E3EA,0 5px 10px rgba(237,104,133,.10)}
 #healroom .hmood:active{transform:scale(.95)}
 #healroom .hmood .e{font-size:36px;display:block}
-#healroom .hmood .n{margin-top:7px;font-size:15px;font-weight:600;color:#fff}
+#healroom .hmood .n{margin-top:7px;font-size:15px;font-weight:600;color:#44434A}
 #healroom .hchoices{display:flex;flex-direction:column;gap:11px;width:100%}
-#healroom .hchip{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:14px;font-size:15px;line-height:1.5;transition:transform .15s,background .2s;text-align:left;color:#fff}
+#healroom .hchip{background:#fff;border:1px solid #F0DCE4;border-radius:15px;padding:14px;font-size:15px;line-height:1.5;transition:transform .15s,background .2s;text-align:left;color:#44434A;box-shadow:0 2px 0 #F6E3EA,0 5px 10px rgba(237,104,133,.10)}
 #healroom .hchip:active{transform:scale(.97)}
-#healroom .hchip.pick{background:#fff;color:#7A2E4E;font-weight:700}
-#healroom textarea{width:100%;flex:1;min-height:100px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.16);border-radius:18px;color:#fff;font-size:17px;line-height:1.6;padding:15px;font-family:inherit;resize:none;margin:10px 0;transition:opacity 1.2s,transform 1.2s,filter 1.2s}
-#healroom input{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.16);border-radius:14px;color:#fff;font-size:17px;padding:13px;font-family:inherit;margin:10px 0}
-#healroom textarea::placeholder,#healroom input::placeholder{color:rgba(255,255,255,.5)}
+#healroom .hchip.pick{background:#C92A5E;color:#fff;font-weight:700}
+#healroom textarea{width:100%;flex:1;min-height:100px;background:#fff;border:1px solid #F0C9D8;border-radius:18px;color:#44434A;font-size:17px;line-height:1.6;padding:15px;font-family:inherit;resize:none;margin:10px 0;transition:opacity 1.2s,transform 1.2s,filter 1.2s}
+#healroom input{width:100%;background:#fff;border:1px solid #F0C9D8;border-radius:14px;color:#44434A;font-size:17px;padding:13px;font-family:inherit;margin:10px 0}
+#healroom textarea::placeholder,#healroom input::placeholder{color:#B9AEB6}
 #healroom textarea.gone{opacity:0;transform:translateY(-90px) scale(.85);filter:blur(12px)}
 #healroom .horb{width:158px;height:158px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.55),rgba(150,220,235,.15) 60%,transparent);box-shadow:0 0 55px rgba(150,225,240,.4);transition:transform 4s ease;font-size:18px;font-weight:700;text-align:center;padding:12px}
-#healroom .hnote{background:rgba(255,255,255,.1);border-radius:14px;padding:13px 15px;font-size:14.5px;line-height:1.7;margin-top:12px;color:#fff}
+#healroom .hnote{background:#FDF0F5;border-radius:14px;padding:13px 15px;font-size:14.5px;line-height:1.7;margin-top:12px;color:#44434A}
 #healroom .hsafe{margin-top:12px;background:rgba(255,90,90,.15);border:1px solid rgba(255,120,120,.32);border-radius:14px;padding:11px 13px;font-size:12px;line-height:1.6;color:#ffdada}
 #healroom .hsafe a{color:#fff;font-weight:700}
 #healroom .hfoot{font-size:10.5px;color:rgba(255,255,255,.35);text-align:center;margin-top:10px;line-height:1.6}
@@ -2157,7 +2157,7 @@ function setBatt(p){BATT=Math.max(0,Math.min(100,p));var fc=bcol(BATT);
   $h("hrfill").style.width=BATT+"%";$h("hrfill").style.background=rgbs(fc);$h("hrfill").style.boxShadow="0 0 18px "+rgbs(fc);
   $h("hrpct").textContent=Math.round(BATT)+"%";$h("hrpct").style.color=rgbs(fc);
   var sc=lerp(EMO,GREEN,BATT/100);
-  $h("hrscene").style.background="radial-gradient(95% 65% at 50% 6%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.5),transparent),radial-gradient(80% 60% at 72% 100%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.25),transparent),#241019"}
+  $h("hrscene").style.background="radial-gradient(95% 65% at 50% 6%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.28),transparent),radial-gradient(80% 60% at 72% 100%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.14),transparent),#FAF3F6"}
 function chargeTo(target,lbl,cb){var tk=++chargeTok;
   $h("hrblbl").innerHTML='<span class="bolt on">⚡</span> '+(lbl||"กำลังชาร์จ...");
   var start=BATT,t0=null;
