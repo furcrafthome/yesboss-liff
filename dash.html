@@ -388,12 +388,36 @@
       render();
     }
     function bn(v){return v===null||v===undefined?'เช็คไม่ได้':number(v)}
+    // 🧭 เครื่องประเมินสุขภาพสมอง — pure function: payload ยอดรวม → รายการ {level, area, msg, act}
+    // level ตายตัว 3 ค่า (red/yellow/green) · ข้อความ action ชี้ไป docs/memory-ops-runbook.md
+    // กติกาเหล็ก: แยก "ไม่มีข้อมูล (0 จริง)" จาก "อ่าน/worker ล้ม (null)" จาก "ยังไม่มี telemetry (ปกติช่วงแรก)"
+    function brainAssess(b){
+      const out=[]; const q=(b&&b.queue)||{}; const r=(b&&b.retrieval);
+      const nul=(v)=>v===null||v===undefined;
+      if(!b||!b.ok||nul(q.pending)&&nul(q.dead_letter)){out.push({level:'red',area:'อ่านข้อมูล',msg:'อ่านตัวเลขคิวไม่ได้ทั้งแผง — นี่คือ "เช็คไม่ได้" ไม่ใช่ "คิวว่าง/ระบบดี"',act:'runbook §อ่านไม่ได้'});return out}
+      if(nul(q.dead_letter)){out.push({level:'red',area:'dead letter',msg:'อ่านยอด dead letter ไม่ได้',act:'runbook §อ่านไม่ได้'})}
+      else if(q.dead_letter>0){out.push({level:'red',area:'dead letter',msg:'มีงานตกคิวถาวร '+q.dead_letter+' ใบ — ความจำบางใบไม่ถูกเขียนแน่นอน',act:'runbook §dead_letter (ดูรหัสใน error_codes ก่อน)'})}
+      if(q.scheduler_state==='possibly_stalled'){out.push({level:'red',area:'ตัวปลุก worker',msg:'มีของพร้อมทำค้าง >30 นาทีแต่ไม่มีใครหยิบ — worker อาจไม่ถูกปลุก',act:'runbook §worker ไม่เดิน (เช็ค cron.job / secret)'})}
+      else if(q.scheduler_state==='unknown'){out.push({level:'yellow',area:'ตัวปลุก worker',msg:'อ่านสถานะตัวปลุกไม่ได้ (เช็คไม่ได้ ≠ พัง)',act:'รีเฟรช · ค้างนานให้ดู runbook §อ่านไม่ได้'})}
+      if(typeof q.retry_rate_24h_pct==='number'&&q.retry_rate_24h_pct>20){out.push({level:'yellow',area:'อัตราลองซ้ำ',msg:'งานสำเร็จแบบต้องลองซ้ำ '+q.retry_rate_24h_pct+'% ใน 24 ชม. — มีอะไรฝืดๆ ต้นน้ำ',act:'ดู error_codes ประกอบ'})}
+      if(typeof q.oldest_ready_min==='number'&&q.oldest_ready_min>30&&q.scheduler_state==='ok'){out.push({level:'yellow',area:'คิวค้าง',msg:'งานเก่าสุดรอมา '+q.oldest_ready_min+' นาทีทั้งที่ worker เดินอยู่ — คิวอาจยาวกว่ากำลัง',act:'เฝ้าดู ถ้าโตต่อเนื่องเปิด runbook'})}
+      if(r===null||r===undefined){out.push({level:'red',area:'telemetry',msg:'อ่านตัวนับการเลือกแหล่งไม่ได้',act:'runbook §อ่านไม่ได้'})}
+      else if(Object.keys(r).length===0){out.push({level:'yellow',area:'telemetry',msg:'วันนี้ยังไม่มีตัวนับ — ปกติช่วงแรกหลัง deploy (ตัวนับเดินเฉพาะเส้นคุย/ถาม ~สิบครั้ง/วัน)',act:'เช็คใหม่พรุ่งนี้เช้า ถ้ายังศูนย์ทั้งที่มีคนคุยค่อยสงสัย'})}
+      else if((r['structured:error']||0)>0){out.push({level:'yellow',area:'ดึงข้อมูล',msg:'มีครั้งที่อ่านตารางไม่ได้ '+r['structured:error']+' ครั้งวันนี้ (ลูกค้าได้ยิน "ขอเช็คใหม่" แทนคำโกหกว่าไม่มี)',act:'ถ้าเลขโตเร็ว เช็คสถานะ DB'})}
+      if(!out.length)out.push({level:'green',area:'รวม',msg:'สมองเดินปกติ — คิวไหล ตัวนับเดิน ไม่มีของตกค้าง',act:'ไม่ต้องทำอะไร'});
+      return out;
+    }
     function brainPanel(){
       if(brain===null)return '<div class="empty">กำลังโหลด…</div>';
       if(brainErr)return `<div class="notice">${esc(brainErr)}</div>`;
       const q=brain.queue||{},t=brain.threads||{},c=brain.commitments||{},r=brain.retrieval||{};
       const rv=(l)=>number(r[l]||0);
-      return `<div class="metrics">${metric('คิวความจำรอทำ',bn(q.pending),q.oldest_ready_min===null?'อายุคิว: เช็คไม่ได้':`เก่าสุดรอมา ${bn(q.oldest_ready_min)} นาที`)}${metric('ล้มรอลองใหม่',bn(q.retryable_failed))}${metric('ตกคิวถาวร (dead letter)',bn(q.dead_letter),Number(q.dead_letter)>0?'ต้องไล่ดู memory_jobs':'')}${metric('เรื่องคุยค้าง active',bn(t.active),`วันนี้ใหม่ ${bn(t.created_today)} · ปิด ${bn(t.resolved_today)}`)}</div>
+      // 🚦 แถบตัดสินใจ 30 วินาที: อาการแย่สุดขึ้นก่อน พร้อมสิ่งที่ต้องทำ
+      const ax=brainAssess(brain); const rank={red:0,yellow:1,green:2}; ax.sort((x,y)=>rank[x.level]-rank[y.level]);
+      const dot={red:'🔴',yellow:'🟡',green:'🟢'};
+      const strip=`<article class="card" style="margin-bottom:12px"><div class="metric-label">อ่านตรงนี้ก่อน (เรียงจากด่วนสุด)</div><ul class="list">${ax.map(a=>`<li class="row"><span>${dot[a.level]} <b>${esc(a.area)}</b> — ${esc(a.msg)}</span><b style="white-space:nowrap;margin-left:8px">${esc(a.act)}</b></li>`).join('')}</ul></article>`;
+      const ops=`<div class="metrics" style="margin-top:12px">${metric('worker กำลังทำ',bn(q.processing),q.scheduler_state?`ตัวปลุก: ${esc(String(q.scheduler_state))}`:'')}${metric('สำเร็จชั่วโมงล่าสุด',bn(q.completed_60m),q.last_completed_min===null?'ล่าสุด: ยังบอกไม่ได้':`งานสำเร็จล่าสุด ${bn(q.last_completed_min)} นาทีก่อน`)}${metric('อัตราลองซ้ำ 24 ชม.',q.retry_rate_24h_pct===null||q.retry_rate_24h_pct===undefined?'เช็คไม่ได้':q.retry_rate_24h_pct+'%')}${metric('รหัสงานล้มล่าสุด',q.error_codes===null||q.error_codes===undefined?'เช็คไม่ได้':(Object.keys(q.error_codes||{}).length?Object.entries(q.error_codes).map(([k,v])=>`${k}×${v}`).slice(0,3).join(' · '):'ไม่มี'),'รหัสตายตัว ไม่มีเนื้อหา')}</div>`;
+      return `${strip}<div class="metrics">${metric('คิวความจำรอทำ',bn(q.pending),q.oldest_ready_min===null?'อายุคิว: เช็คไม่ได้':`เก่าสุดรอมา ${bn(q.oldest_ready_min)} นาที`)}${metric('ล้มรอลองใหม่',bn(q.retryable_failed))}${metric('ตกคิวถาวร (dead letter)',bn(q.dead_letter),Number(q.dead_letter)>0?'ต้องไล่ดู runbook':'')}${metric('เรื่องคุยค้าง active',bn(t.active),`วันนี้ใหม่ ${bn(t.created_today)} · ปิด ${bn(t.resolved_today)}`)}</div>${ops}
         <div class="split" style="margin-top:12px"><article class="card"><div class="metric-label">วันนี้เลขาเลือกแหล่งตอบจากไหน (ครั้ง)</div><ul class="list"><li class="row"><span>ตารางจริง (งาน/นัด/เงิน/แฟ้ม)</span><b>${rv('pick:structured')}</b></li><li class="row"><span>ความจำถาวร</span><b>${rv('pick:facts')}</b></li><li class="row"><span>คลังความรู้</span><b>${rv('pick:knowledge')}</b></li><li class="row"><span>คุยทั่วไป</span><b>${rv('pick:chat')}</b></li></ul></article>
         <article class="card"><div class="metric-label">ดึงแล้วได้ของไหม (ครั้ง)</div><ul class="list"><li class="row"><span>ตาราง: ได้ / ว่าง / อ่านไม่ได้</span><b>${rv('structured:ok')} / ${rv('structured:empty')} / <span style="${Number(r['structured:error'])>0?'color:var(--red)':''}">${rv('structured:error')}</span></b></li><li class="row"><span>ความจำ: แนบทัน / ไม่ทัน</span><b>${rv('facts:ok')} / ${rv('facts:none')}</b></li><li class="row"><span>คลังความรู้: สด / ตกของสำรอง</span><b>${rv('knowledge:ok')} / ${rv('knowledge:fallback')}</b></li><li class="row"><span>เรื่องคุยค้าง: เจอ / ว่าง / อ่านไม่ได้</span><b>${rv('thread:ok')} / ${rv('thread:empty')} / ${rv('thread:error')}</b></li></ul></article></div>
         <div class="metrics" style="margin-top:12px">${metric('คำรับปากค้าง',bn(c.pending))}${metric('เลยกำหนด',bn(c.overdue),Number(c.overdue)>0?'มีคำรับปากที่ยังไม่ได้ทำ':'')}${metric('ทำสำเร็จวันนี้',bn(c.fulfilled_today))}</div>
