@@ -433,6 +433,8 @@ async function boot(){
       if(!tb){var ls=qp.get("liff.state");if(ls){tb=new URLSearchParams(ls.charAt(0)==="?"?ls.slice(1):ls).get("tab")}}
       if(tb==="story")tb="home"; // ปุ่มเรื่องราวของบอส (rich menu) -> เข้าหน้าหลักแดชบอร์ดรวม (บอสยืนยัน 2026-07-04); แท็บ 📖 ในแอปยังเปิดหน้าเรื่องราวได้
       if(tb==="diary")tb="story"; // 🎀 ปุ่ม "ไดอารี่ของบอส" (เมนู v14, 18 ส.ค.) -> เปิดหน้าเรื่องราว/คลังความจำตรงๆ ห้ามสลับไป home
+      var secQ=qp.get("sec");if(!secQ){var lsSec=qp.get("liff.state");if(lsSec){secQ=new URLSearchParams(lsSec.charAt(0)==="?"?lsSec.slice(1):lsSec).get("sec")}}
+      if(secQ==="files"){setTimeout(function(){var el=document.getElementById("st_files");if(el){el.scrollIntoView({behavior:"smooth"})}},700)}
       if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier"].indexOf(tb)>=0){TAB=tb}
       /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
       var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
@@ -1488,12 +1490,13 @@ function vStory(){
     }
   }
   /* ---- คลังไฟล์: จัดเป็นโฟลเดอร์ (มีทั้งไฟล์และภาพ) ---- */
-  h+='<h2 id="st_files">'+icn("folder",17)+' คลังไฟล์</h2>';
+  h+='<h2 id="st_files">'+icn("folder",17)+' คลังไฟล์<span class="more" onclick="addFolder()" style="cursor:pointer">➕ สร้างโฟลเดอร์</span></h2>';
   if(!files.length){h+='<div class="empty">ยังไม่มีไฟล์ — ส่งรูป/สลิป/เอกสารเข้าแชต เดี๋ยวเก็บเข้าคลังให้</div>'}
   else{
     var byF={};for(var k=0;k<files.length;k++){var fid=files[k].folder_id||"_none";(byF[fid]=byF[fid]||[]).push(files[k])}
     for(var gf=0;gf<folders.length;gf++){var fo=folders[gf],items=byF[fo.id]||[];
-      h+='<div class="rowitem" onclick="toggleFolder(\''+fo.id+'\')" style="cursor:pointer"><div style="font-size:20px">📁</div><div class="grow"><div class="t">'+esc(fo.name)+'</div><div class="m">'+items.length+' รายการ</div></div><span id="fa_'+fo.id+'" style="color:#A6A6B0;font-size:15px">▸</span></div>';
+      h+='<div class="rowitem"><div style="font-size:20px" onclick="toggleFolder(\''+fo.id+'\')">📁</div><div class="grow" onclick="toggleFolder(\''+fo.id+'\')" style="cursor:pointer"><div class="t">'+esc(fo.name)+'</div><div class="m">'+items.length+' รายการ</div></div>'+
+        '<button class="ic" aria-label="แก้ชื่อโฟลเดอร์" onclick="renFolder(\''+fo.id+'\')">'+icn("pencil",15)+'</button><button class="ic danger" aria-label="ลบโฟลเดอร์" onclick="delFolder(\''+fo.id+'\')">'+icn("trash",15)+'</button><span id="fa_'+fo.id+'" onclick="toggleFolder(\''+fo.id+'\')" style="color:#A6A6B0;font-size:15px;padding:8px;cursor:pointer">▸</span></div>';
       h+='<div id="fld_'+fo.id+'" style="display:none;padding-left:10px;margin-bottom:4px">';
       if(!items.length){h+='<div class="empty" style="padding-left:2px">โฟลเดอร์นี้ยังว่างอยู่</div>'}
       for(var m=0;m<items.length;m++){h+=fileRow(items[m])}
@@ -1506,9 +1509,50 @@ function vStory(){
   return h;
 }
 function fileRow(d){var nm=d.title||d.file_name||"ไฟล์";
-  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic danger" aria-label="ลบไฟล์นี้" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
+  return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" aria-label="ย้ายโฟลเดอร์" onclick="moveFile(\''+d.id+'\')">'+icn("folder",15)+'</button><button class="ic danger" aria-label="ลบไฟล์นี้" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
 }
 function toggleFolder(id){var e=$("#fld_"+id),a=$("#fa_"+id);if(!e){return}var op=e.style.display==="none";e.style.display=op?"block":"none";if(a){a.textContent=op?"▾":"▸"}}
+/* 🗂 จัดการโฟลเดอร์ (บอสสั่ง 26 ส.ค.) */
+function askText(title,ph,val){return new Promise(function(res){
+  var w=document.createElement("div");w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");
+  w.style.cssText="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px";
+  w.innerHTML='<div style="background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:400px;width:100%">'
+    +'<div style="font-size:17px;font-weight:800">'+esc(title)+'</div>'
+    +'<input id="atin" placeholder="'+esc(ph||"")+'" value="'+esc(val||"")+'" maxlength="20" autocomplete="off">'
+    +'<div class="eact"><button class="btn" id="atok">ตกลง</button><button class="btn ghost" id="atno">ยกเลิก</button></div></div>';
+  document.body.appendChild(w);
+  var inp=w.querySelector("#atin");
+  function close(v){document.body.removeChild(w);res(v)}
+  w.querySelector("#atok").onclick=function(){var v=inp.value.trim();if(v){close(v)}else{inp.focus()}};
+  w.querySelector("#atno").onclick=function(){close(null)};
+  setTimeout(function(){inp.focus()},50)})}
+function pickFolder(){return new Promise(function(res){
+  var fs=((DATA.story&&DATA.story.folders)||[]);
+  var w=document.createElement("div");w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");
+  w.style.cssText="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px";
+  var b='<div style="background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:400px;width:100%;max-height:70vh;overflow:auto">'
+    +'<div style="font-size:17px;font-weight:800">ย้ายไปโฟลเดอร์ไหน?</div><div style="margin-top:10px">';
+  for(var i=0;i<fs.length;i++){b+='<button class="btn ghost" style="width:100%;margin-top:8px;text-align:left" data-fid="'+fs[i].id+'">📁 '+esc(fs[i].name)+'</button>'}
+  b+='<button class="btn ghost" style="width:100%;margin-top:8px;text-align:left" data-fid="_none">📎 เอาออกจากโฟลเดอร์</button>'
+    +'<button class="btn ghost" style="width:100%;margin-top:8px;text-align:left" data-fid="_new">➕ โฟลเดอร์ใหม่…</button>'
+    +'<button class="btn warn" style="width:100%;margin-top:12px" data-fid="_x">ยกเลิก</button></div></div>';
+  w.innerHTML=b;document.body.appendChild(w);
+  w.onclick=function(e){var t=e.target.closest("[data-fid]");if(!t){return}
+    document.body.removeChild(w);var v=t.getAttribute("data-fid");
+    res(v==="_x"?undefined:v==="_none"?null:v)}})}
+async function addFolder(){var nm=await askText("สร้างโฟลเดอร์ใหม่","เช่น ใบรับประกัน");if(!nm){return}
+  await act("folder.create",{name:nm},"สร้างโฟลเดอร์แล้ว 📁")}
+async function renFolder(id){var fs=((DATA.story&&DATA.story.folders)||[]),f=null;
+  for(var i=0;i<fs.length;i++){if(String(fs[i].id)===String(id)){f=fs[i];break}}
+  var nm=await askText("แก้ชื่อโฟลเดอร์","ชื่อใหม่",f?f.name:"");if(!nm){return}
+  await act("folder.rename",{id:id,name:nm},"แก้ชื่อแล้ว ✏️")}
+async function delFolder(id){var ok=await dlg({title:"ลบโฟลเดอร์นี้?",okText:"ลบโฟลเดอร์",
+    body:"ไฟล์ข้างในไม่หายนะ — จะถูกย้ายออกมาไว้นอกโฟลเดอร์ให้เอง"});
+  if(!ok){return}await act("folder.delete",{id:id},"ลบโฟลเดอร์แล้ว 🗑")}
+async function moveFile(id){var fid=await pickFolder();if(fid===undefined){return}
+  if(fid==="_new"){var nm=await askText("โฟลเดอร์ใหม่","เช่น สัญญา");if(!nm){return}
+    var nf=await api("folder.create",{name:nm});if(!nf||!nf.id){toast("สร้างไม่สำเร็จ");return}fid=nf.id}
+  await act("file.move",{id:id,folder_id:fid},"ย้ายแล้ว 📁")}
 function reportFact(id){
   var arr=(DATA.story&&DATA.story.facts)||[],f=null;
   for(var i=0;i<arr.length;i++){if(String(arr[i].id)===String(id)){f=arr[i];break}}
