@@ -98,6 +98,7 @@ function go() {
     if (left || document.hidden) {
       r.className = 'res on ok';
       r.textContent = 'เด้งออกไปแล้ว — ไปเช็คในแอปนาฬิกาว่ามี 07:00 ขึ้นไหม';
+      try { localStorage.setItem('ybAlarmReady', '1'); } catch (e) {}
     } else {
       r.className = 'res on bad';
       r.textContent = 'ไม่มีอะไรเกิดขึ้น — บอกผมได้เลย';
