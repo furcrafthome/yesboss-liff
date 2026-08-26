@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>สร้างทางลัดตั้งปลุก — YES BOSS</title>
+<title>ติดตั้งปุ่มปลุก — YES BOSS</title>
 <style>
-  :root { --pink:#E8779B; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
+  :root { --pink:#E8779B; --rose:#B85C7E; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --line:#F0DCE4; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { margin:0; padding:26px 20px 44px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
          background:var(--bg); color:#2B2B2E; line-height:1.65; max-width:460px; margin-inline:auto; }
   h1 { font-size:21px; margin:0 0 6px; }
-  .lead { font-size:14px; color:var(--gray); margin:0 0 24px; }
-  ol { list-style:none; counter-reset:s; padding:0; margin:0 0 26px; }
-  li { counter-increment:s; position:relative; padding:0 0 20px 44px; }
-  li::before { counter-increment:none; content:counter(s); position:absolute; left:0; top:1px;
+  .lead { font-size:14px; color:var(--gray); margin:0 0 22px; }
+  ol { list-style:none; counter-reset:s; padding:0; margin:0 0 4px; }
+  li { counter-increment:s; position:relative; padding:0 0 18px 44px; }
+  li::before { content:counter(s); position:absolute; left:0; top:1px;
                width:30px; height:30px; border-radius:50%; background:var(--pink); color:#fff;
                font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; }
   li::after { content:""; position:absolute; left:15px; top:34px; bottom:2px; width:2px; background:var(--line); }
@@ -22,54 +22,61 @@
   li span { font-size:14px; color:var(--gray); }
   .tap { display:inline-block; background:#fff; border:1.5px solid var(--soft); border-radius:7px;
          padding:1px 8px; font-size:13.5px; color:var(--pink); font-weight:600; white-space:nowrap; }
-  .box { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; text-align:center; }
-  .box h2 { font-size:17px; margin:0 0 4px; }
-  .box p { font-size:13.5px; color:var(--gray); margin:0 0 16px; }
-  button { width:100%; border:0; border-radius:12px; padding:17px; font-size:17px; font-weight:700;
-           background:var(--pink); color:#fff; font-family:inherit; box-shadow:0 4px 14px rgba(232,119,155,.28); }
-  .res { margin-top:14px; font-size:15px; font-weight:600; display:none; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 18px; margin-bottom:18px; }
+  a.big, button { display:block; width:100%; border:0; border-radius:14px; padding:17px; font-size:17px; font-weight:700;
+           background:var(--rose); color:#fff; font-family:inherit; text-align:center; text-decoration:none;
+           box-shadow:0 4px 14px rgba(184,92,126,.28); }
+  button.test { background:var(--pink); box-shadow:0 4px 14px rgba(232,119,155,.28); }
+  .res { margin-top:14px; font-size:15px; font-weight:600; display:none; text-align:center; }
   .res.on { display:block; }
   .res.ok  { color:#B8437A; }
   .res.bad { color:var(--gray); }
+  details { margin-top:22px; }
+  summary { font-size:14px; color:var(--gray); font-weight:600; }
+  details ol { margin-top:14px; }
 </style>
 </head>
 <body>
 
-<h1>⏰ สร้างทางลัด "yesboss"</h1>
-<p class="lead">ทำครั้งเดียวจบ ประมาณ 1 นาที<br>ทำเสร็จแล้วเลื่อนลงมากดปุ่มทดสอบข้างล่าง</p>
-<p style="background:#FDF0F5;border-radius:12px;padding:12px 14px;font-size:13.5px;color:#8A4560">
-⚠️ <b>จุดที่พลาดบ่อยสุดคือข้อ 5</b> — ถ้าตั้งปลุกแล้วเครื่องยังถามให้เลือกเวลาอีก แปลว่าช่องเวลายังไม่ได้ผูกกับ "ข้อมูลป้อนเข้าทางลัด" · วิธีแก้: เปิดแอปคำสั่งลัด → แตะ ⋯ บนทางลัด yesboss → แตะช่องเวลาในกล่อง "สร้างนาฬิกาปลุก" → เลือกตัวแปร <b>ข้อมูลป้อนเข้าทางลัด (Shortcut Input)</b> → เสร็จ</p>
+<h1>⏰ ติดตั้งปุ่มปลุก (ครั้งเดียวจบ)</h1>
+<p class="lead">หนูเตรียมทางลัดสำเร็จรูปไว้ให้แล้ว แค่กดยืนยันตามเครื่องบอก ไม่ต้องตั้งค่าอะไรเองเลยค่ะ</p>
 
-<ol>
-  <li><b>เปิดแอป "คำสั่งลัด"</b>
-      <span>ไอคอนสีฟ้า-ม่วง มีรูปลูกศรสองอัน ถ้าหาไม่เจอให้ลากนิ้วลงกลางจอแล้วพิมพ์ว่า คำสั่งลัด</span></li>
+<div class="card">
+  <ol>
+    <li><b>แตะปุ่มติดตั้งด้านล่าง</b>
+        <span>เครื่องจะถามว่า "ดาวน์โหลด?" → กด <span class="tap">ดาวน์โหลด</span></span></li>
+    <li><b>แตะลูกศร <span class="tap">⬇</span> มุมขวาบนของจอ</b>
+        <span>แล้วแตะไฟล์ <span class="tap">yesboss</span> ที่เพิ่งโหลดมา</span></li>
+    <li><b>กด <span class="tap">เพิ่มทางลัด</span></b>
+        <span>หน้าแอปคำสั่งลัดจะเด้งขึ้นมาเอง กดปุ่มแดงๆ อันเดียวจบ</span></li>
+    <li><b>กลับมาหน้านี้ แล้วกดปุ่มทดสอบ</b>
+        <span>ถ้ามีปลุกโผล่ในแอปนาฬิกา = เสร็จสมบูรณ์ ครั้งต่อไปอัตโนมัติตลอด</span></li>
+  </ol>
+  <a class="big" href="/yesboss.shortcut" download="yesboss.shortcut">⚡ ติดตั้งทางลัด yesboss</a>
+</div>
 
-  <li><b>กดเครื่องหมาย <span class="tap">+</span> มุมขวาบน</b>
-      <span>จะได้ทางลัดเปล่าๆ ขึ้นมาอันนึง</span></li>
-
-  <li><b>ค้นหาคำว่า <span class="tap">ปลุก</span></b>
-      <span>มีช่องค้นหาอยู่กลางจอหรือล่างจอ พิมพ์ลงไปได้เลย</span></li>
-
-  <li><b>เลือก <span class="tap">สร้างนาฬิกาปลุก</span></b>
-      <span>หรือถ้าเครื่องเป็นภาษาอังกฤษจะชื่อ Create Alarm</span></li>
-
-  <li><b>แตะช่อง <span class="tap">เวลา</span> แล้วเลือก <span class="tap">ข้อมูลป้อนเข้าทางลัด</span></b>
-      <span>สำคัญที่สุด — ถ้าไม่เจอตัวเลือกนี้ ให้แตะช่องเวลาค้างไว้ แล้วดูรายการตัวแปรที่โผล่มา (ภาษาอังกฤษคือ Shortcut Input)</span></li>
-
-  <li><b>ตั้งชื่อทางลัดว่า <span class="tap">yesboss</span></b>
-      <span>แตะชื่อด้านบนสุดของจอเพื่อเปลี่ยนชื่อ ต้องสะกดแบบนี้เป๊ะๆ ตัวเล็กทั้งหมด ติดกัน แล้วกดเสร็จ</span></li>
-</ol>
-
-<div class="box">
-  <h2 id="boxTitle">ทดสอบเลย</h2>
-  <p id="boxHint">กดแล้วควรมีนาฬิกาปลุก 07:00 โผล่ในแอปนาฬิกา</p>
-  <button id="goBtn" onclick="go()">ตั้งปลุก 7 โมงเช้า</button>
+<div class="card" style="text-align:center">
+  <p id="boxHint" style="font-size:13.5px;color:var(--gray);margin:0 0 14px">ติดตั้งเสร็จแล้วกดตรงนี้ — ควรมีปลุกโผล่ในแอปนาฬิกา ไม่ถามอะไรเพิ่ม</p>
+  <button class="test" id="goBtn" onclick="go()">ทดสอบ: ตั้งปลุก 7 โมงเช้า</button>
   <div class="res" id="res"></div>
 </div>
 
+<details>
+  <summary>ปุ่มติดตั้งใช้ไม่ได้? สร้างเองทีละขั้น (ทางสำรอง)</summary>
+  <ol>
+    <li><b>เปิดแอป "คำสั่งลัด"</b>
+        <span>ไอคอนสีฟ้า-ม่วง ถ้าหาไม่เจอให้ลากนิ้วลงกลางจอแล้วพิมพ์ คำสั่งลัด</span></li>
+    <li><b>กด <span class="tap">+</span> มุมขวาบน แล้วค้นหา <span class="tap">ปลุก</span></b>
+        <span>เลือก "สร้างนาฬิกาปลุก" (Create Alarm)</span></li>
+    <li><b>แตะช่อง <span class="tap">เวลา</span> แล้วเลือก <span class="tap">ข้อมูลป้อนเข้าทางลัด</span></b>
+        <span>สำคัญที่สุด — ถ้าไม่เห็นตัวเลือก ให้แตะช่องเวลาค้างไว้แล้วดูรายการตัวแปร (อังกฤษ: Shortcut Input) ช่องต้องกลายเป็นก้อนสีฟ้า</span></li>
+    <li><b>ตั้งชื่อทางลัดว่า <span class="tap">yesboss</span></b>
+        <span>ตัวเล็กทั้งหมด ติดกัน แล้วกดเสร็จ จากนั้นกดปุ่มทดสอบข้างบน</span></li>
+  </ol>
+</details>
+
 <script>
-// มาจากหน้าตั้งปลุก (กดปุ่ม "ตั้งค่าครั้งแรก") = พกเวลาที่ตั้งใจจะตั้งมาด้วย
-// ตั้งค่าเสร็จให้กดตั้งใบนั้นได้เลย ไม่ต้องย้อนไปหาข้อความในแชท
+// มาจากหน้าตั้งปลุก (ปุ่มตั้งค่าครั้งแรก) = พกเวลาที่ค้างไว้มาด้วย ให้ปิดงานใบนั้นได้เลย
 var P = new URLSearchParams(location.search);
 var raw = (P.get("t") || "").trim();
 var mm = raw.replace(":", "").match(/^(\d{1,2})(\d{2})$/);
@@ -77,12 +84,11 @@ var HH = mm ? parseInt(mm[1], 10) : 7;
 var MI = mm ? parseInt(mm[2], 10) : 0;
 var hasTime = !!mm && HH >= 0 && HH <= 23 && MI >= 0 && MI <= 59;
 function pad(n) { return (n < 10 ? "0" : "") + n; }
-var TIME = pad(HH) + ":" + pad(MI);
+var TIME = hasTime ? pad(HH) + ":" + pad(MI) : "07:00";
 
 if (hasTime) {
-  document.getElementById("boxTitle").textContent = "ทำเสร็จแล้วกดตรงนี้";
-  document.getElementById("boxHint").textContent = "ตั้งปลุก " + TIME + " ตามที่ค้างไว้";
-  document.getElementById("goBtn").textContent = "ตั้งปลุก " + TIME;
+  document.getElementById("boxHint").textContent = "ติดตั้งเสร็จแล้วกดตรงนี้ — ตั้งปลุก " + TIME + " ตามที่ค้างไว้ให้เลย";
+  document.getElementById("goBtn").textContent = "ทดสอบ: ตั้งปลุก " + TIME;
 }
 
 function go() {
@@ -99,16 +105,16 @@ function go() {
     var r = document.getElementById('res');
     if (left || document.hidden) {
       r.className = 'res on ok';
-      r.textContent = 'เด้งออกไปแล้ว — ไปเช็คในแอปนาฬิกาว่ามี 07:00 ขึ้นไหม';
+      r.textContent = 'เด้งออกไปแล้ว — ไปเช็คในแอปนาฬิกาว่ามีปลุก ' + TIME + ' ขึ้นไหม';
       try { localStorage.setItem('ybAlarmReady', '1'); } catch (e) {}
     } else {
       r.className = 'res on bad';
-      r.textContent = 'ไม่มีอะไรเกิดขึ้น — บอกผมได้เลย';
+      r.textContent = 'ไม่มีอะไรเกิดขึ้น — ลองกดติดตั้งด้านบนก่อน หรือทักบอกทีมงานได้เลย';
     }
   }, 1800);
 
   try {
-    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent('07:00');
+    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent(TIME);
   } catch (e) {}
 }
 </script>
