@@ -41,6 +41,7 @@
     <p class="time" id="t">--:--</p>
     <p class="day" id="d"></p>
     <button id="mainBtn" onclick="setAlarm(true)">⏰ ตั้งปลุกในเครื่อง</button>
+    <button class="alt" id="setupBtn" style="display:none" onclick="goSetup()">📲 เปิดระบบปลุกอัตโนมัติ (ตั้งครั้งเดียว ใช้ได้ตลอด)</button>
     <div class="how" id="how">
       <span class="stepn">1</span>เปิดแอป <b>นาฬิกา</b> → แถบ <b>ปลุก</b><br>
       <span class="stepn">2</span>กด <b>+</b> → หมุนเวลาเป็น <b id="ht">--:--</b><br>
@@ -87,16 +88,26 @@ if (!ok) {
     document.getElementById("note").textContent = "กำลังตั้งให้อัตโนมัติ… ถ้าไม่มีอะไรเกิดขึ้น กดปุ่มด้านบน";
     setTimeout(setAlarm, 450);
   } else {
-    // 🍎 iPhone: ไม่มีการติดตั้งใดๆ อีกแล้ว (มติบอส 28 ส.ค. — ระบบทางลัดซับซ้อนเกินไปสำหรับลูกค้าจริง)
-    //    ปุ่มเดียว = โชว์วิธีตั้งเอง 15 วินาที + คัดลอกชื่อนัดให้เลย ทำได้ 100% ทุกเครื่อง
-    document.getElementById("mainBtn").textContent = "⏰ ดูวิธีตั้งปลุก 15 วินาที";
-    document.getElementById("note").textContent = "iPhone ตั้งเองแป๊บเดียว มีขั้นตอนกางให้ครบค่ะ";
+    // 🍎 iPhone (มติบอส 28 ส.ค. ตี 1: เอาปุ่มเดียวแบบที่เคยเวิร์กกลับมา):
+    //    เครื่องที่เปิดระบบแล้ว (ทางลัด yesboss) = กดปุ่มเดียว/ยิงเองเลย · เครื่องใหม่ = เสนอเปิดระบบครั้งเดียว + วิธีตั้งเอง 15 วิเป็นตาข่าย
+    var readyIOS = false;
+    try { readyIOS = localStorage.getItem("ybAlarmReady") === "1"; } catch (e) {}
+    if (readyIOS) {
+      document.getElementById("note").textContent = "กำลังเรียกระบบตั้งปลุก… เห็นแบนเนอร์ด้านบน = สำเร็จ";
+      setTimeout(setAlarm, 450);
+    } else {
+      document.getElementById("note").textContent = "กดปุ่มเดียว ถ้าเครื่องยังไม่เคยเปิดระบบ เดี๋ยวมีตัวช่วยโผล่มาค่ะ";
+    }
   }
 }
 
 function fired() {
   document.getElementById("okmsg").style.display = "block";
   document.getElementById("ic").textContent = "✅";
+  if (!isAnd) { try { localStorage.setItem("ybAlarmReady", "1"); } catch (e) {} }
+}
+function goSetup() {
+  location.href = "/alarm-setup.html?t=" + encodeURIComponent(raw) + "&msg=" + encodeURIComponent(label);
 }
 function copyName() {
   try { navigator.clipboard.writeText(label); } catch (e) {}
@@ -110,7 +121,27 @@ function showHow() {
   document.getElementById("note").textContent = "";
 }
 function setAlarm(fromTap) {
-  if (!isAnd) { showHow(); return; }
+  if (!isAnd) {
+    // 🍎 ยิงทางลัด yesboss (ตัวเสถียร v1 — รับเวลาอย่างเดียว ป้าย "นัดจาก YES BOSS 🎀")
+    var leftI = false;
+    function onLeaveI() { leftI = true; }
+    document.addEventListener("visibilitychange", onLeaveI);
+    window.addEventListener("pagehide", onLeaveI);
+    window.addEventListener("blur", onLeaveI);
+    setTimeout(function () {
+      document.removeEventListener("visibilitychange", onLeaveI);
+      window.removeEventListener("pagehide", onLeaveI);
+      window.removeEventListener("blur", onLeaveI);
+      if (leftI || document.hidden) { fired(); }
+      else if (fromTap) {
+        // เครื่องนี้ยังไม่มีระบบ → เสนอเปิดครั้งเดียว + กางวิธีตั้งเองคู่กัน ไม่มีทางตัน
+        document.getElementById("setupBtn").style.display = "block";
+        showHow();
+      }
+    }, 1500);
+    location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
+    return;
+  }
   // Android: เบราว์เซอร์ยอมเปิดแอปนาฬิกาเฉพาะจากการกดของผู้ใช้ — auto-fire อาจถูกบล็อกเงียบ
   var leftA = false;
   function onLeaveA() { leftA = true; }
