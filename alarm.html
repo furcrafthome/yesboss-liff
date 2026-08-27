@@ -46,11 +46,11 @@
       <span class="stepn">1</span>เปิดแอป <b>นาฬิกา</b> → แถบ <b>ปลุก</b><br>
       <span class="stepn">2</span>กด <b>+</b> → หมุนเวลาเป็น <b id="ht">--:--</b><br>
       <span class="stepn">3</span>แตะ <b>ป้ายกำกับ</b> → วางชื่อนัด (คัดลอกไว้ให้แล้ว) → <b>บันทึก</b>
-      <button class="alt" id="copyBtn" onclick="copyName()">📋 คัดลอกชื่อนัดอีกครั้ง</button>
+      <button class="alt" id="copyBtn" onclick="copyName()">📋 คัดลอกชื่อนัด</button>
       <div id="diag" style="font-size:10.5px;color:#B9A8AF;margin-top:8px"></div>
     </div>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
-    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v14</div>
+    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v15</div>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -132,8 +132,7 @@ function copyName() {
   var c = document.getElementById("copyBtn");
   if (c) c.textContent = "✅ คัดลอกแล้ว — ไปวางในป้ายกำกับได้เลย";
 }
-function showHow() {
-  copyName();
+function showHow() { // ไม่ auto-copy — clipboard permission popup เคยขวางการยิง intent + ขโมยโฟกัส (เจอบน emulator)
   document.getElementById("how").style.display = "block";
   document.getElementById("mainBtn").style.display = "none";
   document.getElementById("note").textContent = "";
@@ -169,8 +168,8 @@ function setAlarm(fromTap) {
     location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
     return;
   }
-  // 🤖 Android v14: กางวิธี+คัดลอกชื่อทันที แล้วเปิดแอปนาฬิกาหน้า "ปลุก" ให้ (SET_ALARM ทำจากเว็บไม่ได้ — permission)
-  showHow();
+  // 🤖 Android v15: ยิงเปิดแอปนาฬิกา "ก่อน" แล้วค่อยกางวิธี — กางก่อนเคยทำ popup แทรกจน intent ไม่ออก
+  setTimeout(showHow, 250);
   var leftA = false;
   function onLeaveA() { leftA = true; }
   document.addEventListener("visibilitychange", onLeaveA);
