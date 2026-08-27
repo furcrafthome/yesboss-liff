@@ -171,15 +171,23 @@ function setAlarm(fromTap) {
     }
     else { document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ"; }
   }, 1600);
-  // ยิงผ่าน anchor จริง (ท่ามาตรฐานที่เบราว์เซอร์ยอมรับกว้างกว่า location.href) + fallback URL กันเงียบหาย
+  // ยิงผ่าน anchor จริง + fallback URL (#fb = เบราว์เซอร์ไม่รองรับ intent)
+  // ⚠️ ห้ามใส่ SKIP_UI=true — เครื่องที่ทำตามจะตั้ง "เงียบ" ไม่เด้งแอป → คนคิดว่าพัง + ตัวจับผลอ่านผิด
+  //    ให้แอปนาฬิกาเด้งขึ้นมาโชว์ปลุกที่ตั้งแล้วดีกว่า เห็นกับตา = เชื่อ
   var itn = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
     ";i.android.intent.extra.alarm.HOUR=" + H +
     ";i.android.intent.extra.alarm.MINUTES=" + M +
     ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
-    ";B.android.intent.extra.alarm.SKIP_UI=true" +
-    ";S.browser_fallback_url=" + encodeURIComponent(location.href.split("#")[0]) + ";end";
+    ";S.browser_fallback_url=" + encodeURIComponent(location.href.split("#")[0] + "#fb") + ";end";
   var a = document.createElement("a");
   a.href = itn; document.body.appendChild(a); a.click(); a.remove();
+}
+if (isAnd && location.hash === "#fb") { // เด้งกลับมาพร้อม #fb = เบราว์เซอร์นี้เปิดแอปนาฬิกาไม่ได้จริงๆ
+  document.getElementById("mt").textContent = TIME;
+  document.getElementById("mn").textContent = label;
+  document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo + " (ไม่รองรับตั้งอัตโนมัติ)";
+  document.getElementById("how").style.display = "block";
+  document.getElementById("note").textContent = "";
 }
 </script>
 </body>
