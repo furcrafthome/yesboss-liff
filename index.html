@@ -183,61 +183,137 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
 .hlhero .hlbtn{position:relative;display:block;width:100%;border:0;border-radius:99px;margin-top:16px;padding:16px;font-size:17px;font-weight:800;color:#fff;background:var(--brand-ink);animation:hlpulse 1.8s ease-in-out infinite;cursor:pointer}
 @keyframes hlpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,42,94,.35);transform:scale(1)}50%{box-shadow:0 0 0 14px rgba(201,42,94,0);transform:scale(1.02)}}
 .hlhero .hlbtn.ghost{background:var(--brand-soft);color:var(--brand-ink);animation:none;font-weight:700}
-/* ---------- 🔋 ห้องพักใจ (โลกอีกใบ: มืด สงบ — จงใจต่างจากธีมหลัก) ---------- */
-#healroom{position:fixed;inset:0;z-index:50;background:#FAF3F6;display:none;color:#44434A}
-#healroom .hwrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto}
-#hrscene{position:absolute;inset:0;transition:background 1.4s ease;z-index:0}
-#healroom .hbrow{display:flex;align-items:center;gap:12px}
-#healroom .hbatt{flex:1;height:30px;border:3px solid #E5C8D4;border-radius:10px;position:relative;padding:3px;background:#F3E3EA}
-#healroom .hbatt:after{content:"";position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:6px;height:14px;background:#E5C8D4;border-radius:0 3px 3px 0}
-#hrfill{height:100%;border-radius:5px;width:8%;transition:width .9s cubic-bezier(.4,1.3,.5,1),background .9s ease,box-shadow .9s ease}
-#hrpct{font-size:18px;font-weight:800;min-width:52px;text-align:right}
-#hrblbl{font-size:12px;color:#6E6E73;opacity:.9;margin-top:6px;height:16px}
-#healroom .bolt.on{display:inline-block;animation:hrflash 1s infinite}
-@keyframes hrflash{50%{opacity:.3}}
-#hrstage{flex:1;display:flex;flex-direction:column;margin-top:12px;min-height:0;overflow-y:auto}
+/* ---------- 🎮 ห้องพักใจ v2: เกมดูแลใจ "ห้องที่อุ่นขึ้นตามการดูแลใจ" (219 — ธีมสว่างตามมติบอส ห้ามมืด) ---------- */
+#healroom{position:fixed;inset:0;z-index:50;background:#FAF3F6;display:none;color:#44434A;flex-direction:column}
+#hroom{position:relative;height:46%;flex:none;overflow:hidden;background:linear-gradient(#FDF4F8 0%,#FBEEF3 62%,#F4E2D6 62%,#EFD9CB 100%)}
+#hrsvg{position:absolute;inset:0;width:100%;height:100%}
+#healroom .itm{opacity:0;transform:translateY(8px);transition:opacity .8s ease,transform .8s cubic-bezier(.34,1.56,.64,1)}
+#healroom .itm.on{opacity:1;transform:none}
+#hrbossy{position:absolute;left:50%;bottom:6%;transform:translateX(-58%);width:29%;max-width:150px;filter:drop-shadow(0 10px 20px rgba(150,80,110,.28))}
+@keyframes hrbob{0%,100%{transform:translateX(-58%) translateY(0)}50%{transform:translateX(-58%) translateY(-7px)}}
+#hrbossy.bob{animation:hrbob 4.5s ease-in-out infinite}
+#hrbubble{position:absolute;left:6%;right:6%;top:calc(env(safe-area-inset-top) + 46px);background:#fff;border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.65;color:#44434A;box-shadow:0 6px 20px rgba(190,110,140,.18);z-index:5}
+#hrbubble:after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:9px solid transparent;border-top-color:#fff;border-bottom:none}
+#hrbubble b{color:#B85C7E}
+#hrhud{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;right:10px;display:flex;justify-content:space-between;z-index:6;pointer-events:none}
+#healroom .hudchip{background:rgba(255,255,255,.92);border:1px solid #F0DCE4;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;color:#8A4560;box-shadow:0 3px 10px rgba(190,110,140,.14)}
+#healroom .hfly{position:absolute;z-index:30;font-size:22px;color:#E8B54A;text-shadow:0 0 10px rgba(240,190,90,.8);transition:all 1.1s cubic-bezier(.5,-0.2,.6,1);pointer-events:none}
+#hrpanel{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px 18px calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;width:100%}
+#hrstage{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto}
 #healroom .hinner{display:flex;flex-direction:column;flex:1;min-height:0}
-#healroom .hfade{animation:hrfade .5s ease}
-@keyframes hrfade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#healroom .hfade{animation:hrfade .45s ease}
+@keyframes hrfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 #healroom .htag{font-size:12px;letter-spacing:.6px;color:#8A4560;display:flex;align-items:center;gap:9px}
 #healroom .hback{background:#F6E9EE;border:none;color:#8A4560;border-radius:50%;width:30px;height:30px;font-size:15px;flex:none;font-family:inherit}
-#healroom h1{font-size:21px;font-weight:800;line-height:1.35;margin-top:10px;color:#23232B;letter-spacing:0}
-#healroom h1 .soft{display:block;font-weight:600;font-size:14.5px;opacity:.82;margin-top:9px;line-height:1.7}
-#healroom .hmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100px}
-#healroom .hero{font-size:62px;animation:hrbob 4.5s ease-in-out infinite}
-#healroom .hbossy{width:118px;animation:hrbob 4.5s ease-in-out infinite;filter:drop-shadow(0 10px 26px rgba(122,162,255,.4))}
-@keyframes hrbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-#healroom .hbtn{background:#C92A5E;color:#fff;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;font-family:inherit;width:100%;transition:transform .15s;margin-top:9px;flex:none}
+#healroom h1{font-size:17.5px;font-weight:800;line-height:1.4;margin-top:9px;color:#23232B;letter-spacing:0}
+#healroom h1 .soft{display:block;font-weight:600;font-size:13.5px;opacity:.8;margin-top:7px;line-height:1.65}
+#healroom .hbtn{background:#C92A5E;color:#fff;border:none;border-radius:15px;padding:13px;font-size:15px;font-weight:700;font-family:inherit;width:100%;transition:transform .15s;margin-top:9px;flex:none}
 #healroom .hbtn:active{transform:scale(.97)}
 #healroom .hbtn.ghost{background:#F6E9EE;color:#8A4560}
-#healroom .hbtn:disabled{opacity:.45}
-#healroom .hmoods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
-#healroom .hmood{background:#fff;border:1px solid #F0DCE4;border-radius:20px;padding:18px 12px;transition:transform .15s;text-align:center;box-shadow:0 2px 0 #F6E3EA,0 5px 10px rgba(237,104,133,.10)}
-#healroom .hmood:active{transform:scale(.95)}
-#healroom .hmood .e{font-size:36px;display:block}
-#healroom .hmood .n{margin-top:7px;font-size:15px;font-weight:600;color:#44434A}
-#healroom .hchoices{display:flex;flex-direction:column;gap:11px;width:100%}
-#healroom .hchip{background:#fff;border:1px solid #F0DCE4;border-radius:15px;padding:14px;font-size:15px;line-height:1.5;transition:transform .15s,background .2s;text-align:left;color:#44434A;box-shadow:0 2px 0 #F6E3EA,0 5px 10px rgba(237,104,133,.10)}
+#healroom .hbtn:disabled{opacity:.4}
+#healroom .hmoods{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:12px}
+#healroom .hmood{background:#fff;border:1px solid #F0DCE4;border-radius:16px;padding:10px 3px;text-align:center;transition:transform .15s;box-shadow:0 2px 0 #F6E3EA}
+#healroom .hmood:active{transform:scale(.93)}
+#healroom .hmood .n{display:block;margin-top:4px;font-size:11px;font-weight:600;color:#44434A}
+#healroom .htools{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px}
+#healroom .htool{background:#fff;border:1px solid #F0DCE4;border-radius:14px;padding:9px 3px;text-align:center;font-size:11px;font-weight:600;color:#8A4560;transition:transform .15s;box-shadow:0 2px 0 #F6E3EA}
+#healroom .htool:active{transform:scale(.93)}
+#healroom .htool .e{display:block;font-size:16px;margin-bottom:2px}
+#healroom .hchoices{display:flex;flex-direction:column;gap:9px;width:100%;margin-top:10px}
+#healroom .hchip{background:#fff;border:1px solid #F0DCE4;border-radius:14px;padding:12px 13px;font-size:14px;line-height:1.5;transition:transform .15s,background .2s;text-align:left;color:#44434A;box-shadow:0 2px 0 #F6E3EA}
 #healroom .hchip:active{transform:scale(.97)}
 #healroom .hchip.pick{background:#C92A5E;color:#fff;font-weight:700}
-#healroom textarea{width:100%;flex:1;min-height:100px;background:#fff;border:1px solid #F0C9D8;border-radius:18px;color:#44434A;font-size:17px;line-height:1.6;padding:15px;font-family:inherit;resize:none;margin:10px 0;transition:opacity 1.2s,transform 1.2s,filter 1.2s}
-#healroom input{width:100%;background:#fff;border:1px solid #F0C9D8;border-radius:14px;color:#44434A;font-size:17px;padding:13px;font-family:inherit;margin:10px 0}
+#healroom .hcgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+#healroom .hcgrid .hchip{text-align:center}
+#healroom textarea{width:100%;flex:1;min-height:80px;background:#fff;border:1px solid #F0C9D8;border-radius:16px;color:#44434A;font-size:16px;line-height:1.6;padding:13px;font-family:inherit;resize:none;margin:9px 0;transition:opacity 1.1s,transform 1.1s,filter 1.1s}
+#healroom input{width:100%;background:#fff;border:1px solid #F0C9D8;border-radius:13px;color:#44434A;font-size:16px;padding:12px;font-family:inherit;margin:9px 0}
 #healroom textarea::placeholder,#healroom input::placeholder{color:#B9AEB6}
-#healroom textarea.gone{opacity:0;transform:translateY(-90px) scale(.85);filter:blur(12px)}
-#healroom .horb{width:158px;height:158px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.55),rgba(150,220,235,.15) 60%,transparent);box-shadow:0 0 55px rgba(150,225,240,.4);transition:transform 4s ease;font-size:18px;font-weight:700;text-align:center;padding:12px}
-#healroom .hnote{background:#FDF0F5;border-radius:14px;padding:13px 15px;font-size:14.5px;line-height:1.7;margin-top:12px;color:#44434A}
-#healroom .hsafe{margin-top:12px;background:rgba(255,90,90,.15);border:1px solid rgba(255,120,120,.32);border-radius:14px;padding:11px 13px;font-size:12px;line-height:1.6;color:#ffdada}
-#healroom .hsafe a{color:#fff;font-weight:700}
-#healroom .hfoot{font-size:10.5px;color:rgba(255,255,255,.35);text-align:center;margin-top:10px;line-height:1.6}
-#healroom .hp{position:absolute;pointer-events:none;z-index:6;font-size:20px}
-@keyframes hrup{to{transform:translate(var(--dx,0px),-540px) rotate(var(--r,0deg));opacity:0}}
-@keyframes hrsink{to{transform:translateY(130px);opacity:0;filter:blur(10px)}}
+#healroom textarea.gone{opacity:0;transform:translateY(-80px) scale(.85);filter:blur(12px)}
+#healroom .hnote{background:#FDF0F5;border-radius:13px;padding:11px 13px;font-size:13.5px;line-height:1.65;margin-top:10px;color:#44434A}
+#healroom .hsafe{margin-top:10px;background:#FFF0EE;border:1px solid #F5C9C2;border-radius:13px;padding:9px 12px;font-size:11.5px;line-height:1.6;color:#A0524A}
+#healroom .hsafe a{color:#C0392B;font-weight:700}
+#healroom .hfoot{font-size:10px;color:#B9AEB6;text-align:center;margin-top:8px;line-height:1.6}
+#healroom .hmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:80px}
+#healroom .horb{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 35%,#fff,#FBE3ED 62%,#F6CFDE);box-shadow:0 0 45px rgba(230,140,175,.45);transition:transform .3s ease;font-size:15px;font-weight:700;text-align:center;padding:12px;color:#8A4560;user-select:none;-webkit-user-select:none;touch-action:none}
+#healroom .horb.grow{transition:transform 4s ease;transform:scale(1.45)}
+#healroom .horb.shrink{transition:transform 6s ease;transform:scale(1)}
+#healroom .hbtag{margin-top:12px;font-size:12.5px;color:#8A4560;font-weight:700}
+#hrunlock{position:absolute;inset:0;background:rgba(253,244,248,.94);z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+#hrunlock .big{font-size:62px;animation:hrpop .7s cubic-bezier(.34,1.56,.64,1)}
+@keyframes hrpop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+#hrunlock h2{font-size:19px;color:#23232B;margin-top:14px;font-weight:800}
+#hrunlock p{font-size:13.5px;color:#8A4560;margin-top:8px;line-height:1.7}
+#hrunlock .hbtn{max-width:260px}
+#healroom .hdlist{display:flex;flex-direction:column;gap:9px;margin-top:10px;overflow-y:auto}
+#healroom .hdent{background:#fff;border:1px solid #F0DCE4;border-radius:14px;padding:11px 13px;box-shadow:0 2px 0 #F6E3EA}
+#healroom .hdhead{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#8A4560}
+#healroom .hdcause{background:#FDF0F5;border-radius:999px;padding:2px 9px;font-size:11px}
+#healroom .hddel{margin-left:auto;background:none;border:none;color:#D9A0B5;font-size:13px;font-family:inherit;padding:3px 6px}
+#healroom .hdnote{margin-top:6px;font-size:14px;line-height:1.6;color:#44434A;white-space:pre-wrap}
+#healroom .hp{position:absolute;pointer-events:none;z-index:6;font-size:19px}
+@keyframes hrup{to{transform:translate(var(--dx,0px),-420px) rotate(var(--r,0deg));opacity:0}}
 </style></head><body>
 <div id="app"><div class="ldr"><img src="img/p11-running.webp" alt=""><div class="ldrsh"></div><div class="ldrbar"><i></i></div><div class="ldrtx">เลขากำลังวิ่งไปเตรียมข้อมูลของบอส...</div></div></div>
-<div id="healroom"><div id="hrscene"></div><div class="hwrap">
-<div><div class="hbrow"><span style="font-size:20px">🔋</span><div class="hbatt"><div id="hrfill"></div></div><span id="hrpct">8%</span></div><div id="hrblbl">พลังใจ</div></div>
-<div id="hrstage"></div>
-</div></div>
+<div id="healroom">
+<div id="hroom">
+<svg id="hrsvg" viewBox="0 0 430 414" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<rect x="0" y="0" width="430" height="258" fill="#FBEFF4"/>
+<rect x="0" y="258" width="430" height="156" fill="#F2DFD2"/>
+<line x1="0" y1="258" x2="430" y2="258" stroke="#E4C8B8" stroke-width="2"/>
+<line x1="86" y1="258" x2="60" y2="414" stroke="#E9D2C3" stroke-width="1.4"/>
+<line x1="215" y1="258" x2="215" y2="414" stroke="#E9D2C3" stroke-width="1.4"/>
+<line x1="344" y1="258" x2="370" y2="414" stroke="#E9D2C3" stroke-width="1.4"/>
+<g><rect x="36" y="44" width="150" height="150" rx="16" fill="#DCEBF5" stroke="#E3C7D3" stroke-width="5"/>
+<circle cx="86" cy="96" r="22" fill="#FCD98A"/>
+<path d="M36 152 q40 -18 150 -8 v50 h-150z" fill="#CDE3F2"/>
+<line x1="111" y1="46" x2="111" y2="192" stroke="#E3C7D3" stroke-width="4"/>
+<polygon points="60,194 210,258 340,258 150,194" fill="#FFF7E0" opacity=".5"/></g>
+<g id="hrjar"><rect x="352" y="204" width="52" height="58" rx="12" fill="#FFFFFF" opacity=".75" stroke="#D9B7C4" stroke-width="2.5"/>
+<rect x="360" y="196" width="36" height="10" rx="4" fill="#D9A0B5"/>
+<g id="hrjardots"></g></g>
+<text id="hrjarlbl" x="406" y="280" text-anchor="end" font-size="11" fill="#A9788C" font-weight="bold"></text>
+<g id="hrdbook" style="cursor:pointer" transform="rotate(-8 124 320)">
+<rect x="96" y="300" width="56" height="40" rx="7" fill="#C97A94"/>
+<rect x="96" y="300" width="11" height="40" rx="5" fill="#A85B77"/>
+<rect x="112" y="308" width="33" height="3.5" rx="1.75" fill="#fff" opacity=".85"/>
+<path d="M129 331 c-5-4.5-7-9-3.4-11 c2-1 3.4.6 3.4 1.7 c0-1.1 1.4-2.7 3.4-1.7 c3.6 2 1.6 6.5-3.4 11z" fill="#fff" opacity=".9"/></g>
+<g class="itm" id="it-plant"><rect x="38" y="230" width="34" height="30" rx="6" fill="#D98A9F"/>
+<path d="M55 232 q-20 -26 -8 -44 q12 12 8 44z" fill="#8FBF8F"/>
+<path d="M55 232 q20 -22 6 -42 q-14 10 -6 42z" fill="#A9D0A0"/>
+<path d="M55 234 q2 -30 0 -40" stroke="#7DAF7D" stroke-width="3" fill="none"/></g>
+<g class="itm" id="it-lamp"><path d="M300 130 l40 0 l-8 34 l-24 0 z" fill="#F6C98F"/>
+<ellipse cx="320" cy="176" rx="34" ry="18" fill="#FDEBBE" opacity=".55"/>
+<line x1="320" y1="164" x2="320" y2="250" stroke="#B08A6A" stroke-width="5"/>
+<ellipse cx="320" cy="252" rx="18" ry="6" fill="#B08A6A"/></g>
+<g class="itm" id="it-pic"><rect x="216" y="70" width="52" height="46" rx="9" fill="#fff" stroke="#E3C0CE" stroke-width="3"/>
+<path d="M242 100 c-9 -8 -13 -16 -6 -20 c4 -2 6 1 6 3 c0 -2 2 -5 6 -3 c7 4 3 12 -6 20z" fill="#E27A98"/></g>
+<g class="itm" id="it-shelf"><rect x="290" y="88" width="104" height="7" rx="3.5" fill="#C9A183"/>
+<rect x="298" y="62" width="12" height="26" rx="2" fill="#D98A9F"/>
+<rect x="313" y="58" width="12" height="30" rx="2" fill="#8FB8D8"/>
+<rect x="328" y="66" width="12" height="22" rx="2" fill="#F0C070"/>
+<rect x="343" y="60" width="10" height="28" rx="2" fill="#A9D0A0"/></g>
+<g class="itm" id="it-rug"><ellipse cx="215" cy="360" rx="128" ry="34" fill="#F7D9E3"/>
+<ellipse cx="215" cy="360" rx="96" ry="25" fill="none" stroke="#EDBFCF" stroke-width="3"/></g>
+<g class="itm" id="it-lights"><path d="M0 14 q54 26 108 8 q54 -18 108 8 q54 26 107 6 q54 -20 107 8" fill="none" stroke="#D9B7C4" stroke-width="2.5"/>
+<g fill="#FCD98A"><circle cx="54" cy="27" r="5"/><circle cx="160" cy="22" r="5"/><circle cx="268" cy="30" r="5"/><circle cx="376" cy="24" r="5"/></g>
+<g fill="#E8899F"><circle cx="107" cy="24" r="5"/><circle cx="215" cy="24" r="5"/><circle cx="322" cy="28" r="5"/></g></g>
+<g class="itm" id="it-cat"><ellipse cx="118" cy="372" rx="30" ry="14" fill="#F0A868"/>
+<circle cx="94" cy="362" r="13" fill="#F0A868"/>
+<polygon points="85,353 89,342 95,351" fill="#F0A868"/>
+<polygon points="103,351 99,341 93,351" fill="#F0A868"/>
+<path d="M88 361 q2 3 5 0 M97 361 q2 3 5 0" stroke="#8A5A33" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+<path d="M146 370 q14 -4 10 -16" stroke="#F0A868" stroke-width="7" fill="none" stroke-linecap="round"/></g>
+<g class="itm" id="it-frame"><rect x="358" y="56" width="40" height="30" rx="6" fill="#fff" stroke="#E8B54A" stroke-width="3"/>
+<circle cx="371" cy="70" r="6" fill="#F2B8CB"/>
+<circle cx="386" cy="70" r="6" fill="#F6D08C"/></g>
+</svg>
+<div id="hrhud"><button type="button" class="hudchip" id="hrclose" style="pointer-events:auto;cursor:pointer;font-family:inherit">‹ ปิด</button><span style="display:flex;gap:6px"><span class="hudchip" id="hrstreak">ห้องพักใจ</span><span class="hudchip">✦ <span id="hrspark">0</span></span></span></div>
+<div id="hrbubble"></div>
+<img id="hrbossy" class="bob" src="img/p01-clipboard-hello.webp" alt="">
+</div>
+<div id="hrpanel"><div id="hrstage"></div></div>
+<div id="hrunlock"><div class="big" id="hrunbig"></div><h2 id="hruntitle"></h2><p id="hrunsub"></p><button type="button" class="hbtn" id="hrunbtn">อุ่นขึ้นอีกนิดแล้ว →</button></div>
+</div>
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <script>
 var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0,SRC="";
@@ -435,6 +511,8 @@ async function boot(){
       if(tb==="diary")tb="story"; // 🎀 ปุ่ม "ไดอารี่ของบอส" (เมนู v14, 18 ส.ค.) -> เปิดหน้าเรื่องราว/คลังความจำตรงๆ ห้ามสลับไป home
       var secQ=qp.get("sec");if(!secQ){var lsSec=qp.get("liff.state");if(lsSec){secQ=new URLSearchParams(lsSec.charAt(0)==="?"?lsSec.slice(1):lsSec).get("sec")}}
       if(secQ==="files"){setTimeout(function(){var el=document.getElementById("st_files");if(el){el.scrollIntoView({behavior:"smooth"})}},700)}
+      /* 219: ปุ่ม "บันทึกใจวันนี้" ท้ายรายงานเย็น -> เปิดห้อง+เข้าเช็คใจเลย (openHealRoom รอ login เองถ้ายังไม่พร้อม) */
+      if(secQ==="checkin"){setTimeout(function(){if(window.openHealRoom)openHealRoom("checkin")},900)}
       if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier"].indexOf(tb)>=0){TAB=tb}
       /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
       var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
@@ -2195,262 +2273,410 @@ async function doErase(){
   try{await api("pdpa.erase");$("#app").innerHTML='<div class="err">🔒 ลบข้อมูลของคุณเรียบร้อยแล้ว<br>ขอบคุณที่เคยใช้บริการนะ 🤍<br><br>หากอยากเริ่มใหม่ ทักหาเลขาในแชตได้เสมอ</div>'}catch(e){toast(e.message||"ผิดพลาด")}
 }
 
-/* ---------- 🔋 ห้องพักใจ: เกมชาร์จพลังใจ (หลอดแดง→เขียว จบด้วยก้าวจริง + เช็คเอาต์ตามจริง) ----------
-   หลักการ: สิ่งที่พิมพ์ระบายไม่ถูกส่งขึ้นระบบเลย (อยู่ในเครื่องแล้วทิ้ง) — บันทึกเฉพาะผลเช็คเอาต์ผ่าน heal.log
-   น้ำเสียงตาม character จริงของผู้ใช้ (pt()) ; ปุ่ม "ตั้งเตือน" ยิง reminder.add = เข้าระบบเตือนจริงของเลขา */
+/* ---------- 🎮 ห้องพักใจ v2: เกมดูแลใจ "ห้องที่อุ่นขึ้นตามการดูแลใจ" (219) ----------
+   state จริงอยู่ heal_state/heal_diary ฝั่งเซิร์ฟเวอร์ — หน้านี้เป็นแค่มือที่เล่นภาพ
+   กติกาที่ล็อกกับบอส: ธีมสว่าง · moodFace ไม่ใช้อีโมจิ · ข้อความ "ระบาย" ไม่ออกจากเครื่อง ·
+   ไดอารี่ = ตั้งใจเก็บ (คนละเรื่องกับระบาย) · 1323 ค้ำเสมอ · ✦ ได้เท่ากันทุกคำตอบเช็คเอาต์
+   API ล้มต้องไปต่อได้เสมอ (ห้ามขวางทางเดินใจ) */
 (function(){
-var timers=[],P="ครับ",BATT=8,chargeTok=0,curSteps=[],si=0,journeyKey="",HS={};
-var STOPS=[[0,[229,72,77]],[33,[240,136,62]],[66,[245,215,10]],[100,[48,209,88]]];
-var GREEN=[48,209,88],EMO=[196,110,148];
+var timers=[],P="ครับ",S=null,ckMood="",ckCause="",curSteps=[],si=0,journeyKey="",HS={},pendingUnlock=null;
 function delay(fn,ms){var id=setTimeout(fn,ms);timers.push(id);return id}
 function every(fn,ms){var id=setInterval(fn,ms);timers.push(id);return id}
 function clearTimers(){for(var i=0;i<timers.length;i++){clearTimeout(timers[i]);clearInterval(timers[i])}timers=[]}
 function $h(x){return document.getElementById(x)}
 function kb(){return P}
 function kbNa(){return P==="ครับ"?"นะครับ":P==="ค่ะ"?"นะคะ":"นะ"}
-function lerp(a,b,t){return[Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)]}
-function bcol(p){var a=STOPS[0];for(var i=1;i<STOPS.length;i++){var b=STOPS[i];if(p<=b[0])return lerp(a[1],b[1],(p-a[0])/(b[0]-a[0]));a=b}return GREEN}
-function rgbs(c){return"rgb("+c[0]+","+c[1]+","+c[2]+")"}
-function setBatt(p){BATT=Math.max(0,Math.min(100,p));var fc=bcol(BATT);
-  $h("hrfill").style.width=BATT+"%";$h("hrfill").style.background=rgbs(fc);$h("hrfill").style.boxShadow="0 0 18px "+rgbs(fc);
-  $h("hrpct").textContent=Math.round(BATT)+"%";$h("hrpct").style.color=rgbs(fc);
-  var sc=lerp(EMO,GREEN,BATT/100);
-  $h("hrscene").style.background="radial-gradient(95% 65% at 50% 6%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.28),transparent),radial-gradient(80% 60% at 72% 100%,rgba("+sc[0]+","+sc[1]+","+sc[2]+",.14),transparent),#FAF3F6"}
-function chargeTo(target,lbl,cb){var tk=++chargeTok;
-  $h("hrblbl").innerHTML='<span class="bolt on">⚡</span> '+(lbl||"กำลังชาร์จ...");
-  var start=BATT,t0=null;
-  function s(ts){if(tk!==chargeTok)return;if(!t0)t0=ts;var k=Math.min(1,(ts-t0)/900);
-    setBatt(start+(target-start)*k);
-    if(k<1)requestAnimationFrame(s);else{$h("hrblbl").innerHTML="พลังใจ "+Math.round(target)+"% 🔋";if(cb)cb()}}
-  requestAnimationFrame(s)}
-function burst(list,anim,n){var ph=$h("healroom");
-  for(var i=0;i<n;i++){(function(i){delay(function(){
-    var e=document.createElement("div");e.className="hp";e.textContent=list[Math.floor(Math.random()*list.length)];
-    e.style.left=(12+Math.random()*76)+"%";e.style.top=(anim==="hrsink"?"44%":"66%");
-    e.style.setProperty("--dx",(Math.random()*120-60)+"px");e.style.setProperty("--r",(Math.random()*180-90)+"deg");
-    e.style.animation=anim+" "+(1.6+Math.random()*1.2)+"s ease-out forwards";ph.appendChild(e);
-    setTimeout(function(){e.remove()},3200)},i*45)})(i)}}
-function render(h){clearTimers();chargeTok++;
-  $h("hrstage").innerHTML='<div class="hinner hfade">'+h+'</div>';
-  var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
+function hpose(x){var e=$h("hrbossy");if(e)e.src="img/"+x+".webp"}
+function hbub(h){var e=$h("hrbubble");if(e)e.innerHTML=h}
+function ymdAdd(ymd,days){try{return new Date(Date.parse(ymd+"T00:00:00Z")+days*86400000).toISOString().slice(0,10)}catch(e){return ymd}}
+function hrisky(s){return /ทำร้ายตัวเอง|ไม่อยากมีชีวิต|ไม่อยากอยู่|ฆ่าตัวตาย|อยากตาย|จบชีวิต|สิ้นหวัง|อยู่ไปทำไม/.test(s||"")}
+
+/* ---------- ของในห้อง: ปลดล็อกตามแสงใจสะสม (ordinal ต้องตรงกับ celebrated ฝั่ง DB) ---------- */
+var ITEMS=[
+ {at:2, id:"it-plant", e:"🪴", n:"ต้นไม้เล็ก", s:"มีของมีชีวิตอยู่ด้วยแล้ว ห้องเริ่มหายใจ"},
+ {at:5, id:"it-lamp",  e:"💡", n:"โคมไฟแสงอุ่น", s:"มุมนี้ไว้นั่งพักตอนเย็น ๆ"},
+ {at:9, id:"it-pic",   e:"🖼️", n:"รูปหัวใจติดผนัง", s:"ฝีมือบอสซี่เอง ติดเบี้ยวนิดนึงแต่ตั้งใจมาก"},
+ {at:14,id:"it-shelf", e:"📚", n:"ชั้นหนังสือ", s:"เก็บเรื่องที่ผ่านมาแล้วขึ้นชั้น ไม่ต้องถือไว้ตลอด"},
+ {at:20,id:"it-rug",   e:"🧶", n:"พรมนุ่ม", s:"ยืนตรงนี้แล้วเท้าไม่เย็นแล้ว"},
+ {at:27,id:"it-lights",e:"✨", n:"ไฟประดับ", s:"ห้องนี้สว่างเพราะบอสแวะมาเรื่อย ๆ"},
+ {at:35,id:"it-cat",   e:"🐱", n:"แมวส้มมาอยู่ด้วย", s:"มันเลือกห้องที่อบอุ่นเองเสมอ"},
+ {at:44,id:"it-frame", e:"🏅", n:"รูปคู่บอสกับบอสซี่", s:"ห้องเต็มแล้ว — แต่บอสแวะมาได้ทุกวันเหมือนเดิม"}];
+function itemsOwned(){var n=0;for(var i=0;i<ITEMS.length;i++)if(S.sparks>=ITEMS[i].at)n++;return n}
+function nextItem(){for(var i=0;i<ITEMS.length;i++)if(S.sparks<ITEMS[i].at)return ITEMS[i];return null}
+function drawRoom(){if(!S)return;
+ for(var i=0;i<ITEMS.length;i++){var el=$h(ITEMS[i].id);if(el)el.classList.toggle("on",S.sparks>=ITEMS[i].at)}
+ var nx=nextItem(),dots=$h("hrjardots"),h="";
+ if(nx){var prev=0;for(var j=0;j<ITEMS.length;j++)if(ITEMS[j].at<=S.sparks&&ITEMS[j].at>prev)prev=ITEMS[j].at;
+   var have=S.sparks-prev;
+   for(var d=0;d<Math.min(have,12);d++){h+='<circle cx="'+(362+(d%4)*11)+'" cy="'+(252-Math.floor(d/4)*13)+'" r="4" fill="#F0C25A"><animate attributeName="opacity" values="1;.55;1" dur="'+(2+d*0.3)+'s" repeatCount="indefinite"/></circle>'}
+   var lb=$h("hrjarlbl");if(lb)lb.textContent="อีก "+(nx.at-S.sparks)+" ✦ ได้"+nx.n;
+ }else{for(var d2=0;d2<12;d2++){h+='<circle cx="'+(362+(d2%4)*11)+'" cy="'+(252-Math.floor(d2/4)*13)+'" r="4" fill="#F0C25A"/>'}
+   var lb2=$h("hrjarlbl");if(lb2)lb2.textContent="ห้องเต็มแล้ว ✦"}
+ if(dots)dots.innerHTML=h;
+ var sp=$h("hrspark");if(sp)sp.textContent=S.sparks;
+ var stk=$h("hrstreak");if(stk)stk.innerHTML=S.streak>=2?("ดูแลใจต่อเนื่อง <span style='font-size:14px'>"+S.streak+"</span> วัน"):"ห้องพักใจ"}
+
+/* ---------- แสงใจบินเข้าโหล + ฉลองของใหม่ (quiet = ตอนใจหนัก เลื่อนไปฉลองตอนกลับห้อง) ---------- */
+function earnSpark(n,cb,quiet,target){var room=$h("hroom"),i=0;
+ function fin(){if(typeof target==="number"){S.sparks=target;drawRoom()}
+   if(quiet){if(cb)cb()}else checkUnlock(cb)}
+ if(!n||n<=0){fin();return}
+ function one(){var st=document.createElement("div");st.className="hfly";st.textContent="✦";
+   st.style.left="48%";st.style.top="55%";room.appendChild(st);
+   requestAnimationFrame(function(){requestAnimationFrame(function(){st.style.left="86%";st.style.top="56%";st.style.opacity="0";st.style.fontSize="10px"})});
+   setTimeout(function(){st.remove()},1200);
+   S.sparks++;drawRoom();i++;
+   if(i<n)setTimeout(one,380);else setTimeout(fin,900)}
+ one()}
+function checkUnlock(cb){var owned=itemsOwned();
+ if(S.celebrated<owned){var it=ITEMS[S.celebrated];
+   $h("hrunbig").textContent=it.e;$h("hruntitle").textContent="ได้ "+it.n+" มาอยู่ในห้อง";
+   $h("hrunsub").textContent=it.s;pendingUnlock=cb||null;
+   $h("hrunlock").style.display="flex";drawRoom()}
+ else if(cb)cb()}
+function closeUnlock(){$h("hrunlock").style.display="none";
+ S.celebrated++;try{api("heal.celebrate",{n:S.celebrated}).catch(function(){})}catch(e){}
+ drawRoom();var cb=pendingUnlock;pendingUnlock=null;
+ if(S.celebrated<itemsOwned())checkUnlock(cb);else if(cb)cb()}
+
+/* ---------- โครงหน้าแผงล่าง ---------- */
+function render(h){clearTimers();$h("hrstage").innerHTML='<div class="hinner hfade">'+h+'</div>';
+ var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
 function inner(){return document.querySelector("#hrstage .hinner")}
-function head(t){return '<div class="htag"><button class="hback" id="hrbk">‹</button><span>'+steptag()+' · '+t+'</span></div>'}
-function addBtn(txt,ghost){var b=document.createElement("button");b.className="hbtn"+(ghost?" ghost":"");b.textContent=txt;inner().appendChild(b);return b}
+function addBtn(txt,ghost){var b=document.createElement("button");b.type="button";b.className="hbtn"+(ghost?" ghost":"");b.innerHTML=txt;inner().appendChild(b);return b}
 function once(b,fn){b.onclick=function(){if(b.dataset.x)return;b.dataset.x=1;fn()}}
 function hval(s){var e=document.querySelector(s);return e?e.value:""}
-function risky(s){return /ทำร้ายตัวเอง|ไม่อยากมีชีวิต|ไม่อยากอยู่|ฆ่าตัวตาย|อยากตาย|จบชีวิต|สิ้นหวัง|อยู่ไปทำไม/.test(s||"")}
-function proceed(t,lbl,txt){chargeTo(t,lbl,function(){var b=addBtn(txt||"ไปต่อ →");b.classList.add("hfade");once(b,step)})}
 function chipf(t){return '<div class="hchip">'+t+'</div>'}
-function note(msg){var m=document.createElement("div");m.className="hnote hfade";m.textContent=msg;inner().appendChild(m);return m}
-function wireChoices(t,notes,handlers){var cs=document.querySelectorAll("#hrstage .hchip");
-  cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
-    if(handlers&&handlers[idx]){handlers[idx]();return}
-    var msg=notes&&notes[idx];if(msg)note(msg);
-    delay(function(){proceed(t,"รับทราบ"+kb())},msg?450:260)}})}
+function head(t){return '<div class="htag"><button type="button" class="hback" id="hrbk">‹</button><span>'+t+'</span></div>'}
+function noteEl(msg){var m=document.createElement("div");m.className="hnote hfade";m.textContent=msg;inner().appendChild(m);return m}
+function burst(list,n){var ph=$h("hroom");
+ for(var i=0;i<n;i++){(function(i){delay(function(){
+   var e=document.createElement("div");e.className="hp";e.textContent=list[Math.floor(Math.random()*list.length)];
+   e.style.left=(12+Math.random()*76)+"%";e.style.top="70%";
+   e.style.setProperty("--dx",(Math.random()*120-60)+"px");e.style.setProperty("--r",(Math.random()*180-90)+"deg");
+   e.style.animation="hrup "+(1.5+Math.random()*1.1)+"s ease-out forwards";ph.appendChild(e);
+   setTimeout(function(){e.remove()},3000)},i*45)})(i)}}
+
+/* ---------- หน้าแรก: ในห้อง ---------- */
+function greeting(){
+ if(!S.last_check&&S.sparks===0)return "สวัสดี"+kb()+"บอส ห้องนี้เป็นของบอสนะ ยังโล่ง ๆ อยู่เลย — <b>ทุกครั้งที่บอสแวะมาดูแลใจ ห้องจะอุ่นขึ้นทีละนิด</b> บอสซี่จัดของให้เอง";
+ if(S.checked_today){var nx=nextItem();
+   return nx?("วันนี้เช็คใจแล้ว ✓ จะนั่งเล่นเฉย ๆ ก็ได้"+kbNa()+" — อีก "+(nx.at-S.sparks)+" ✦ ได้"+nx.n+"มาเพิ่ม"):"วันนี้เช็คใจแล้ว ✓ ห้องเราเต็มแล้ว นั่งเล่นกันเฉย ๆ ก็ได้"+kb()}
+ var yest=ymdAdd(S.today,-1);
+ if(S.prev_outcome==="heavy"&&S.last_check===yest)
+   return "<b>เมื่อวานบอสบอกว่ายังหนักอยู่</b> บอสซี่เก็บเรื่องนี้ไว้ในใจทั้งวันเลย"+kb()+" — วันนี้เป็นยังไงบ้าง";
+ if(S.prev_mood&&S.last_check===yest){var m=MOOD_TH[S.prev_mood];
+   return "เมื่อวานบอสบอกว่า"+(m?m[1]:"")+"อยู่ — วันนี้ใจเป็นยังไงบ้าง"+kb()}
+ if(S.last_check){var gap=Math.round((Date.parse(S.today)-Date.parse(S.last_check))/86400000);
+   if(gap>1)return "ไม่เจอกัน "+gap+" วัน บอสซี่เฝ้าห้องรออยู่"+kb()+" ของทุกชิ้นยังอยู่ครบ — วันนี้ใจเป็นยังไงบ้าง"}
+ return "วันนี้ใจเป็นยังไงบ้าง"+kb()+"บอส เช็คแป๊บเดียว ห้องอุ่นขึ้นอีกนิดด้วย"}
+function hrHome(){clearTimers();drawRoom();
+ hpose(itemsOwned()>=5?"p13-sofa-relax":"p01-clipboard-hello");
+ hbub(greeting());
+ render(
+   (S.checked_today
+     ?'<button type="button" class="hbtn ghost" style="margin-top:0" disabled>เช็คใจวันนี้แล้ว ✓ (พรุ่งนี้มาใหม่'+kbNa()+')</button>'
+     :'<button type="button" class="hbtn" style="margin-top:0" id="hrck">เช็คใจวันนี้ · รับ ✦</button>')+
+   '<div class="htag" style="margin-top:10px">เครื่องมือดูแลใจ (ทำจบได้ ✦ 2)</div>'+
+   '<div class="htools">'+
+     '<div class="htool" data-k="anger"><span class="e">'+moodFace("angry",24)+'</span>โมโห<br>หัวร้อน</div>'+
+     '<div class="htool" data-k="stress"><span class="e">'+moodFace("stressed",24)+'</span>เครียด<br>คิดวน</div>'+
+     '<div class="htool" data-k="sad"><span class="e">'+moodFace("tired",24)+'</span>เหนื่อยใจ<br>ท้อ</div>'+
+     '<div class="htool" data-k="rest"><span class="e">'+moodFace("ok",24)+'</span>ขอพัก<br>แป๊บนึง</div>'+
+   '</div>'+
+   '<button type="button" class="hbtn ghost" style="margin-top:10px;padding:10px;font-size:13px" id="hrdb">📖 แฟ้มไดอารี่</button>'+
+   '<div class="hfoot">ระบายในเครื่องมือ = ไม่บันทึก · ไดอารี่ = ตั้งใจเก็บไว้ให้บอสกลับมาอ่าน (ลบได้ทีละหน้า)</div>');
+ var ck=$h("hrck");if(ck)once(ck,checkin);
+ var db=$h("hrdb");if(db)once(db,openDiary);
+ var bk=$h("hrbk");if(bk)bk.onclick=closeHealRoom;
+ var dbook=$h("hrdbook");if(dbook)dbook.onclick=openDiary;
+ var ub=$h("hrunbtn");if(ub)ub.onclick=closeUnlock;
+ document.querySelectorAll("#hrstage .htool").forEach(function(t){t.onclick=function(){runJourney(t.getAttribute("data-k"))}});
+ checkUnlock(null)}
+
+/* ---------- เช็คใจรายวัน ---------- */
+function checkin(){if(S.checked_today)return openDiary();
+ ckMood="";ckCause="";hpose("p03-thinking");hbub("เลือกตามจริงได้เลย"+kb()+" ไม่ต้องฝืนเลือกหน้ายิ้ม");
+ var ks=["happy","ok","tired","stressed","anxious","sad","angry","lonely"];
+ var h='<div class="hmoods">';
+ for(var i=0;i<ks.length;i++)h+='<div class="hmood" data-k="'+ks[i]+'">'+moodFace(ks[i],36)+'<span class="n">'+MOOD_TH[ks[i]][1]+'</span></div>';
+ h+='</div>';
+ render(head("เช็คใจวันนี้")+h);
+ document.querySelectorAll("#hrstage .hmood").forEach(function(m){m.onclick=function(){ckMood=m.getAttribute("data-k");
+   if(ckMood==="happy"||ckMood==="ok")return respond();
+   causePick()}})}
+function causePick(){
+ render(head("เช็คใจวันนี้")+
+   '<h1 style="font-size:16.5px">เรื่องไหนกดใจสุดวันนี้<span class="soft">แตะเลือกอันเดียว ไม่ต้องพิมพ์อะไร</span></h1>'+
+   '<div class="hcgrid">'+chipf("งาน / ลูกค้า")+chipf("เงิน")+chipf("คนรอบตัว")+chipf("ครอบครัว")+chipf("ร่างกาย / สุขภาพ")+chipf("บอกไม่ถูก")+'</div>');
+ var cs=document.querySelectorAll("#hrstage .hchip");
+ cs.forEach(function(c){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
+   ckCause=c.textContent;delay(respond,350)}})}
+var RESP={
+ happy:["p04-cheer-jump","วันสดใสก็ควรถูกนับเหมือนกัน{K} — คนส่วนใหญ่จำแต่วันแย่ วันดี ๆ เลยหายไปเฉย ๆ"],
+ ok:["p06-ok-wink","เฉย ๆ คือข่าวดีแบบเงียบ ๆ{K} ไม่ต้องทุกวันพิเศษก็ได้ แวะมาให้ห้องอุ่นก็พอ"],
+ tired:["p10-heart","เหนื่อยสะสมไม่ใช่ความอ่อนแอ{K} มันคือหลักฐานว่าบอสแบกมานานแค่ไหน"],
+ stressed:["p10-heart","เครียดแปลว่าสมองแบกหลายเรื่องพร้อมกันเกินไป{K} — เทออกมาให้มันหยุดวนได้"],
+ anxious:["p10-heart","กังวลคือใจที่วิ่งไปอยู่พรุ่งนี้ก่อนตัว{K} ดึงกลับมาทีละลมหายใจได้"],
+ sad:["p10-heart","เศร้าได้ ไม่ต้องรีบหาย{K} ความรู้สึกที่ถูกยอมรับ จะเบากว่าความรู้สึกที่ถูกไล่"],
+ angry:["p10-heart","โกรธได้{K} แต่อย่าให้มันตัดสินใจแทนบอส — เดี๋ยวเราค่อย ๆ แยกกัน"],
+ lonely:["p10-heart","เหงาไม่ได้แปลว่าไม่มีใคร มันแปลว่าอยากมีคนเข้าใจ{K} — บอสซี่กับเลขาอยู่ตรงนี้ แชตมาได้เสมอ"]};
+var OFFER={tired:"sad",stressed:"stress",anxious:"stress",sad:"sad",angry:"anger",lonely:"sad"};
+var TOOL_OFFER={
+ tired:"พักใจต่ออีก 3 นาที (เหนื่อยใจ) · ✦ 2",stressed:"เทออกจากหัว 3 นาที · ✦ 2",
+ anxious:"ดึงใจกลับมาที่ลมหายใจ · ✦ 2",sad:"อยู่กับมันแบบมีเพื่อน 3 นาที · ✦ 2",
+ angry:"ปล่อยของก่อนกลับไปคุยกับใคร · ✦ 2",lonely:"พักใจ 3 นาที แล้วค่อยแชตกับเลขา · ✦ 2"};
+function respond(){var r=RESP[ckMood];hpose(r[0]);hbub(r[1].replace("{K}",kb()));
+ diaryAsk(OFFER[ckMood]||null)}
+
+/* ---------- 📖 ไดอารี่: เขียนได้วันละหน้า (ไม่บังคับ) — ที่เดียวในห้องที่ "ตั้งใจเก็บ" ---------- */
+function diaryAsk(neg){
+ hbub("มีอะไรอยากเล่าเก็บไว้มั้ย"+kb()+" 2-3 บรรทัดพอ — <b>หน้านี้ตั้งใจเก็บไว้ให้บอสกลับมาอ่าน</b> ไม่เหมือนที่ระบายทิ้งในเครื่องมือ");
+ render(head("ไดอารี่วันนี้ (ไม่บังคับ)")+
+   '<textarea id="hrdnote" placeholder="เช่น วันนี้ปิดดีลเจ้าใหญ่ได้ / ทะเลาะกับซัพ ยังค้าง ๆ อยู่..." style="min-height:70px"></textarea>');
+ var b=addBtn("เก็บใส่ไดอารี่ · รับ ✦");b.disabled=true;
+ var g=addBtn("วันนี้ไม่เขียน",true);
+ var ta=document.querySelector("#hrdnote");
+ ta.oninput=function(){b.disabled=ta.value.trim().length<5};
+ once(b,function(){var v=ta.value.trim();
+   if(hrisky(v)){try{api("heal.checkin",{mood:ckMood,cause:ckCause,note:v}).catch(function(){})}catch(e){}return safety(true)}
+   sendCheckin(v,neg)});
+ once(g,function(){sendCheckin(null,neg)})}
+function sendCheckin(v,neg){render('<div class="htag">กำลังบันทึก...</div>');
+ api("heal.checkin",{mood:ckMood,cause:ckCause,note:v}).then(function(res){
+   if(res&&res.safety)return safety(true);
+   S.checked_today=true;S.diary_today=!!(res&&res.diary_today);S.streak=(res&&res.streak)||S.streak;
+   S.last_check=S.today;S.prev_mood=ckMood;S.prev_outcome="";
+   render('<div class="htag">'+(v?"เก็บเข้าแฟ้มแล้ว ✓ เปิดอ่านได้จากสมุดในห้อง":"เช็คใจแล้ว · ขอบคุณที่ตอบตามจริง")+kb()+'</div>'+
+     (S.streak>=2?'<div class="hnote" style="margin-top:8px">ดูแลใจต่อเนื่อง '+S.streak+' วันแล้ว — ความสม่ำเสมอแบบนี้แหละที่ใจชอบ</div>':''));
+   earnSpark((res&&res.earned)||0,function(){afterCheckin(neg)},false,res?res.sparks:undefined);
+ }).catch(function(){
+   S.checked_today=true;S.last_check=S.today;S.prev_mood=ckMood;
+   render('<div class="htag">เช็คใจแล้ว'+kb()+'</div>');
+   noteEl("เน็ตสะดุด บันทึกไม่เข้า — ไว้ลองใหม่จากสมุดในห้องได้"+kb());
+   delay(function(){afterCheckin(neg)},600)})}
+function afterCheckin(neg){
+ render('<div class="htag">เช็คใจวันนี้เรียบร้อย'+kb()+'</div>'+
+   (S.streak>=2?'<div class="hnote" style="margin-top:8px">ดูแลใจต่อเนื่อง '+S.streak+' วันแล้ว — ความสม่ำเสมอแบบนี้แหละที่ใจชอบ</div>':''));
+ if(neg){var b=addBtn(TOOL_OFFER[ckMood]||"ใช้เครื่องมือดูแลใจต่อ · ✦ 2");b.classList.add("hfade");
+   once(b,function(){runJourney(neg)});
+   var g=addBtn("วันนี้พอแค่นี้ กลับเข้าห้อง",true);g.classList.add("hfade");once(g,hrHome);
+ }else{var b2=addBtn("กลับเข้าห้อง");b2.classList.add("hfade");once(b2,hrHome)}}
+function openDiary(){clearTimers();hpose("p08-clipboard-write");
+ hbub("สมุดเล่มนี้ของบอสคนเดียว"+kb()+" อ่านย้อนได้ตลอด ลบได้ทีละหน้า — <b>คนละเรื่องกับที่ระบายทิ้งนะ อันนั้นไม่เก็บเลย</b>");
+ render(head("แฟ้มไดอารี่")+'<div class="hmid" style="color:#B9AEB6;font-size:13px">กำลังเปิดสมุด...</div>');
+ api("diary.list").then(function(res){var rows=(res&&res.rows)||[];
+   var h=head("แฟ้มไดอารี่ · "+rows.length+" บันทึก");
+   if(!rows.length)h+='<div class="hmid" style="color:#B9AEB6;font-size:13px;line-height:1.7">ยังไม่มีบันทึกเลย<br>เขียนหน้าแรกได้ตอนเช็คใจ'+kbNa()+'</div>';
+   else{h+='<div class="hdlist">';
+     for(var i=0;i<rows.length;i++){var e=rows[i];
+       h+='<div class="hdent"><div class="hdhead">'+moodFace(MOOD_TH[e.mood]?e.mood:"ok",20)+' <b>'+fdateOnly(e.entry_date)+'</b>'+(e.cause?' · <span class="hdcause">'+esc(e.cause)+'</span>':'')+'<button type="button" class="hddel" data-i="'+e.id+'" aria-label="ลบ">✕</button></div><div class="hdnote">'+esc(e.note)+'</div></div>'}
+     h+='</div>'}
+   render(h+'<div class="hfoot">ไดอารี่เก็บไว้ให้บอสคนเดียว · ลบได้ทีละหน้า · ลบบัญชี = หายทั้งเล่ม</div>');
+   if(S.checked_today&&!S.diary_today){var w=addBtn("เขียนของวันนี้ · รับ ✦");
+     once(w,function(){ckMood=S.prev_mood||"ok";ckCause="";diaryAsk(null)})}
+   document.querySelectorAll("#hrstage .hddel").forEach(function(x){x.onclick=function(){
+     x.disabled=true;api("diary.delete",{id:x.getAttribute("data-i")}).then(function(){S.diary_today=false;openDiary()}).catch(function(){x.disabled=false})}})
+ }).catch(function(){render(head("แฟ้มไดอารี่")+'<div class="hmid" style="color:#B9AEB6;font-size:13px">เปิดสมุดไม่ได้ตอนนี้ ลองใหม่อีกทีนะ</div>')})}
+
+/* ---------- เครื่องมือดูแลใจ (4 เส้นเดิมที่บอสอนุมัติ + แบตซื่อสัตย์) ---------- */
 function steptag(){return "ก้าวที่ "+si+" / "+curSteps.length}
-function starget(){return Math.round(8+si/curSteps.length*77)}
-function runJourney(k){var j=JOURNEYS[k];journeyKey=k;HS={};EMO=j.color;curSteps=j.steps;si=0;setBatt(8);
-  $h("hrblbl").textContent="พลังใจเหลือน้อย 🪫";step()}
-function step(){if(si>=curSteps.length)return checkout();si++;curSteps[si-1](starget())}
+function jhead(t){return head(steptag()+" · "+t)}
+function runJourney(k){var j=JOURNEYS[k];journeyKey=k;HS={};curSteps=j.steps;si=0;
+ hpose("p07-desk-work");hbub(j.intro+kb());step()}
+function step(){if(si>=curSteps.length)return checkout();si++;curSteps[si-1]()}
+function proceed(txt){var b=addBtn(txt||"ไปต่อ →");b.classList.add("hfade");once(b,step)}
+function wireChoices(notes,handlers){var cs=document.querySelectorAll("#hrstage .hchip");
+ cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
+   if(handlers&&handlers[idx]){handlers[idx]();return}
+   var msg=notes&&notes[idx];if(msg)noteEl(msg);
+   delay(function(){proceed("รับทราบ"+kb())},msg?450:260)}})}
 function tomorrow9(){var d=new Date(Date.parse(todayBKK()+"T00:00:00Z")+86400000).toISOString().slice(0,10);return wallUtc(d,"09:00").toISOString()}
-function logHeal(outcome){try{api("heal.log",{journey:journeyKey,outcome:outcome}).catch(function(){})}catch(e){}}
-/* ตั้งเตือนจริงผ่านเลขา — พังก็ไปต่อได้ (ห้ามขวางทางเดินใจ) */
-function setRem(t,text,okMsg){
-  api("reminder.add",{text:text,remind_at:tomorrow9()})
-    .then(function(){note(okMsg||("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 เลขาจะทวงให้"+kb()));delay(function(){proceed(t,"อยู่ในมือเลขาแล้ว")},400)})
-    .catch(function(){note("ตั้งเตือนไม่สำเร็จ — ไว้พิมพ์บอกเลขาในแชตได้"+kb());delay(function(){proceed(t,"ไปต่อกันก่อน")},400)})}
+function setRem(text,okMsg){
+ api("reminder.add",{text:text,remind_at:tomorrow9()})
+   .then(function(){noteEl(okMsg||("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 เลขาจะทวงให้"+kb()));delay(function(){proceed("อยู่ในมือเลขาแล้ว →")},400)})
+   .catch(function(){noteEl("ตั้งเตือนไม่สำเร็จ — ไว้พิมพ์บอกเลขาในแชตได้"+kb());delay(function(){proceed("ไปต่อกันก่อน →")},400)})}
 
-function hrHome(){EMO=[196,110,148];render(
-  '<div class="htag"><button class="hback" id="hrbk">‹</button><span>ห้องพักใจ · YES BOSS</span></div>'+
-  '<h1>ตอนนี้ใจเป็นยังไง'+kb()+'บอส<span class="soft">เลือกตามจริงได้เลย ไม่ต้องฝืน — ใช้เวลาแค่ 2-3 นาที แล้วค่อยกลับไปลุยต่อ</span></h1>'+
-  '<div class="hmid"><img class="hbossy" src="img/p10-heart.webp" alt=""></div>'+
-  '<div class="hmoods">'+
-    '<div class="hmood" data-k="anger"><span class="e">'+moodFace("angry",34)+'</span><span class="n">โมโห / หัวร้อน</span></div>'+
-    '<div class="hmood" data-k="stress"><span class="e">'+moodFace("stressed",34)+'</span><span class="n">เครียด / คิดวนไม่หยุด</span></div>'+
-    '<div class="hmood" data-k="sad"><span class="e">'+moodFace("tired",34)+'</span><span class="n">เหนื่อยใจ / ท้อ</span></div>'+
-    '<div class="hmood" data-k="rest"><span class="e">'+moodFace("calm",34)+'</span><span class="n">ขอพักแป๊บ</span></div>'+
-  '</div>'+
-  '<div class="hfoot">สิ่งที่พิมพ์ระบายในห้องนี้ไม่ถูกบันทึก · เก็บเฉพาะผลว่ารอบนี้ช่วยได้ไหม</div>');
-  setBatt(8);$h("hrblbl").textContent="พลังใจ";
-  var bk=$h("hrbk");if(bk)bk.onclick=closeHealRoom;
-  document.querySelectorAll("#hrstage .hmood").forEach(function(m){m.onclick=function(){runJourney(m.getAttribute("data-k"))}})}
+/* หายใจแบบ "ทำจริงถึงผ่าน": กดค้าง = สูดเข้า (4 วิ) · ปล่อย = ผ่อนออก (6 วิ) — แบตโกหกไม่ได้แล้ว */
+function stepBreathe(){var need=3,done=0;
+ render(jhead("หายใจด้วยกันจริง ๆ")+
+   '<h1 style="font-size:16px">อันนี้ต้องทำจริง ไม่มีทางลัด<span class="soft"><b>กดวงกลมค้างไว้</b>ตอนสูดเข้า (4 วิ) แล้ว<b>ปล่อย</b>ตอนผ่อนออก (6 วิ) ให้ไหล่ตกตอนปล่อย — ครบ '+need+' เฮือกถึงไปต่อได้</span></h1>'+
+   '<div class="hmid"><div class="horb" id="hrorb">กดค้าง<br>เมื่อพร้อม</div><div class="hbtag" id="hrbtag">เฮือกที่ 1 / '+need+'</div></div>');
+ var orb=$h("hrorb"),holdT0=0,holding=false,exhaleTimer=null;
+ function setTag(){var el=$h("hrbtag");if(el)el.textContent=done<need?("เฮือกที่ "+(done+1)+" / "+need):"ครบแล้ว"}
+ function down(e){e.preventDefault();if(done>=need||holding)return;holding=true;holdT0=Date.now();
+   if(exhaleTimer){clearTimeout(exhaleTimer);exhaleTimer=null}
+   orb.classList.remove("shrink");orb.classList.add("grow");orb.innerHTML="สูดเข้า...<br>ค้างไว้"}
+ function up(e){e.preventDefault();if(!holding)return;holding=false;
+   var held=(Date.now()-holdT0)/1000;
+   orb.classList.remove("grow");orb.classList.add("shrink");
+   if(held<2.5){orb.innerHTML="ยังสั้นไป"+kb()+"<br>สูดให้ถึง 4 วิ";return}
+   orb.innerHTML="ผ่อนออก...<br>ไหล่ตก";
+   exhaleTimer=setTimeout(function(){done++;setTag();
+     if(done>=need){orb.innerHTML="ดีมาก"+kb()+" ✓";orb.onpointerdown=null;orb.onpointerup=null;
+       hbub("เห็นมั้ย"+kb()+" ร่างกายนำใจเสมอ — คุมลมหายใจได้ ก็ดึงเกมกลับมาได้");hpose("p06-ok-wink");
+       proceed()}
+     else orb.innerHTML="อีก "+(need-done)+" เฮือก"+kb()+"<br>กดค้างเลย"},5000)}
+ orb.onpointerdown=down;orb.onpointerup=up;orb.onpointercancel=up;orb.onpointerleave=up}
 
-function stepBreathe(t){render(head("คุมลมหายใจก่อน")+
-  '<h1 style="font-size:19px">ร่างกายนำใจเสมอ — คุมลมหายใจได้ ก็ดึงเกมกลับมาได้<span class="soft">1 เฮือกยาว ๆ ตามวงกลม (เข้า 4 · ค้าง 2 · ออก 6 วินาที) ปล่อยให้ไหล่ตกลงตอนหายใจออก</span></h1>'+
-  '<div class="hmid"><div class="horb" id="hrorb">พร้อมเมื่อไหร่<br>แตะปุ่มเลย</div></div>');
-  var extra=0;
-  function breatheOnce(done){
-    function phase(txt,scale,secs,next){var o=$h("hrorb");if(!o)return;
-      o.style.transitionDuration=secs+"s";o.style.transform="scale("+scale+")";
-      var left=secs;o.innerHTML=txt+"<br>"+left;
-      var iv=every(function(){left--;var el=$h("hrorb");if(!el||left<=0){clearInterval(iv);return}el.innerHTML=txt+"<br>"+left},1000);
-      delay(function(){clearInterval(iv);if(next)next()},secs*1000)}
-    phase("สูดเข้า...",1.5,4,function(){phase("ค้างไว้...",1.5,2,function(){phase("ผ่อนออก... ไหล่ตก",1,6,done)})})}
-  var b=addBtn("เริ่มหายใจ");
-  once(b,function(){b.disabled=true;chargeTo(t,"หายใจอยู่...");
-    breatheOnce(function(){var o=$h("hrorb");if(o)o.innerHTML="ดีมาก"+kb()+" 🔋";b.remove();
-      var n=addBtn("ไปต่อ →");n.classList.add("hfade");once(n,step);
-      var g=addBtn("ขออีกเฮือก (ไม่รีบ)",true);g.classList.add("hfade");
-      once(g,function(){g.disabled=true;extra++;chargeTo(Math.min(t+4*extra,90),"หายใจอยู่...");
-        breatheOnce(function(){var o2=$h("hrorb");if(o2)o2.innerHTML="ดีมาก"+kb()+" 🔋";g.disabled=false;delete g.dataset.x})})})})}
+function stepVent(){render(jhead("เทออกมาให้หมด")+
+   '<h1 style="font-size:16px">พิมพ์ทุกอย่างที่อัดอั้น ด่าได้เต็มที่<span class="soft">ไม่มีใครเห็น ไม่ถูกบันทึก — พอกดปล่อย มันหายไปเลย ไม่เหลือหลักฐาน</span></h1>'+
+   '<textarea id="hrvent" placeholder="พิมพ์เลย ไม่ต้องเรียบเรียง..."></textarea>'+
+   '<div class="hsafe">ถ้าหนักเกินจะไหว โทร <a href="tel:1323">1323</a> ฟรี 24 ชม.</div>');
+ var b=addBtn("ปล่อยทิ้งไป");b.disabled=true;
+ var ta=document.querySelector("#hrvent");
+ ta.oninput=function(){b.disabled=ta.value.trim().length<10};
+ once(b,function(){if(hrisky(hval("#hrvent")))return safety();
+   ta.classList.add("gone");burst(["✦","💨"],20);b.remove();
+   hbub("ทิ้งไปแล้ว ไม่เหลืออะไร"+kb()+" ห้องนี้ไม่เก็บของแบบนั้นไว้");
+   proceed("โล่งขึ้นหน่อย ไปต่อ →")})}
 
-function stepVent(t){render(head("เทออกมาให้หมด")+
-  '<h1 style="font-size:19px">พิมพ์ทุกอย่างที่อัดอั้น ด่าได้เต็มที่<span class="soft">ไม่มีใครเห็น ไม่ถูกบันทึก — พอกดปล่อย มันหายไปเลย ไม่เหลือหลักฐาน</span></h1>'+
-  '<textarea id="hrvent" placeholder="พิมพ์เลย ไม่ต้องเรียบเรียง..."></textarea>'+
-  '<div class="hsafe">ถ้าหนักเกินจะไหว โทร <a href="tel:1323">1323</a> ฟรี 24 ชม.</div>');
-  var b=addBtn("🔥 ปล่อยทิ้งไป");
-  once(b,function(){if(risky(hval("#hrvent")))return safety();
-    var x=document.querySelector("#hrvent");if(x)x.classList.add("gone");
-    burst(["🔥","💨","✦"],"hrup",26);b.remove();
-    proceed(t,"ทิ้งไปแล้ว ไม่เหลืออะไร")})}
+function stepControl(){render(jhead("แยกให้ขาด")+
+   '<h1 style="font-size:16px">เรื่องที่โมโหอยู่ — มันอยู่ในมือบอสแค่ไหน<span class="soft">แรงใจมีจำกัด อย่าเผาไปกับส่วนที่เราคุมไม่ได้</span></h1>'+
+   '<div class="hchoices">'+chipf("คุมได้บางส่วน")+chipf("คุมไม่ได้เลย เป็นเรื่องของคนอื่น/ดวง")+chipf("คุมได้ แต่ยังไม่พร้อมจัดการตอนนี้")+'</div>');
+ wireChoices([
+   "งั้นเก็บแรงไว้เฉพาะส่วนที่คุมได้"+kb()+" ที่เหลือปล่อยให้เป็นเรื่องของโลก — ไม่ใช่หน้าที่บอสต้องแบกทั้งหมด",
+   "เรื่องที่คุมไม่ได้ ไม่คุ้มให้เผาพลังใจต่อ"+kb()+" โกรธได้ แต่ไม่ต้องแบกกลับบ้าน",
+   "ไม่พร้อมวันนี้ไม่ใช่ความผิด — เลือกจัดการตอนที่เราได้เปรียบ ดีกว่าตอนหัวร้อน"+kb()])}
 
-function stepControl(t){render(head("แยกให้ขาด")+
-  '<h1 style="font-size:19px">เรื่องที่โมโหอยู่ — มันอยู่ในมือบอสแค่ไหน<span class="soft">แรงใจมีจำกัด อย่าเผาไปกับส่วนที่เราคุมไม่ได้</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("คุมได้บางส่วน")+chipf("คุมไม่ได้เลย เป็นเรื่องของคนอื่น/ดวง")+chipf("คุมได้ แต่ยังไม่พร้อมจัดการตอนนี้")+
-  '</div></div>');
-  wireChoices(t,[
-    "งั้นเก็บแรงไว้เฉพาะส่วนที่คุมได้"+kb()+" ที่เหลือปล่อยให้เป็นเรื่องของโลก — ไม่ใช่หน้าที่บอสต้องแบกทั้งหมด",
-    "เรื่องที่คุมไม่ได้ ไม่คุ้มให้เผาพลังใจต่อ"+kb()+" โกรธได้ แต่ไม่ต้องแบกกลับบ้าน",
-    "ไม่พร้อมวันนี้ไม่ใช่ความผิด — เลือกจัดการตอนที่เราได้เปรียบ ดีกว่าตอนหัวร้อน"+kb()])}
+function stepNextMove(){render(jhead("ก้าวถัดไป")+
+   '<h1 style="font-size:16px">ก่อนกลับไป เลือกไว้ 1 อย่าง<span class="soft">ไม่ต้องแก้ทั้งเรื่องวันนี้ เอาแค่ก้าวเดียวที่ทำได้จริง</span></h1>'+
+   '<div class="hchoices">'+
+     chipf("ยังไม่ตอบโต้อะไรตอนนี้ (ตอนหัวร้อน นี่คือเกมที่ฉลาดสุด)")+
+     chipf("ร่างสิ่งที่จะพูด ไว้พูดตอนใจเย็น")+
+     chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง ค่อยจัดการ")+'</div>');
+ wireChoices([
+   "เยี่ยม"+kb()+" การไม่ตอบโต้ตอนนี้ = เราคุมเกม ไม่ใช่อารมณ์คุมเรา",
+   "ดี"+kb()+" คำพูดตอนใจเย็นมักได้ผลกว่าตอนเดือดเสมอ",null],
+ [null,null,function(){
+   noteEl("จะให้เตือนว่าอะไรดี"+kbNa()+" (สั้น ๆ)");
+   var inp=document.createElement("input");inp.id="hrrem";inp.placeholder="เช่น โทรเคลียร์เรื่องเมื่อวาน";inner().appendChild(inp);
+   var b=addBtn("⏰ ตั้งเตือนพรุ่งนี้ 9:00");
+   once(b,function(){b.disabled=true;var v=(hval("#hrrem")||"").trim()||"จัดการเรื่องที่ค้างใจเมื่อวาน";
+     b.remove();setRem(v)})}])}
 
-function stepNextMove(t){render(head("ก้าวถัดไป")+
-  '<h1 style="font-size:19px">ก่อนกลับไป เลือกไว้ 1 อย่าง<span class="soft">ไม่ต้องแก้ทั้งเรื่องวันนี้ เอาแค่ก้าวเดียวที่ทำได้จริง</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("ยังไม่ตอบโต้อะไรตอนนี้ (ตอนหัวร้อน นี่คือเกมที่ฉลาดสุด)")+
-    chipf("ร่างสิ่งที่จะพูด ไว้พูดตอนใจเย็น")+
-    chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง ค่อยจัดการ")+
-  '</div></div>');
-  wireChoices(t,[
-    "เยี่ยม"+kb()+" การไม่ตอบโต้ตอนนี้ = เราคุมเกม ไม่ใช่อารมณ์คุมเรา",
-    "ดี"+kb()+" คำพูดตอนใจเย็นมักได้ผลกว่าตอนเดือดเสมอ",null],
-  [null,null,function(){
-    note("จะให้เตือนว่าอะไรดี"+kbNa()+" (สั้น ๆ)");
-    var inp=document.createElement("input");inp.id="hrrem";inp.placeholder="เช่น โทรเคลียร์เรื่องเมื่อวาน";inner().appendChild(inp);
-    var b=addBtn("⏰ ตั้งเตือนพรุ่งนี้ 9:00");
-    once(b,function(){b.disabled=true;var v=(hval("#hrrem")||"").trim()||"จัดการเรื่องที่ค้างใจเมื่อวาน";
-      b.remove();setRem(t,v)})}])}
+function stepDump(){render(jhead("เทออกจากหัว")+
+   '<h1 style="font-size:16px">เรื่องที่วนอยู่ในหัว — เทออกมาเป็นข้อ ๆ<span class="soft">ไม่ต้องเรียงสวย แค่ให้มันออกจากหัวไปอยู่บนจอ สมองจะเลิกวนเอง (ไม่ถูกบันทึก)</span></h1>'+
+   '<textarea id="hrdump" placeholder="- งานส่งพรุ่งนี้&#10;- ยังไม่ตอบลูกค้า&#10;- เงินเดือนลูกน้อง..."></textarea>');
+ var b=addBtn("เทหมดแล้ว");b.disabled=true;
+ var ta=document.querySelector("#hrdump");
+ ta.oninput=function(){b.disabled=ta.value.trim().length<10};
+ once(b,function(){if(hrisky(hval("#hrdump")))return safety();b.remove();proceed("ออกจากหัวแล้ว →")})}
 
-function stepDump(t){render(head("เทออกจากหัว")+
-  '<h1 style="font-size:19px">เรื่องที่วนอยู่ในหัว — เทออกมาเป็นข้อ ๆ<span class="soft">ไม่ต้องเรียงสวย แค่ให้มันออกจากหัวไปอยู่บนจอ สมองจะเลิกวนเอง (ไม่ถูกบันทึก)</span></h1>'+
-  '<textarea id="hrdump" placeholder="- งานส่งพรุ่งนี้&#10;- ยังไม่ตอบลูกค้า&#10;- เงินเดือนลูกน้อง..."></textarea>');
-  var b=addBtn("เทหมดแล้ว");
-  once(b,function(){if(risky(hval("#hrdump")))return safety();b.remove();proceed(t,"ออกจากหัวแล้ว")})}
+function stepOneThing(){render(jhead("เลือกสนามรบ")+
+   '<h1 style="font-size:16px">ในทั้งหมดนั้น มีแค่เรื่องเดียวที่สำคัญจริงพรุ่งนี้<span class="soft">พิมพ์ชื่อมันสั้น ๆ — ที่เหลือรอได้ และการปล่อยให้มันรอ คือการจัดลำดับ ไม่ใช่ความขี้เกียจ</span></h1>'+
+   '<input id="hrone" placeholder="เช่น ตอบใบเสนอราคาเจ้าใหญ่"><div class="hmid"></div>');
+ var b=addBtn("เอาเรื่องนี้แหละ"),g=addBtn("นึกไม่ออก ขอข้าม",true);
+ once(b,function(){b.remove();g.remove();var v=(hval("#hrone")||"").trim();HS.one=v;
+   if(v)noteEl("“"+v+"” — พรุ่งนี้เอาแค่เรื่องนี้เรื่องเดียวให้ขยับ ก็ถือว่าชนะแล้ว"+kb());
+   proceed("เลือกสนามรบแล้ว →")});
+ once(g,function(){b.remove();g.remove();proceed("ไม่เป็นไร ค่อย ๆ มา →")})}
 
-function stepOneThing(t){render(head("เลือกสนามรบ")+
-  '<h1 style="font-size:19px">ในทั้งหมดนั้น มีแค่เรื่องเดียวที่สำคัญจริงพรุ่งนี้<span class="soft">พิมพ์ชื่อมันสั้น ๆ — ที่เหลือรอได้ และการปล่อยให้มันรอ ไม่ใช่ความขี้เกียจ มันคือการจัดลำดับ</span></h1>'+
-  '<input id="hrone" placeholder="เช่น ตอบใบเสนอราคาเจ้าใหญ่">'+
-  '<div class="hmid"></div>');
-  var b=addBtn("เอาเรื่องนี้แหละ");
-  var g=addBtn("นึกไม่ออก ขอข้าม",true);
-  once(b,function(){b.remove();g.remove();
-    var v=(hval("#hrone")||"").trim();HS.one=v;
-    if(v){note("“"+v+"” — พรุ่งนี้เอาแค่เรื่องนี้เรื่องเดียวให้ขยับ ก็ถือว่าชนะแล้ว"+kb())}
-    proceed(t,"เลือกสนามรบแล้ว")});
-  once(g,function(){b.remove();g.remove();proceed(t,"ไม่เป็นไร ค่อย ๆ มา")})}
+function stepFirstMove(){render(jhead("ก้าวแรก 5 นาที")+
+   '<h1 style="font-size:16px">ก้าวแรกที่เล็กที่สุดของเรื่องนั้นคืออะไร<span class="soft">เอาแบบที่ทำเสร็จใน 5 นาที — งานใหญ่แพ้ก้าวเล็กที่เริ่มจริงเสมอ</span></h1>'+
+   '<div class="hchoices">'+
+     chipf("เขียนลิสต์ 3 ข้อไว้ทำพรุ่งนี้เช้า")+
+     chipf("ส่งข้อความถามคนที่เกี่ยวข้อง 1 ข้อความ")+
+     chipf("เปิดไฟล์/เอกสารที่ต้องใช้ เตรียมไว้เฉย ๆ")+
+     chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง")+'</div>');
+ wireChoices([
+   "พรุ่งนี้เช้าตื่นมามีแผนรออยู่แล้ว สมองไม่ต้องวนคืนนี้"+kb(),
+   "ส่งแล้วเรื่องขยับเอง — บอลไปอยู่ฝั่งเขาแล้ว"+kb(),
+   "แค่เปิดเตรียมไว้ พรุ่งนี้แรงเสียดทานหายไปครึ่งนึง"+kb(),null],
+ [null,null,null,function(){
+   var v=(HS.one||"").trim();
+   setRem(v?("ลุยก้าวแรก: "+v):"ลุยก้าวแรกของเรื่องสำคัญที่เลือกไว้",
+     v?("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 — “"+v+"”"):null)}])}
 
-function stepFirstMove(t){render(head("ก้าวแรก 5 นาที")+
-  '<h1 style="font-size:19px">ก้าวแรกที่เล็กที่สุดของเรื่องนั้นคืออะไร<span class="soft">เอาแบบที่ทำเสร็จใน 5 นาที — งานใหญ่แพ้ก้าวเล็กที่เริ่มจริงเสมอ</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("เขียนลิสต์ 3 ข้อไว้ทำพรุ่งนี้เช้า")+
-    chipf("ส่งข้อความถามคนที่เกี่ยวข้อง 1 ข้อความ")+
-    chipf("เปิดไฟล์/เอกสารที่ต้องใช้ เตรียมไว้เฉย ๆ")+
-    chipf("⏰ ให้เลขาเตือนพรุ่งนี้ 9 โมง")+
-  '</div></div>');
-  wireChoices(t,[
-    "พรุ่งนี้เช้าตื่นมามีแผนรออยู่แล้ว สมองไม่ต้องวนคืนนี้"+kb(),
-    "ส่งแล้วเรื่องขยับเอง — บอลไปอยู่ฝั่งเขาแล้ว"+kb(),
-    "แค่เปิดเตรียมไว้ พรุ่งนี้แรงเสียดทานหายไปครึ่งนึง"+kb(),null],
-  [null,null,null,function(){
-    var v=(HS.one||"").trim();
-    setRem(t,v?("ลุยก้าวแรก: "+v):"ลุยก้าวแรกของเรื่องสำคัญที่เลือกไว้",
-      v?("ตั้งเตือนแล้ว ✓ พรุ่งนี้ 9:00 — “"+v+"”"):null)}])}
+function stepName(){render(jhead("เรียกชื่อมันให้ถูก")+
+   '<h1 style="font-size:16px">ที่หนักอยู่ตอนนี้ ใกล้เคียงอันไหนสุด<span class="soft">ความรู้สึกที่ถูกเรียกชื่อถูก จะเบาลงกว่าความรู้สึกที่ตีกันมั่ว ๆ ในหัว</span></h1>'+
+   '<div class="hchoices">'+chipf("เหนื่อยสะสม แบกมานาน")+chipf("ผิดหวัง — ทุ่มไปแล้วไม่ได้อย่างที่หวัง")+chipf("เสียใจกับสิ่งที่เกิดไปแล้ว")+chipf("ว่างเปล่า ไม่รู้ทำไปเพื่ออะไร")+'</div>');
+ wireChoices([
+   "เหนื่อยสะสมไม่ใช่ความอ่อนแอ — มันคือหลักฐานว่าบอสแบกมานานแค่ไหน"+kb(),
+   "ผิดหวังแปลว่าบอสกล้าหวังและกล้าลงมือ — คนไม่ทำอะไรเลยไม่มีวันผิดหวัง"+kb(),
+   "เรื่องที่เกิดไปแล้วแก้ไม่ได้ แต่มันไม่ได้ตัดสินว่าบอสเป็นใครต่อจากนี้"+kb(),
+   "ช่วงว่างเปล่าเกิดกับคนที่วิ่งมานานทุกคน — มันคือสัญญาณให้พัก ไม่ใช่สัญญาณให้เลิก"+kb()])}
 
-function stepName(t){render(head("เรียกชื่อมันให้ถูก")+
-  '<h1 style="font-size:19px">ที่หนักอยู่ตอนนี้ ใกล้เคียงอันไหนสุด<span class="soft">ความรู้สึกที่ถูกเรียกชื่อถูก จะเบาลงกว่าความรู้สึกที่ตีกันมั่ว ๆ ในหัว</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("เหนื่อยสะสม แบกมานาน")+chipf("ผิดหวัง — ทุ่มไปแล้วไม่ได้อย่างที่หวัง")+
-    chipf("เสียใจกับสิ่งที่เกิดไปแล้ว")+chipf("ว่างเปล่า ไม่รู้ทำไปเพื่ออะไร")+
-  '</div></div>');
-  wireChoices(t,[
-    "เหนื่อยสะสมไม่ใช่ความอ่อนแอ — มันคือหลักฐานว่าบอสแบกมานานแค่ไหน"+kb(),
-    "ผิดหวังแปลว่าบอสกล้าหวังและกล้าลงมือ — คนไม่ทำอะไรเลยไม่มีวันผิดหวัง"+kb(),
-    "เรื่องที่เกิดไปแล้วแก้ไม่ได้ แต่มันไม่ได้ตัดสินว่าบอสเป็นใครต่อจากนี้"+kb(),
-    "ช่วงว่างเปล่าเกิดกับคนที่วิ่งมานานทุกคน — มันคือสัญญาณให้พัก ไม่ใช่สัญญาณให้เลิก"+kb()])}
+function stepFriendVoice(){render(jhead("พูดกับตัวเองแบบเพื่อน")+
+   '<h1 style="font-size:16px">ถ้าเพื่อนสนิทเจอแบบบอสเป๊ะ ๆ บอสจะพูดกับเขายังไง<span class="soft">เลือกประโยคที่บอสจะพูดกับเพื่อน — แล้วให้ตัวเองได้ยินบ้าง มาตรฐานเดียวกัน</span></h1>'+
+   '<div class="hchoices">'+chipf("“ที่ผ่านมามันหนักจริง ไม่ได้คิดไปเอง”")+chipf("“พักก่อนได้ ไม่ใช่การยอมแพ้”")+chipf("“ทำมาขนาดนี้ ถือว่าไม่ธรรมดาแล้ว”")+'</div>');
+ wireChoices(null)}
 
-function stepFriendVoice(t){render(head("พูดกับตัวเองแบบเพื่อน")+
-  '<h1 style="font-size:19px">ถ้าเพื่อนสนิทเจอแบบบอสเป๊ะ ๆ บอสจะพูดกับเขายังไง<span class="soft">เลือกประโยคที่บอสจะพูดกับเพื่อน — แล้วให้ตัวเองได้ยินบ้าง มาตรฐานเดียวกัน</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("“ที่ผ่านมามันหนักจริง ไม่ได้คิดไปเอง”")+
-    chipf("“พักก่อนได้ ไม่ใช่การยอมแพ้”")+
-    chipf("“ทำมาขนาดนี้ ถือว่าไม่ธรรมดาแล้ว”")+
-  '</div></div>');
-  wireChoices(t,null)}
+function stepTinyCare(){render(jhead("ก้าวเล็กที่สุด")+
+   '<h1 style="font-size:16px">เลือกดูแลตัวเอง 1 อย่างหลังปิดหน้านี้<span class="soft">วันแย่ ๆ ไม่ต้องการแผนใหญ่ ต้องการแค่ก้าวเดียวที่ทำจริง</span></h1>'+
+   '<div class="hchoices">'+chipf("ดื่มน้ำ ลุกยืดตัว 1 นาที")+chipf("ทักหาเพื่อน/คนที่ไว้ใจ 1 ข้อความ")+chipf("คืนนี้นอนเร็วขึ้นครึ่งชั่วโมง")+chipf("ยังไม่ทำอะไร ขอพักเฉย ๆ (ก็เป็นคำตอบที่ใช้ได้)")+'</div>');
+ wireChoices(null)}
 
-function stepTinyCare(t){render(head("ก้าวเล็กที่สุด")+
-  '<h1 style="font-size:19px">เลือกดูแลตัวเอง 1 อย่างหลังปิดหน้านี้<span class="soft">วันแย่ ๆ ไม่ต้องการแผนใหญ่ ต้องการแค่ก้าวเดียวที่ทำจริง</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("ดื่มน้ำ ลุกยืดตัว 1 นาที")+
-    chipf("ทักหาเพื่อน/คนที่ไว้ใจ 1 ข้อความ")+
-    chipf("คืนนี้นอนเร็วขึ้นครึ่งชั่วโมง")+
-    chipf("ยังไม่ทำอะไร ขอพักเฉย ๆ (ก็เป็นคำตอบที่ใช้ได้)")+
-  '</div></div>');
-  wireChoices(t,null)}
-
-function stepRestPick(t){render(head("พักแบบพักจริง")+
-  '<h1 style="font-size:19px">10 นาทีต่อจากนี้ พักแบบไหนดี<span class="soft">พักแบบตั้งใจ 10 นาที ได้ผลกว่าไถมือถือครึ่งชั่วโมงแบบไม่ได้พักจริง</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("เดินสั้น ๆ ไม่จับมือถือ")+chipf("ชงอะไรอุ่น ๆ ดื่ม ไม่เปิดงาน")+
-    chipf("เปิดเพลง 2 เพลง หลับตาฟังให้จบ")+chipf("งีบ 15 นาที ตั้งปลุกไว้")+
-  '</div></div>');
-  wireChoices(t,null)}
-
-function checkout(){render('<div class="htag"><button class="hback" id="hrbk">‹</button><span>ก่อนกลับไป</span></div>'+
-  '<h1 style="font-size:20px">เอาจริง ๆ — ตอนนี้ใจเป็นไง'+kb()+'<span class="soft">ตอบตามจริง ไม่ต้องเกรงใจ'+kbNa()+'</span></h1>'+
-  '<div class="hmid" style="justify-content:flex-start;margin-top:8px"><div class="hchoices">'+
-    chipf("เบาขึ้น")+chipf("พอ ๆ เดิม")+chipf("ยังหนักอยู่")+'</div></div>');
-  var cs=document.querySelectorAll("#hrstage .hchip");
-  cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
-    delay(function(){[finBetter,finSame,finHeavy][idx]()},300)}})}
-
-function finBetter(){logHeal("better");chargeTo(100,"ชาร์จครบรอบ",function(){burst(["💚","⚡","✨"],"hrup",26);
-  render('<div class="htag">🔋 100%</div>'+
-    '<h1>กลับไปลุยต่อได้'+kb()+'บอส<span class="soft">ปัญหาอาจยังอยู่ที่เดิม แต่บอสพร้อมกว่าเมื่อ 3 นาทีที่แล้ว — และก้าวถัดไปก็เลือกไว้แล้ว เท่านี้พอสำหรับตอนนี้</span></h1>'+
-    '<div class="hmid"><img class="hbossy" src="img/p04-cheer-jump.webp" alt=""></div>');
-  var a=addBtn("เสร็จแล้ว กลับไปลุยต่อ");once(a,closeHealRoom);
-  var b=addBtn("💬 แชตกับเลขาต่อ",true);once(b,vent)})}
-function finSame(){logHeal("same");chargeTo(72,"ก็ยังดีกว่าตอนเข้ามา",function(){
-  render('<div class="htag">🔋 72%</div>'+
-    '<h1>พอ ๆ เดิมก็ไม่แปลก'+kb()+'<span class="soft">บางเรื่องมันหนักจริง รอบเดียวไม่พอ — ไม่ได้แปลว่าบอสทำผิดวิธี แปลว่าเรื่องมันใหญ่ ลองอีกรอบสั้น ๆ หรือเล่าให้เลขาฟังต่อก็ได้</span></h1>'+
-    '<div class="hmid"><img class="hbossy" src="img/p13-sofa-relax.webp" alt=""></div>');
-  var a=addBtn("อีกรอบสั้น ๆ");once(a,function(){runJourney(journeyKey)});
-  var b=addBtn("💬 เล่าให้เลขาฟังต่อ",true);once(b,vent);
-  var c=addBtn("กลับหน้าฮีลใจ",true);once(c,closeHealRoom)})}
-function finHeavy(){logHeal("heavy");render('<div class="htag">เราอยู่ตรงนี้</div>'+
-    '<div class="hmid"><img class="hbossy" src="img/p10-heart.webp" alt="">'+
-    '<h1 style="font-size:20px;margin-top:14px">งั้นอย่าเพิ่งอยู่คนเดียวตอนนี้'+kb()+'<span class="soft">บางเรื่องต้องการคนฟังจริง ๆ ไม่ใช่หน้าจอ — คุยกับเลขาต่อได้เลย หรือถ้าหนักมากจริง ๆ สาย 1323 มีคนรับฟังตลอด 24 ชม.</span></h1></div>');
-  $h("hrblbl").innerHTML="เราอยู่ตรงนี้กับบอส";
-  var a=addBtn("💬 คุยกับเลขาตอนนี้");once(a,vent);
-  var tl=document.createElement("a");tl.className="hbtn ghost";tl.href="tel:1323";tl.textContent="📞 สายด่วนใจ 1323 (ฟรี 24 ชม.)";
-  tl.style.textAlign="center";tl.style.textDecoration="none";tl.style.display="block";inner().appendChild(tl);
-  var b=addBtn("กลับหน้าฮีลใจ",true);once(b,closeHealRoom)}
-function safety(){logHeal("safety");render('<div class="htag"><button class="hback" id="hrbk">‹</button><span>เราห่วงบอสนะ</span></div>'+
-    '<div class="hmid"><img class="hbossy" src="img/p10-heart.webp" alt="">'+
-    '<h1 style="font-size:20px;margin-top:14px">บอสไม่ได้อยู่คนเดียว'+kb()+'<span class="soft">ที่พิมพ์มาแปลว่าข้างในหนักมากจริง ๆ — เรื่องแบบนี้ควรมีคนฟังเป็นคน ๆ จริง ไม่ใช่ให้บอสแบกเอง</span></h1></div>');
-  $h("hrblbl").innerHTML="เราอยู่ตรงนี้กับบอส";
-  var a=document.createElement("a");a.className="hbtn";a.href="tel:1323";a.textContent="📞 โทรสายด่วนใจ 1323 (ฟรี 24 ชม.)";
-  a.style.textAlign="center";a.style.textDecoration="none";a.style.display="block";inner().appendChild(a);
-  var b=addBtn("คุยกับเลขาตอนนี้ 💬",true);once(b,vent);
-  var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
+function stepRestPick(){render(jhead("พักแบบพักจริง")+
+   '<h1 style="font-size:16px">10 นาทีต่อจากนี้ พักแบบไหนดี<span class="soft">พักแบบตั้งใจ 10 นาที ได้ผลกว่าไถมือถือครึ่งชั่วโมงแบบไม่ได้พักจริง</span></h1>'+
+   '<div class="hchoices">'+chipf("เดินสั้น ๆ ไม่จับมือถือ")+chipf("ชงอะไรอุ่น ๆ ดื่ม ไม่เปิดงาน")+chipf("เปิดเพลง 2 เพลง หลับตาฟังให้จบ")+chipf("งีบ 15 นาที ตั้งปลุกไว้")+'</div>');
+ wireChoices(null)}
 
 var JOURNEYS={
-  anger: {color:[210,70,70],  steps:[stepVent,stepBreathe,stepControl,stepNextMove]},
-  stress:{color:[225,140,70], steps:[stepBreathe,stepDump,stepOneThing,stepFirstMove]},
-  sad:   {color:[95,120,190], steps:[stepName,stepBreathe,stepFriendVoice,stepTinyCare]},
-  rest:  {color:[60,150,160], steps:[stepBreathe,stepRestPick]}
-};
-window.openHealRoom=function(){P=pt();$h("healroom").style.display="block";document.body.style.overflow="hidden";hrHome()};
-function closeHealRoom(){clearTimers();chargeTok++;$h("healroom").style.display="none";document.body.style.overflow="";try{reload().catch(function(){})}catch(e){}}
+ anger: {intro:"ปล่อยของกันก่อน ไม่รีบ",steps:[stepVent,stepBreathe,stepControl,stepNextMove]},
+ stress:{intro:"เดี๋ยวช่วยเทของออกจากหัว",steps:[stepBreathe,stepDump,stepOneThing,stepFirstMove]},
+ sad:   {intro:"ไม่ต้องรีบหาย อยู่ด้วยกันก่อน",steps:[stepName,stepBreathe,stepFriendVoice,stepTinyCare]},
+ rest:  {intro:"พักจริง ๆ กัน 3 นาที",steps:[stepBreathe,stepRestPick]}};
+
+/* ---------- เช็คเอาต์ตามจริง (✦2 เท่ากันทุกคำตอบ — ตอบจริงไม่ถูกลงโทษ) ---------- */
+function sendOutcome(oc,cb){
+ try{api("heal.log",{journey:journeyKey,outcome:oc}).then(function(r){cb(r&&typeof r.sparks==="number"?r.sparks:undefined)})
+   .catch(function(){cb(undefined)})}catch(e){cb(undefined)}}
+function checkout(){hpose("p03-thinking");hbub("ตอบตามจริง"+kbNa()+" — คำตอบไหนก็ได้ ✦ เท่ากัน อยากรู้ไว้เพื่อดูแลบอสให้ถูก");
+ render(head("ก่อนกลับเข้าห้อง")+
+   '<h1 style="font-size:16.5px">เอาจริง ๆ — ตอนนี้ใจเป็นไง'+kb()+'</h1>'+
+   '<div class="hchoices">'+chipf("เบาขึ้น")+chipf("พอ ๆ เดิม")+chipf("ยังหนักอยู่")+'</div>');
+ var cs=document.querySelectorAll("#hrstage .hchip");
+ cs.forEach(function(c,idx){c.onclick=function(){cs.forEach(function(x){x.onclick=null});c.classList.add("pick");
+   delay(function(){[finBetter,finSame,finHeavy][idx]()},300)}})}
+function finBetter(){S.prev_outcome="better";hpose("p04-cheer-jump");burst(["✦","✨"],18);
+ hbub("กลับไปลุยต่อได้"+kb()+"บอส — ปัญหาอาจยังอยู่ที่เดิม แต่บอสพร้อมกว่าเมื่อ 3 นาทีที่แล้ว");
+ render('<div class="htag">รอบนี้ช่วยได้ · เก่งมาก'+kb()+'</div>');
+ sendOutcome("better",function(t){earnSpark(2,function(){
+   var a=addBtn("กลับเข้าห้อง");once(a,hrHome);
+   var b=addBtn("💬 แชตกับเลขาต่อ",true);once(b,vent)},false,t)})}
+function finSame(){S.prev_outcome="same";hpose("p13-sofa-relax");
+ hbub("พอ ๆ เดิมก็ไม่แปลก"+kb()+" บางเรื่องมันหนักจริง รอบเดียวไม่พอ — ไม่ได้แปลว่าบอสทำผิดวิธี");
+ render('<div class="htag">ขอบคุณที่ตอบตามจริง'+kb()+'</div>');
+ sendOutcome("same",function(t){earnSpark(2,function(){
+   var a=addBtn("อีกรอบสั้น ๆ");once(a,function(){runJourney(journeyKey)});
+   var b=addBtn("💬 เล่าให้เลขาฟังต่อ",true);once(b,vent);
+   var c=addBtn("กลับเข้าห้อง",true);once(c,hrHome)},false,t)})}
+function finHeavy(){S.prev_outcome="heavy";hpose("p10-heart");
+ hbub("งั้นอย่าเพิ่งอยู่คนเดียวตอนนี้"+kb()+" บางเรื่องต้องการคนฟังจริง ๆ ไม่ใช่หน้าจอ — <b>พรุ่งนี้เลขาจะทักไปถามเอง</b>");
+ render('<div class="htag">เราอยู่ตรงนี้กับบอส</div>');
+ /* ตอนใจหนัก: ✦ เข้าเงียบ ๆ ไม่เด้งป๊อปอัพฉลองทับหน้า 1323 — ไปฉลองตอนกลับเข้าห้องแทน */
+ sendOutcome("heavy",function(t){earnSpark(2,function(){
+   var a=addBtn("💬 คุยกับเลขาตอนนี้");once(a,vent);
+   var tl=document.createElement("a");tl.className="hbtn ghost";tl.href="tel:1323";tl.textContent="📞 สายด่วนใจ 1323 (ฟรี 24 ชม.)";
+   tl.style.textAlign="center";tl.style.textDecoration="none";tl.style.display="block";inner().appendChild(tl);
+   var b=addBtn("กลับเข้าห้อง",true);once(b,hrHome)},true,t)})}
+function safety(fromDiary){
+ /* จากเครื่องมือ (vent/dump): แจ้ง heal.log ธง safety — จากไดอารี่: เซิร์ฟเวอร์ธงให้แล้วตอน heal.checkin */
+ if(!fromDiary){try{api("heal.log",{journey:journeyKey||"rest",outcome:"safety"}).catch(function(){})}catch(e){}}
+ hpose("p10-heart");
+ hbub("บอสไม่ได้อยู่คนเดียว"+kb()+" ที่พิมพ์มาแปลว่าข้างในหนักมากจริง ๆ — เรื่องแบบนี้ควรมีคนฟังเป็นคน ๆ จริง");
+ render(head("เราห่วงบอสนะ"));
+ var a=document.createElement("a");a.className="hbtn";a.href="tel:1323";a.textContent="📞 โทรสายด่วนใจ 1323 (ฟรี 24 ชม.)";
+ a.style.textAlign="center";a.style.textDecoration="none";a.style.display="block";inner().appendChild(a);
+ var b=addBtn("คุยกับเลขาตอนนี้ 💬",true);once(b,vent);
+ var bk=$h("hrbk");if(bk)bk.onclick=hrHome}
+
+/* ---------- เปิด/ปิดห้อง ---------- */
+window.openHealRoom=function(mode){P=pt();
+ $h("healroom").style.display="flex";document.body.style.overflow="hidden";
+ hbub("แป๊บนึง"+kbNa()+" บอสซี่กำลังเปิดไฟในห้อง");hpose("p01-clipboard-hello");
+ render('<div class="htag">กำลังเปิดห้อง...</div>');
+ var ub=$h("hrunbtn");if(ub)ub.onclick=closeUnlock;
+ var xc=$h("hrclose");if(xc)xc.onclick=closeHealRoom;
+ var tries=0;
+ var iv=setInterval(function(){if(!IDT&&tries++<40)return;clearInterval(iv);
+   api("heal.state").then(function(st){S=st;hrHome();
+     if(mode==="checkin"&&!S.checked_today)checkin()})
+   .catch(function(){
+     S={today:new Date().toISOString().slice(0,10),sparks:0,streak:0,checked_today:false,diary_today:false,last_check:null,prev_mood:null,prev_outcome:null,celebrated:0};
+     hrHome()})},250)};
+function closeHealRoom(){clearTimers();$h("healroom").style.display="none";document.body.style.overflow="";try{reload().catch(function(){})}catch(e){}}
 })();
 
 /* 🛡️ ปิดบังเบอร์โดยปริยาย — แตะเพื่อดู แล้วปิดเองใน 6 วิ (กันคนมองข้างจอ/หลุดตอนแคป) */
