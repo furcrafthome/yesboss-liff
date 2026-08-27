@@ -50,7 +50,7 @@
       <div id="diag" style="font-size:10.5px;color:#B9A8AF;margin-top:8px"></div>
     </div>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
-    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v13</div>
+    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v14</div>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -97,9 +97,10 @@ if (!ok) {
   document.getElementById("d").textContent = (target > now ? "ปลุกวันนี้" : "ปลุกพรุ่งนี้") + " · ดังทะลุแม้ปิดเสียงไลน์";
 
   if (isAnd) {
-    // 🤖 Android: ลองตั้งให้เองก่อน (บางเครื่องยอม) — ไม่สำเร็จค่อยโชว์วิธีตั้งเอง
-    document.getElementById("note").textContent = "กำลังตั้งให้อัตโนมัติ… ถ้าไม่มีอะไรเกิดขึ้น กดปุ่มด้านบน";
-    setTimeout(setAlarm, 450);
+    // 🤖 ความจริง Android (พิสูจน์บน emulator 28 ส.ค.): เว็บสั่ง "ตั้งปลุก" ตรงๆ ไม่ได้ —
+    //    activity SET_ALARM ของแอปนาฬิกาบังคับ permission ที่ Chrome ไม่ถือ → โดนปัดตกทุกเครื่อง
+    //    ทางที่ทำได้จริง: เปิด "หน้ารายการปลุก" (SHOW_ALARMS ไม่ติด permission) + กางวิธี + คัดลอกชื่อให้
+    document.getElementById("note").textContent = "กดปุ่มเดียว เดี๋ยวเปิดแอปนาฬิกาให้พร้อมวิธีตั้งค่ะ";
   } else if (!isIOS) {
     // ไม่ใช่ทั้ง Android/iPhone (เดสก์ท็อปจริง) — กางวิธีตั้งเองตรงๆ ห้ามยัดชุด iPhone ใส่
     document.getElementById("mainBtn").textContent = "⏰ ดูวิธีตั้งปลุกในมือถือ";
@@ -168,7 +169,8 @@ function setAlarm(fromTap) {
     location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
     return;
   }
-  // Android: เบราว์เซอร์ยอมเปิดแอปนาฬิกาเฉพาะจากการกดของผู้ใช้ — auto-fire อาจถูกบล็อกเงียบ
+  // 🤖 Android v14: กางวิธี+คัดลอกชื่อทันที แล้วเปิดแอปนาฬิกาหน้า "ปลุก" ให้ (SET_ALARM ทำจากเว็บไม่ได้ — permission)
+  showHow();
   var leftA = false;
   function onLeaveA() { leftA = true; }
   document.addEventListener("visibilitychange", onLeaveA);
@@ -178,20 +180,14 @@ function setAlarm(fromTap) {
     document.removeEventListener("visibilitychange", onLeaveA);
     window.removeEventListener("pagehide", onLeaveA);
     window.removeEventListener("blur", onLeaveA);
-    if (leftA || document.hidden) { fired(); }
-    else if (fromTap) {
-      document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo;
-      showHow();
+    if (leftA || document.hidden) {
+      document.getElementById("okmsg").textContent = "✅ เปิดแอปนาฬิกาให้แล้ว — กด + แล้วตั้งตามกล่องด้านบนค่ะ";
+      fired();
+    } else {
+      document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo + " — เปิดแอปนาฬิกาเองแล้วทำตามกล่องด้านบนได้เลยค่ะ";
     }
-    else { document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ"; }
   }, 1600);
-  // ยิงผ่าน anchor จริง + fallback URL (#fb = เบราว์เซอร์ไม่รองรับ intent)
-  // ⚠️ ห้ามใส่ SKIP_UI=true — เครื่องที่ทำตามจะตั้ง "เงียบ" ไม่เด้งแอป → คนคิดว่าพัง + ตัวจับผลอ่านผิด
-  //    ให้แอปนาฬิกาเด้งขึ้นมาโชว์ปลุกที่ตั้งแล้วดีกว่า เห็นกับตา = เชื่อ
-  var itn = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
-    ";i.android.intent.extra.alarm.HOUR=" + H +
-    ";i.android.intent.extra.alarm.MINUTES=" + M +
-    ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
+  var itn = "intent://#Intent;action=android.intent.action.SHOW_ALARMS" +
     ";S.browser_fallback_url=" + encodeURIComponent(location.href.split("#")[0] + "#fb") + ";end";
   var a = document.createElement("a");
   a.href = itn; document.body.appendChild(a); a.click(); a.remove();
