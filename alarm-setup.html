@@ -79,6 +79,7 @@
 // มาจากหน้าตั้งปลุก (ปุ่มตั้งค่าครั้งแรก) = พกเวลาที่ค้างไว้มาด้วย ให้ปิดงานใบนั้นได้เลย
 var P = new URLSearchParams(location.search);
 var raw = (P.get("t") || "").trim();
+var label = ((P.get("msg") || "ทดสอบจากเลขา").slice(0, 60)).replace(/\|/g, "·");
 var mm = raw.replace(":", "").match(/^(\d{1,2})(\d{2})$/);
 var HH = mm ? parseInt(mm[1], 10) : 7;
 var MI = mm ? parseInt(mm[2], 10) : 0;
@@ -114,7 +115,7 @@ function go() {
   }, 1800);
 
   try {
-    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent(TIME);
+    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent(TIME + '|' + label);
   } catch (e) {}
 }
 </script>

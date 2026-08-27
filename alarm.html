@@ -102,7 +102,9 @@ function setAlarm() {
     fired();
     return;
   }
-  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
+  // 🍎 v2: ส่ง "เวลา|ชื่อนัด" — ทางลัดแยกเอง ปลุกขึ้นชื่อนัดจริง ("|" ในชื่อนัดถูกกันไว้ตอนประกอบ)
+  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" +
+    encodeURIComponent(pad(H) + ":" + pad(M) + "|" + label.replace(/\|/g, "·"));
   var left = false;
   function onLeave() { left = true; }
   window.addEventListener("blur", onLeave); window.addEventListener("pagehide", onLeave);
