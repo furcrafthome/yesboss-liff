@@ -47,6 +47,7 @@
       <span class="stepn">2</span>กด <b>+</b> → หมุนเวลาเป็น <b id="ht">--:--</b><br>
       <span class="stepn">3</span>แตะ <b>ป้ายกำกับ</b> → วางชื่อนัด (คัดลอกไว้ให้แล้ว) → <b>บันทึก</b>
       <button class="alt" id="copyBtn" onclick="copyName()">📋 คัดลอกชื่อนัดอีกครั้ง</button>
+      <div id="diag" style="font-size:10.5px;color:#B9A8AF;margin-top:8px"></div>
     </div>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
     <p class="note" id="note"></p>
@@ -69,6 +70,12 @@ var ok = m && H >= 0 && H <= 23 && M >= 0 && M <= 59;
 
 var ua = navigator.userAgent;
 var isAnd = /Android/i.test(ua);
+var inLineApp = /Line\//i.test(ua); // LINE in-app browser: ยิง intent:// ไม่ได้ ต้องออกเบราว์เซอร์จริงก่อน
+var devInfo = (function () { // รุ่นเครื่อง+เบราว์เซอร์ — โชว์ในกล่องช่วยเหลือ ให้ภาพหน้าจอเดียวบอกครบว่าต้องแก้รุ่นไหน
+  var mdl = (ua.match(/Android [^;]+; ([^)]+)\)/) || [])[1] || "";
+  var br = inLineApp ? "LINE app" : /SamsungBrowser/i.test(ua) ? "Samsung Internet" : /MiuiBrowser/i.test(ua) ? "Mi Browser" : /Chrome\//i.test(ua) ? "Chrome" : "อื่นๆ";
+  return (mdl + " · " + br).replace(/^ · /, "");
+})();
 function pad(n) { return (n < 10 ? "0" : "") + n; }
 var TIME = ok ? pad(H) + ":" + pad(M) : "--:--";
 
@@ -121,6 +128,11 @@ function showHow() {
   document.getElementById("note").textContent = "";
 }
 function setAlarm(fromTap) {
+  if (isAnd && inLineApp) {
+    // อยู่ใน LINE in-app browser = intent ยิงไม่ออกแน่นอน — บอกทางออกก่อน ไม่เสียแตะฟรี
+    document.getElementById("note").textContent = "แตะ ⋯ มุมขวาบน แล้วเลือก \"เปิดในเบราว์เซอร์\" ก่อนนะคะ แล้วกดปุ่มนี้อีกครั้ง";
+    return;
+  }
   if (!isAnd) {
     // 🍎 ยิงทางลัด yesboss (ตัวเสถียร v1 — รับเวลาอย่างเดียว ป้าย "นัดจาก YES BOSS 🎀")
     var leftI = false;
@@ -153,14 +165,21 @@ function setAlarm(fromTap) {
     window.removeEventListener("pagehide", onLeaveA);
     window.removeEventListener("blur", onLeaveA);
     if (leftA || document.hidden) { fired(); }
-    else if (fromTap) { showHow(); }
+    else if (fromTap) {
+      document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo;
+      showHow();
+    }
     else { document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ"; }
   }, 1600);
-  location.href = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
+  // ยิงผ่าน anchor จริง (ท่ามาตรฐานที่เบราว์เซอร์ยอมรับกว้างกว่า location.href) + fallback URL กันเงียบหาย
+  var itn = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
     ";i.android.intent.extra.alarm.HOUR=" + H +
     ";i.android.intent.extra.alarm.MINUTES=" + M +
     ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
-    ";B.android.intent.extra.alarm.SKIP_UI=true;end";
+    ";B.android.intent.extra.alarm.SKIP_UI=true" +
+    ";S.browser_fallback_url=" + encodeURIComponent(location.href.split("#")[0]) + ";end";
+  var a = document.createElement("a");
+  a.href = itn; document.body.appendChild(a); a.click(); a.remove();
 }
 </script>
 </body>
