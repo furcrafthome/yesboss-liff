@@ -125,9 +125,9 @@ function setAlarm(fromTap) {
       ";B.android.intent.extra.alarm.SKIP_UI=true;end"; // ตั้งเงียบทันที ไม่ต้องกดยืนยันซ้ำ
     return;
   }
-  // 🍎 v2: ส่ง "เวลา|ชื่อนัด" — ทางลัดแยกเอง ปลุกขึ้นชื่อนัดจริง ("|" ในชื่อนัดถูกกันไว้ตอนประกอบ)
-  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" +
-    encodeURIComponent(pad(H) + ":" + pad(M) + "|" + label.replace(/\|/g, "·"));
+  // 🍎 ส่งเวลาอย่างเดียว — ทางลัดตัวเสถียร (ป้ายปลุก = "นัดจาก YES BOSS 🎀" คงที่)
+  //    มติบอส 28 ส.ค.: ถอยจากตัวแยกชื่อนัด (v2/v3) ที่เทสบนเครื่องจริงไม่ผ่านสักรอบ — อย่ากลับไปทางนั้นโดยไม่มีเครื่อง iOS เทสเอง
+  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
   var left = false;
   function onLeave() { left = true; }
   window.addEventListener("blur", onLeave); window.addEventListener("pagehide", onLeave);
