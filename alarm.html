@@ -50,7 +50,7 @@
       <div id="diag" style="font-size:10.5px;color:#B9A8AF;margin-top:8px"></div>
     </div>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
-    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v15</div>
+    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v16</div>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -186,7 +186,7 @@ function setAlarm(fromTap) {
       document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo + " — เปิดแอปนาฬิกาเองแล้วทำตามกล่องด้านบนได้เลยค่ะ";
     }
   }, 1600);
-  var itn = "intent://#Intent;action=android.intent.action.SHOW_ALARMS" +
+  var itn = "intent://alarms#Intent;action=android.intent.action.SHOW_ALARMS" +
     ";S.browser_fallback_url=" + encodeURIComponent(location.href.split("#")[0] + "#fb") + ";end";
   var a = document.createElement("a");
   a.href = itn; document.body.appendChild(a); a.click(); a.remove();
