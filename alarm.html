@@ -35,9 +35,12 @@
     <p class="msg" id="m">นัดของบอส</p>
     <p class="time" id="t">--:--</p>
     <p class="day" id="d"></p>
-    <button id="mainBtn" onclick="setAlarm()">⏰ ตั้งปลุกในเครื่อง</button>
+    <button id="mainBtn" onclick="setAlarm(true)">⏰ ตั้งปลุกในเครื่อง</button>
     <button class="alt" id="setupBtn" style="display:none" onclick="goSetup()">iPhone ครั้งแรก? ติดตั้งทางลัดที่นี่ (ครั้งเดียวจบ)</button>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
+    <div id="manual" style="display:none;background:#FDF0F5;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;text-align:left;line-height:1.7">
+      📋 เครื่องนี้ขอให้ตั้งเอง (15 วินาที):<br>เปิดแอป <b>นาฬิกา</b> → แตะ <b>+</b> เพิ่มปลุก → เวลา <b id="mt"></b> → ตั้งชื่อ/ป้ายกำกับว่า <b id="mn"></b> → บันทึก
+    </div>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -92,14 +95,34 @@ function fired() {
   document.getElementById("ic").textContent = "✅";
   if (isIOS) localStorage.setItem("ybAlarmReady", "1");
 }
-function setAlarm() {
+function setAlarm(fromTap) {
   if (isAnd) {
+    // 🤖 เบราว์เซอร์ Android ยอมเปิดแอปนาฬิกาเฉพาะจากการกดของผู้ใช้ (auto-fire อาจถูกบล็อกเงียบ)
+    //    จับผล: ถ้าหน้าไม่เด้งออก = โดนบล็อก → โชว์วิธีตั้งเอง ห้ามปล่อยลูกค้าเจอทางตัน
+    var leftA = false;
+    function onLeaveA() { leftA = true; }
+    document.addEventListener("visibilitychange", onLeaveA);
+    window.addEventListener("pagehide", onLeaveA);
+    window.addEventListener("blur", onLeaveA);
+    setTimeout(function () {
+      document.removeEventListener("visibilitychange", onLeaveA);
+      window.removeEventListener("pagehide", onLeaveA);
+      window.removeEventListener("blur", onLeaveA);
+      if (leftA || document.hidden) { fired(); }
+      else if (fromTap) {
+        document.getElementById("mt").textContent = pad(H) + ":" + pad(M);
+        document.getElementById("mn").textContent = label;
+        document.getElementById("manual").style.display = "block";
+        document.getElementById("note").textContent = "";
+      } else {
+        document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ";
+      }
+    }, 1600);
     location.href = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
       ";i.android.intent.extra.alarm.HOUR=" + H +
       ";i.android.intent.extra.alarm.MINUTES=" + M +
       ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
       ";B.android.intent.extra.alarm.SKIP_UI=true;end"; // ตั้งเงียบทันที ไม่ต้องกดยืนยันซ้ำ
-    fired();
     return;
   }
   // 🍎 v2: ส่ง "เวลา|ชื่อนัด" — ทางลัดแยกเอง ปลุกขึ้นชื่อนัดจริง ("|" ในชื่อนัดถูกกันไว้ตอนประกอบ)
