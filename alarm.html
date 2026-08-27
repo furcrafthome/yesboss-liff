@@ -69,8 +69,13 @@ var M = m ? parseInt(m[2], 10) : NaN;
 var ok = m && H >= 0 && H <= 23 && M >= 0 && M <= 59;
 
 var ua = navigator.userAgent;
-var isAnd = /Android/i.test(ua);
+// ⚠️ เคสจริงเครื่องบอส (Xiaomi+Chrome): เปิด "โหมดเว็บไซต์คอมพิวเตอร์" → UA ไม่มีคำว่า Android (กลายเป็น X11; Linux)
+//    → เว็บเคยหลงยิงชุดคำสั่ง iPhone ใส่ = พังเงียบทั้งคืน · ต้องจับ 3 ชั้น: UA ตรง / UA-CH / UA เดสก์ท็อปลินุกซ์+จอสัมผัส
+var uaCh = (navigator.userAgentData && navigator.userAgentData.platform) || "";
+var isAnd = /Android/i.test(ua) || /android/i.test(uaCh) ||
+  (/Linux|X11/i.test(ua) && !/Windows|Mac|CrOS/i.test(ua) && navigator.maxTouchPoints > 1);
 var inLineApp = /Line\//i.test(ua); // LINE in-app browser: ยิง intent:// ไม่ได้ ต้องออกเบราว์เซอร์จริงก่อน
+var isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 var devInfo = (function () { // รุ่นเครื่อง+เบราว์เซอร์ — โชว์ในกล่องช่วยเหลือ ให้ภาพหน้าจอเดียวบอกครบว่าต้องแก้รุ่นไหน
   var mdl = (ua.match(/Android [^;]+; ([^)]+)\)/) || [])[1] || "";
   var br = inLineApp ? "LINE app" : /SamsungBrowser/i.test(ua) ? "Samsung Internet" : /MiuiBrowser/i.test(ua) ? "Mi Browser" : /Chrome\//i.test(ua) ? "Chrome" : "อื่นๆ";
@@ -94,6 +99,10 @@ if (!ok) {
     // 🤖 Android: ลองตั้งให้เองก่อน (บางเครื่องยอม) — ไม่สำเร็จค่อยโชว์วิธีตั้งเอง
     document.getElementById("note").textContent = "กำลังตั้งให้อัตโนมัติ… ถ้าไม่มีอะไรเกิดขึ้น กดปุ่มด้านบน";
     setTimeout(setAlarm, 450);
+  } else if (!isIOS) {
+    // ไม่ใช่ทั้ง Android/iPhone (เดสก์ท็อปจริง) — กางวิธีตั้งเองตรงๆ ห้ามยัดชุด iPhone ใส่
+    document.getElementById("mainBtn").textContent = "⏰ ดูวิธีตั้งปลุกในมือถือ";
+    document.getElementById("note").textContent = "เปิดลิงก์นี้จากมือถือจะตั้งให้อัตโนมัติค่ะ";
   } else {
     // 🍎 iPhone (มติบอส 28 ส.ค. ตี 1: เอาปุ่มเดียวแบบที่เคยเวิร์กกลับมา):
     //    เครื่องที่เปิดระบบแล้ว (ทางลัด yesboss) = กดปุ่มเดียว/ยิงเองเลย · เครื่องใหม่ = เสนอเปิดระบบครั้งเดียว + วิธีตั้งเอง 15 วิเป็นตาข่าย
@@ -131,6 +140,10 @@ function setAlarm(fromTap) {
   if (isAnd && inLineApp) {
     // อยู่ใน LINE in-app browser = intent ยิงไม่ออกแน่นอน — บอกทางออกก่อน ไม่เสียแตะฟรี
     document.getElementById("note").textContent = "แตะ ⋯ มุมขวาบน แล้วเลือก \"เปิดในเบราว์เซอร์\" ก่อนนะคะ แล้วกดปุ่มนี้อีกครั้ง";
+    return;
+  }
+  if (!isAnd && !isIOS) { // เดสก์ท็อปจริง: กางวิธีเอง (เวลาใน how ถูกตั้งไว้ตั้งแต่โหลดหน้าแล้ว)
+    showHow();
     return;
   }
   if (!isAnd) {
@@ -183,8 +196,6 @@ function setAlarm(fromTap) {
   a.href = itn; document.body.appendChild(a); a.click(); a.remove();
 }
 if (isAnd && location.hash === "#fb") { // เด้งกลับมาพร้อม #fb = เบราว์เซอร์นี้เปิดแอปนาฬิกาไม่ได้จริงๆ
-  document.getElementById("mt").textContent = TIME;
-  document.getElementById("mn").textContent = label;
   document.getElementById("diag").textContent = "อุปกรณ์: " + devInfo + " (ไม่รองรับตั้งอัตโนมัติ)";
   document.getElementById("how").style.display = "block";
   document.getElementById("note").textContent = "";
