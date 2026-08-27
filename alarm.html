@@ -8,21 +8,26 @@
   :root { --pink:#E8779B; --rose:#B85C7E; --soft:#F4A9C0; --gray:#6E6E73; --bg:#FFF7FA; --ink:#2B2B2E; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; }
-  body { margin:0; padding:30px 22px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+  body { margin:0; padding:26px 20px; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
          background:linear-gradient(180deg,#FBE7EE,var(--bg) 45%); color:var(--ink); line-height:1.6;
          display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-  .card { background:#fff; border-radius:24px; padding:30px 24px; width:100%; max-width:360px;
+  .card { background:#fff; border-radius:24px; padding:26px 22px; width:100%; max-width:360px;
           box-shadow:0 3px 0 #F6E3EA, 0 6px 0 #EFD6DF, 0 14px 26px rgba(184,92,126,.15); }
-  .emoji { font-size:44px; }
-  .msg  { font-size:22px; font-weight:800; margin:8px 0 2px; word-break:break-word; }
-  .time { font-size:58px; font-weight:800; letter-spacing:-1px; margin:0; color:var(--rose); }
-  .day  { font-size:14px; color:var(--pink); font-weight:700; margin:2px 0 22px; }
-  button { width:100%; border:0; border-radius:16px; padding:18px; font-size:18px;
+  .emoji { font-size:40px; }
+  .msg  { font-size:22px; font-weight:800; margin:6px 0 0; word-break:break-word; }
+  .time { font-size:56px; font-weight:800; letter-spacing:-1px; margin:0; color:var(--rose); }
+  .day  { font-size:13.5px; color:var(--pink); font-weight:700; margin:2px 0 16px; }
+  button { width:100%; border:0; border-radius:16px; padding:17px; font-size:17px;
            font-weight:800; background:var(--rose); color:#fff; font-family:inherit;
            box-shadow:0 4px 14px rgba(184,92,126,.3); }
-  button.alt { background:#FDF0F5; color:var(--rose); box-shadow:none; font-size:15px; padding:14px; margin-top:12px; }
-  .note { font-size:13px; color:var(--gray); margin-top:16px; }
-  .ok   { font-size:16px; font-weight:700; color:#177E37; margin-top:14px; display:none; }
+  button.alt { background:#FDF0F5; color:var(--rose); box-shadow:none; font-size:15px; padding:13px; margin-top:10px; }
+  .note { font-size:13px; color:var(--gray); margin-top:14px; }
+  .ok   { font-size:15px; font-weight:700; color:#177E37; margin-top:12px; display:none; }
+  .how  { display:none; background:#FDF0F5; border-radius:14px; padding:14px 16px; margin-top:14px;
+          font-size:14.5px; text-align:left; line-height:1.9; }
+  .how b { color:var(--rose); }
+  .how .stepn { display:inline-block; width:22px; height:22px; border-radius:50%; background:var(--pink);
+                color:#fff; font-size:12.5px; font-weight:800; text-align:center; line-height:22px; margin-right:6px; }
   .step { display:none; flex-direction:column; align-items:center; width:100%; }
   .step.on { display:flex; }
 </style>
@@ -36,11 +41,13 @@
     <p class="time" id="t">--:--</p>
     <p class="day" id="d"></p>
     <button id="mainBtn" onclick="setAlarm(true)">⏰ ตั้งปลุกในเครื่อง</button>
-    <button class="alt" id="setupBtn" style="display:none" onclick="goSetup()">iPhone ครั้งแรก? ติดตั้งทางลัดที่นี่ (ครั้งเดียวจบ)</button>
-    <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
-    <div id="manual" style="display:none;background:#FDF0F5;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;text-align:left;line-height:1.7">
-      📋 เครื่องนี้ขอให้ตั้งเอง (15 วินาที):<br>เปิดแอป <b>นาฬิกา</b> → แตะ <b>+</b> เพิ่มปลุก → เวลา <b id="mt"></b> → ตั้งชื่อ/ป้ายกำกับว่า <b id="mn"></b> → บันทึก
+    <div class="how" id="how">
+      <span class="stepn">1</span>เปิดแอป <b>นาฬิกา</b> → แถบ <b>ปลุก</b><br>
+      <span class="stepn">2</span>กด <b>+</b> → หมุนเวลาเป็น <b id="ht">--:--</b><br>
+      <span class="stepn">3</span>แตะ <b>ป้ายกำกับ</b> → วางชื่อนัด (คัดลอกไว้ให้แล้ว) → <b>บันทึก</b>
+      <button class="alt" id="copyBtn" onclick="copyName()">📋 คัดลอกชื่อนัดอีกครั้ง</button>
     </div>
+    <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -60,84 +67,69 @@ var M = m ? parseInt(m[2], 10) : NaN;
 var ok = m && H >= 0 && H <= 23 && M >= 0 && M <= 59;
 
 var ua = navigator.userAgent;
-var isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 var isAnd = /Android/i.test(ua);
 function pad(n) { return (n < 10 ? "0" : "") + n; }
+var TIME = ok ? pad(H) + ":" + pad(M) : "--:--";
 
 if (!ok) {
   document.getElementById("ready").className = "step";
   document.getElementById("bad").className = "step on";
 } else {
-  document.getElementById("t").textContent = pad(H) + ":" + pad(M);
+  document.getElementById("t").textContent = TIME;
   document.getElementById("m").textContent = label;
+  document.getElementById("ht").textContent = TIME;
   var now = new Date();
   var target = new Date(); target.setHours(H, M, 0, 0);
   document.getElementById("d").textContent = (target > now ? "ปลุกวันนี้" : "ปลุกพรุ่งนี้") + " · ดังทะลุแม้ปิดเสียงไลน์";
 
   if (isAnd) {
-    document.getElementById("note").textContent = "กำลังตั้งให้อัตโนมัติ… ถ้าแอปนาฬิกาไม่เปิด กดปุ่มด้านบนอีกครั้ง";
-    setTimeout(setAlarm, 450); // 🤖 Android: ตั้งให้เองเลย ไม่ต้องกดอะไร (SKIP_UI ตั้งเงียบ + มี toast ของระบบ)
-  } else if (isIOS) {
-    document.getElementById("setupBtn").style.display = "block";
-    if (localStorage.getItem("ybAlarmReady") === "1") {
-      document.getElementById("note").textContent = "กำลังเรียกทางลัดตั้งปลุก… เห็นแบนเนอร์ด้านบน = สำเร็จ";
-      setTimeout(setAlarm, 450); // 🍎 เคยติดตั้งทางลัดแล้ว: ยิงเองเลย
-    } else {
-      document.getElementById("note").textContent = "iPhone ครั้งแรกต้องติดตั้งทางลัด 1 นาที ครั้งต่อไปอัตโนมัติตลอด";
-    }
+    // 🤖 Android: ลองตั้งให้เองก่อน (บางเครื่องยอม) — ไม่สำเร็จค่อยโชว์วิธีตั้งเอง
+    document.getElementById("note").textContent = "กำลังตั้งให้อัตโนมัติ… ถ้าไม่มีอะไรเกิดขึ้น กดปุ่มด้านบน";
+    setTimeout(setAlarm, 450);
   } else {
-    document.getElementById("note").textContent = "เปิดลิงก์นี้จากมือถือนะคะ";
+    // 🍎 iPhone: ไม่มีการติดตั้งใดๆ อีกแล้ว (มติบอส 28 ส.ค. — ระบบทางลัดซับซ้อนเกินไปสำหรับลูกค้าจริง)
+    //    ปุ่มเดียว = โชว์วิธีตั้งเอง 15 วินาที + คัดลอกชื่อนัดให้เลย ทำได้ 100% ทุกเครื่อง
+    document.getElementById("mainBtn").textContent = "⏰ ดูวิธีตั้งปลุก 15 วินาที";
+    document.getElementById("note").textContent = "iPhone ตั้งเองแป๊บเดียว มีขั้นตอนกางให้ครบค่ะ";
   }
 }
 
 function fired() {
   document.getElementById("okmsg").style.display = "block";
   document.getElementById("ic").textContent = "✅";
-  if (isIOS) localStorage.setItem("ybAlarmReady", "1");
+}
+function copyName() {
+  try { navigator.clipboard.writeText(label); } catch (e) {}
+  var c = document.getElementById("copyBtn");
+  if (c) c.textContent = "✅ คัดลอกแล้ว — ไปวางในป้ายกำกับได้เลย";
+}
+function showHow() {
+  copyName();
+  document.getElementById("how").style.display = "block";
+  document.getElementById("mainBtn").style.display = "none";
+  document.getElementById("note").textContent = "";
 }
 function setAlarm(fromTap) {
-  if (isAnd) {
-    // 🤖 เบราว์เซอร์ Android ยอมเปิดแอปนาฬิกาเฉพาะจากการกดของผู้ใช้ (auto-fire อาจถูกบล็อกเงียบ)
-    //    จับผล: ถ้าหน้าไม่เด้งออก = โดนบล็อก → โชว์วิธีตั้งเอง ห้ามปล่อยลูกค้าเจอทางตัน
-    var leftA = false;
-    function onLeaveA() { leftA = true; }
-    document.addEventListener("visibilitychange", onLeaveA);
-    window.addEventListener("pagehide", onLeaveA);
-    window.addEventListener("blur", onLeaveA);
-    setTimeout(function () {
-      document.removeEventListener("visibilitychange", onLeaveA);
-      window.removeEventListener("pagehide", onLeaveA);
-      window.removeEventListener("blur", onLeaveA);
-      if (leftA || document.hidden) { fired(); }
-      else if (fromTap) {
-        document.getElementById("mt").textContent = pad(H) + ":" + pad(M);
-        document.getElementById("mn").textContent = label;
-        document.getElementById("manual").style.display = "block";
-        document.getElementById("note").textContent = "";
-      } else {
-        document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ";
-      }
-    }, 1600);
-    location.href = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
-      ";i.android.intent.extra.alarm.HOUR=" + H +
-      ";i.android.intent.extra.alarm.MINUTES=" + M +
-      ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
-      ";B.android.intent.extra.alarm.SKIP_UI=true;end"; // ตั้งเงียบทันที ไม่ต้องกดยืนยันซ้ำ
-    return;
-  }
-  // 🍎 ส่งเวลาอย่างเดียว — ทางลัดตัวเสถียร (ป้ายปลุก = "นัดจาก YES BOSS 🎀" คงที่)
-  //    มติบอส 28 ส.ค.: ถอยจากตัวแยกชื่อนัด (v2/v3) ที่เทสบนเครื่องจริงไม่ผ่านสักรอบ — อย่ากลับไปทางนั้นโดยไม่มีเครื่อง iOS เทสเอง
-  location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
-  var left = false;
-  function onLeave() { left = true; }
-  window.addEventListener("blur", onLeave); window.addEventListener("pagehide", onLeave);
+  if (!isAnd) { showHow(); return; }
+  // Android: เบราว์เซอร์ยอมเปิดแอปนาฬิกาเฉพาะจากการกดของผู้ใช้ — auto-fire อาจถูกบล็อกเงียบ
+  var leftA = false;
+  function onLeaveA() { leftA = true; }
+  document.addEventListener("visibilitychange", onLeaveA);
+  window.addEventListener("pagehide", onLeaveA);
+  window.addEventListener("blur", onLeaveA);
   setTimeout(function () {
-    window.removeEventListener("blur", onLeave); window.removeEventListener("pagehide", onLeave);
-    if (left || document.hidden) fired(); // ทางลัดรับงานไปแล้ว = ครั้งหน้ายิงอัตโนมัติได้
-  }, 1500);
-}
-function goSetup() {
-  location.href = "/alarm-setup.html?t=" + encodeURIComponent(raw) + "&msg=" + encodeURIComponent(label);
+    document.removeEventListener("visibilitychange", onLeaveA);
+    window.removeEventListener("pagehide", onLeaveA);
+    window.removeEventListener("blur", onLeaveA);
+    if (leftA || document.hidden) { fired(); }
+    else if (fromTap) { showHow(); }
+    else { document.getElementById("note").textContent = "กดปุ่มด้านบนหนึ่งครั้งเพื่อตั้งปลุกนะคะ"; }
+  }, 1600);
+  location.href = "intent://alarm#Intent;action=android.intent.action.SET_ALARM" +
+    ";i.android.intent.extra.alarm.HOUR=" + H +
+    ";i.android.intent.extra.alarm.MINUTES=" + M +
+    ";S.android.intent.extra.alarm.MESSAGE=" + encodeURIComponent(label) +
+    ";B.android.intent.extra.alarm.SKIP_UI=true;end";
 }
 </script>
 </body>
