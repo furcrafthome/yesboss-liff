@@ -155,10 +155,13 @@
        ⚠️ ไปคนละประตูกับแท็บอื่น: ฟังก์ชัน knowledge-admin (ไม่ใช่ webhook) — บอทล่มก็ยังแก้ข้อความได้ และกลับกัน */
     const KB_API = API.replace(/\/webhook$/, '/knowledge-admin');
     async function kbApi(action, payload){
-      const r = await fetch(KB_API,{method:'POST',headers:{'Content-Type':'application/json'},referrerPolicy:'no-referrer',
-        body:JSON.stringify({key, action, payload: payload||{}})});
+      /* 🔐 P0-4: ส่ง token แทน key — token หมดอายุ (401) แล้วยังถือ key อยู่ = ต่ออายุเงียบๆ หนึ่งรอบ (ท่าเดียวกับ staffApi) */
+      const call = () => fetch(KB_API,{method:'POST',headers:{'Content-Type':'application/json'},referrerPolicy:'no-referrer',
+        body:JSON.stringify({token: TOK, action, payload: payload||{}})});
+      let r = await call();
+      if(r.status===401 && key && await dashLogin()) r = await call();
       let j=null; try{ j=await r.json() }catch(e){}
-      if(!r.ok) throw new Error(j&&j.detail?j.detail:(r.status===401?'dash key ไม่ถูกต้อง':(j&&j.error)||('เชื่อมต่อไม่ได้ ('+r.status+')')));
+      if(!r.ok) throw new Error(j&&j.detail?j.detail:(r.status===401?'เซสชันหมดอายุ — เปิดจากลิงก์ admin ในแชตบอส หรือใส่ dash key ใหม่':(j&&j.error)||('เชื่อมต่อไม่ได้ ('+r.status+')')));
       return j;
     }
     async function loadKb(){
