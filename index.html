@@ -427,6 +427,13 @@ function tshow(m,undoFn,ms){
   TOASTT=setTimeout(function(){t.className="";TOASTT=null},ms||(undoFn?7000:1700));
 }
 function errBox(m){return '<div class="err">😅 '+esc(m)+'<br><br><button class="btn" onclick="location.reload()">ลองใหม่</button></div>'}
+/* 🧭 P1-2 (ตรวจ 29 ส.ค.): เปิดหน้านี้นอกแอป LINE แล้ว login พัง = เดิมเจอทางตัน (มีแค่ปุ่มลองใหม่ที่วนกลับที่เดิม)
+   ลูกค้าสรุปว่า "ระบบพัง" — กล่องนี้ให้ทางไปต่อเสมอ: เปิดใน LINE / เพิ่มเพื่อน / ลองใหม่ */
+function loginFailBox(m){return '<div class="err">😅 '+esc(m)
+  +'<br><small style="color:var(--muted)">หน้านี้เปิดจากแอป LINE ได้ลื่นที่สุด — แตะเมนู My YES BOSS ในห้องแชตเลขา</small><br><br>'
+  +'<a class="btn" style="display:inline-block;text-decoration:none;margin:0 4px 8px" href="https://liff.line.me/2010582556-jAUGKlnX">📱 เปิดใน LINE</a><br>'
+  +'<a class="btn ghost" style="display:inline-block;text-decoration:none;margin:0 4px 8px" href="https://lin.ee/U7kOStU">➕ ยังไม่เคยใช้? เพิ่มเพื่อน @yes_boss</a><br>'
+  +'<button class="btn ghost" onclick="location.reload()">ลองใหม่อีกครั้ง</button></div>'}
 
 /* 🔑 ID token ของ LIFF อายุแค่ ~1 ชม. — คนเปิดซ้ำหลังจากนั้นได้ token ตาย → API 401 ทั้งหน้า
    (เจอจริง 2026-07-04 จาก function_edge_logs) ทางแก้: เช็ค exp ก่อนใช้ + 401 → login ใหม่อัตโนมัติ 1 ครั้ง */
@@ -437,7 +444,7 @@ function tokenExpired(t){try{var b=t.split(".")[1].replace(/-/g,"+").replace(/_/
    guard ด้วย localStorage (sessionStorage ไม่รอดข้ามการเปิดใหม่) — ถ้าวนซ้ำใน 1 นาที = หยุด แจ้งผู้ใช้ */
 function relogin(){
   try{var k=localStorage.getItem("yb_rl_t");
-    if(k&&Date.now()-Number(k)<60000){$("#app").innerHTML=errBox("เข้าสู่ระบบไม่สำเร็จ ปิดหน้านี้แล้วเปิดใหม่อีกทีนะ");return}
+    if(k&&Date.now()-Number(k)<60000){$("#app").innerHTML=loginFailBox("เข้าสู่ระบบไม่สำเร็จ");return}
     localStorage.setItem("yb_rl_t",String(Date.now()))}catch(e){}
   try{liff.logout()}catch(e){}
   var st="";
@@ -544,7 +551,10 @@ async function boot(){
     if(TAB==="story")ensureStory();
     if(TAB==="help")ensureHelp();
     if(TAB==="trash")ensureTrash();
-  }catch(e){$("#app").innerHTML=errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
+  }catch(e){
+    /* นอกแอป LINE (เว็บ/เดสก์ท็อป) init/login พังได้หลายทาง (คุกกี้ third-party, ยกเลิก login) — ต้องมีทางไปต่อ ไม่ใช่ทางตัน */
+    var _oc=true;try{_oc=!(liff.isInClient&&liff.isInClient())}catch(_e){}
+    $("#app").innerHTML=_oc?loginFailBox(e&&e.message?e.message:"โหลดไม่สำเร็จ"):errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
 }
 
 /* 🖱️ draw() วาดใหม่ทั้งจอ -> ตำแหน่งที่เลื่อนไว้หายทุกครั้ง
@@ -2233,6 +2243,10 @@ function vMe(){
   h+='<h2>'+icn("life",17)+' ช่วยเหลือ</h2>';
   h+='<div class="rowitem" style="padding:0"><button class="btn ghost" style="width:100%;justify-content:flex-start;text-align:left;box-shadow:none;border-radius:14px" onclick="go(\'help\')">'+icn("life",15)+' แจ้งปัญหา / คุยกับทีมงาน</button></div>';
   h+='<div class="rowitem" style="padding:0"><button class="btn ghost" style="width:100%;justify-content:flex-start;text-align:left;box-shadow:none;border-radius:14px" onclick="go(\'trash\')">'+icn("undo",15)+' ถังขยะ (ลบไปแล้วกู้คืนได้ 30 วัน)</button></div>';
+  /* 📱 P1-3: เครื่องที่เชื่อมแอปมือถือ — โหลดตอนกดดู (คนส่วนใหญ่ยังไม่ได้ใช้แอป ไม่ต้องหน่วงหน้า) */
+  h+='<h2>📱 แอปมือถือ</h2>';
+  h+='<div class="card" id="devbox"><button class="btn ghost" style="width:100%" onclick="loadDevices()">ดูอุปกรณ์ที่เชื่อมกับแอป</button>';
+  h+='<div class="l" style="margin-top:8px">มือถือหาย/เปลี่ยนเครื่อง? ตัดการเชื่อมได้ที่นี่ — เครื่องที่ถูกตัดจะซิงก์นัด/ปลุกไม่ได้อีกทันที</div></div>';
   h+='<h2>ข้อมูลส่วนตัว (PDPA)</h2>';
   h+='<div class="card"><button class="btn ghost" style="width:100%;margin-bottom:9px" onclick="doExport()">'+icn("download",15)+' ดาวน์โหลดข้อมูลของฉัน</button>';
   h+='<button class="btn warn" style="width:100%" onclick="doErase()">'+icn("trash",15)+' ลบข้อมูลของฉันทั้งหมด</button>';
@@ -2259,6 +2273,22 @@ async function doExport(){
   try{var res=await api("pdpa.export");var blob=new Blob([JSON.stringify(res.data,null,2)],{type:"application/json"});
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my-yesboss-data.json";a.click();toast("ดาวน์โหลดแล้ว")}catch(e){toast(e.message||"ผิดพลาด")}
 }
+/* 📱 P1-3: รายการเครื่องที่เชื่อมแอป + ปุ่มตัดการเชื่อม (เดิม "ตัดการเชื่อม" ไม่มีอยู่จริงในระบบ) */
+async function loadDevices(){
+  try{var r=await api("device.list");var b=document.getElementById("devbox");if(!b)return;
+    if(!r||!r.devices||!r.devices.length){b.innerHTML='<div class="l">ยังไม่มีเครื่องที่เชื่อมแอปอยู่เลย — อยากใช้แอปปลุกทะลุโหมดเงียบ พิมพ์ "เชื่อมแอป" ในแชตได้เลย</div>';return}
+    var h="";for(var i=0;i<r.devices.length;i++){var d=r.devices[i];
+      h+='<div class="rowitem" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>'+esc(d.platform==="ios"?"iPhone/iPad":(d.platform||"อุปกรณ์"))+(d.app_version?' <span class="l">v'+esc(d.app_version)+'</span>':"")+'</b>'
+        +'<div class="l">เชื่อมเมื่อ '+esc(String(d.created_at||"").slice(0,10))+(d.last_seen_at?' · ใช้ล่าสุด '+esc(String(d.last_seen_at).slice(0,10)):' · ยังไม่เคยซิงก์')+'</div></div>'
+        +'<button class="btn warn" onclick="revokeDevice(\''+esc(d.id)+'\')">ตัดการเชื่อม</button></div>'}
+    b.innerHTML=h;
+  }catch(e){toast(e.message||"โหลดไม่สำเร็จ")}
+}
+async function revokeDevice(id){
+  var okD=await dlg({title:"ตัดการเชื่อมเครื่องนี้?",okText:"ตัดการเชื่อม",body:"เครื่องนั้นจะซิงก์นัด/ปลุกไม่ได้อีกทันที จนกว่าจะพิมพ์ «เชื่อมแอป» ในแชตเพื่อเชื่อมใหม่"});
+  if(!okD)return;
+  try{await api("device.revoke",{id:id});toast("ตัดการเชื่อมแล้ว ✓");loadDevices()}catch(e){toast(e.message||"ผิดพลาด")}
+}
 /* 🔒 ลบทั้งบัญชี (PDPA) — ลบจริงตามกฎหมาย ไม่เข้าถังขยะ กู้ไม่ได้จริงๆ
    เดิมถาม confirm() ซ้อนสองชั้น ซึ่งพิสูจน์แล้วว่าไม่ช่วย: กดรัวสองทีได้พอกัน
    ของใหม่ให้ "พิมพ์คำว่า ลบทั้งหมด" = ต้องอ่านถึงจะผ่าน + บอกจำนวนของจริงที่จะหาย */
@@ -2270,7 +2300,10 @@ async function doErase(){
       +"<br>• ประวัติแชต บันทึกอารมณ์ รายการเงิน และเรื่องที่แจ้งทีมงานทั้งหมด<br><br>"
       +"<b>ลบจริง กู้คืนไม่ได้</b> — อันนี้ไม่เข้าถังขยะ 30 วันเหมือนการลบทั่วไป เพราะเป็นสิทธิ์ตาม PDPA ที่ต้องลบให้จริง"});
   if(!ok)return;
-  try{await api("pdpa.erase");$("#app").innerHTML='<div class="err">🔒 ลบข้อมูลของคุณเรียบร้อยแล้ว<br>ขอบคุณที่เคยใช้บริการนะ 🤍<br><br>หากอยากเริ่มใหม่ ทักหาเลขาในแชตได้เสมอ</div>'}catch(e){toast(e.message||"ผิดพลาด")}
+  /* 230 (P0-2): บอกตามจริง — queued = บางส่วนระบบกำลังลบต่ออัตโนมัติ ไม่ใช่ "เรียบร้อยแล้ว" ทั้งที่ยังไม่ครบ */
+  try{var er=await api("pdpa.erase");$("#app").innerHTML=(er&&er.queued)
+    ?'<div class="err">🔒 เริ่มลบข้อมูลของคุณแล้ว — ส่วนใหญ่ลบเสร็จทันที ที่เหลือระบบจะลบให้ครบภายใน 1 ชั่วโมง (อัตโนมัติ)<br>ขอบคุณที่เคยใช้บริการนะ 🤍</div>'
+    :'<div class="err">🔒 ลบข้อมูลของคุณเรียบร้อยแล้ว<br>ขอบคุณที่เคยใช้บริการนะ 🤍<br><br>หากอยากเริ่มใหม่ ทักหาเลขาในแชตได้เสมอ</div>'}catch(e){toast(e.message||"ผิดพลาด")}
 }
 
 /* ---------- 🎮 ห้องพักใจ v2: เกมดูแลใจ "ห้องที่อุ่นขึ้นตามการดูแลใจ" (219) ----------
