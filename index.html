@@ -1,6 +1,6 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net; style-src 'unsafe-inline'; img-src 'self' data: https://*.line-scdn.net https://eeascfxgfmzlqvirjdua.supabase.co https://app.yesboss.club; frame-src 'self'; connect-src 'self' https://eeascfxgfmzlqvirjdua.supabase.co https://api.line.me https://access.line.me https://*.line.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.line-scdn.net https://eeascfxgfmzlqvirjdua.supabase.co https://app.yesboss.club; frame-src 'self'; connect-src 'self' https://eeascfxgfmzlqvirjdua.supabase.co https://api.line.me https://access.line.me https://*.line.me">
 <meta name="robots" content="noindex, nofollow"><title>My YES BOSS</title>
 <!-- ⚡ เปิดสายรอไว้ล่วงหน้า (แก้ 25 ก.ค. LIFF เปิดช้า): เบราว์เซอร์ทำ DNS+TLS กับ 2 โฮสต์นี้ตั้งแต่อ่าน <head>
      แทนที่จะเริ่มตอนถึงบรรทัด script/fetch — ประหยัดราว 0.2 วิ บนมือถือ · ไม่กระทบ CSP (preconnect ไม่ใช่การโหลด) -->
@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://eeascfxgfmzlqvirjdua.supabase.co">
 <link rel="dns-prefetch" href="https://api.line.me">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<!-- 🎀 SKIN2 (4 ก.ย. 69): ฟอนต์ลายมือ Mali ใช้เฉพาะหัวข้อ — โหลดแบบไม่ block first paint (media=print แล้วสลับ)
+     บทเรียน 25 ก.ค. LIFF เปิดช้า: ห้ามเพิ่มของ render-blocking ใน head เด็ดขาด · fallback = Sukhumvit stack เดิม -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
 /* ═══ 🎨 ระบบสี — ตรวจ WCAG AA แล้วทุกคู่ (ตรวจหน้าบ้าน 25 ก.ค. พบตก 11 จาก 14 จุด) ═══
    แยก 2 ชั้นโดยตั้งใจ:
@@ -252,6 +257,47 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
 #healroom .hdnote{margin-top:6px;font-size:14px;line-height:1.6;color:#44434A;white-space:pre-wrap}
 #healroom .hp{position:absolute;pointer-events:none;z-index:6;font-size:19px}
 @keyframes hrup{to{transform:translate(var(--dx,0px),-420px) rotate(var(--r,0deg));opacity:0}}
+/* ═══ 🏠 SKIN2 "บ้านบอสซี่" (บอสสั่งแปลงคืน 3-4 ก.ย. 69 จากเดโมพรูฟ) ═══
+   กติกา: ทุก selector ต้องอยู่ใต้ body.skin2 — ปิดสวิตช์ SKIN2 ตัวเดียว = กลับโฉมเดิม 100%
+   สีในซีนห้อง/บอร์ดตั้งใจ hardcode โทนอุ่นสว่าง (แบบเดียวกับ #healroom ที่บอสเคาะ "ห้องต้องสว่าง")
+   จึงคงหน้าตาเดิมทั้ง light/dark — ส่วนคอมโพเนนต์เดิมยังใช้โทเคนกลางตามระบบเดิม */
+body.skin2{background:#F4E6DE}
+/* โหมดมืด: พื้นแอปตามโทเคนมืดเดิม — ซีนห้อง/โน้ต/ป้ายไม้เป็น "ของสว่างมีไฟ" บนพื้นมืด (แนวเดียวกับ #healroom) */
+@media (prefers-color-scheme:dark){body.skin2{background:linear-gradient(180deg,var(--bg-top),var(--bg) 260px)}}
+.skin2 h1,.skin2 .ct,.skin2 .hd2{font-family:'Mali','Sukhumvit Set','Noto Sans Thai',-apple-system,sans-serif}
+.skin2 .wall2{position:relative;overflow:hidden;background-color:#F6DADF;background-image:radial-gradient(rgba(255,255,255,.5) 1.6px,transparent 1.6px);background-size:26px 26px;border-radius:18px;margin:2px 0 12px}
+.skin2 .woodg{background-image:repeating-linear-gradient(180deg,rgba(90,55,30,.07) 0 2px,transparent 2px 9px)}
+.skin2 .board2{position:absolute;background:#35443C;border:8px solid #B98A5E;border-radius:12px;box-shadow:0 8px 18px rgba(120,60,80,.24),0 0 22px rgba(255,255,255,.14) inset;cursor:pointer}
+.skin2 .chalk2{color:#F5F0E3;text-shadow:0 0 3px rgba(245,240,227,.4)}
+.skin2 .chalkpink{color:#F9C8D5;text-shadow:0 0 4px rgba(249,200,213,.45)}
+.skin2 .chalkgold{color:#F9E9B8;text-shadow:0 0 4px rgba(249,233,184,.4)}
+.skin2 .tip2{position:absolute;z-index:8;background:#fff;border:0;border-radius:999px;padding:8px 13px;font-size:10.5px;font-weight:800;color:#8A4560;box-shadow:0 3px 8px rgba(120,60,80,.22);white-space:nowrap;cursor:pointer;font-family:inherit;min-height:34px}
+.skin2 .tip2:before{content:'';position:absolute;left:-5px;top:-6px;right:-5px;bottom:-6px} /* ขยายพื้นที่กด ≥44px */
+.skin2 .tip2:after{content:'';position:absolute;left:50%;bottom:-5px;width:0;height:0;margin-left:-5px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #fff}
+.skin2 .hotspot{cursor:pointer;-webkit-tap-highlight-color:rgba(196,84,126,.18)}
+.skin2 .cork2{position:relative;background-color:#DEC094;background-image:radial-gradient(rgba(120,75,35,.16) 1.3px,transparent 1.3px),radial-gradient(rgba(255,240,215,.5) 1px,transparent 1px);background-size:17px 17px,23px 23px;border:9px solid #B98A5E;border-radius:14px;box-shadow:0 10px 22px rgba(120,60,80,.26),0 0 0 2px #A87A4F inset}
+.skin2 .lanehd2{position:absolute;text-align:center;font-weight:700;font-size:12px;padding:5px 2px;border-radius:3px;box-shadow:0 2px 5px rgba(120,60,80,.15);border-left:1px dashed rgba(255,255,255,.8);border-right:1px dashed rgba(255,255,255,.8);z-index:2;font-family:'Mali','Sukhumvit Set',sans-serif}
+.skin2 .note2{position:absolute;border-radius:3px 7px 6px 4px;padding:9px 9px 10px;box-shadow:0 3px 0 rgba(120,60,80,.07),0 6px 10px rgba(120,60,80,.16);transform:rotate(var(--rot,0deg));touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;transition:left .22s ease,top .22s ease;min-height:44px;box-sizing:border-box}
+.skin2 .note2.lift{box-shadow:0 16px 26px rgba(120,60,80,.38);z-index:20;transition:none;cursor:grabbing}
+.skin2 .note2 .nt{font-size:11.5px;font-weight:700;line-height:1.35;color:#3A3A3C;padding-right:20px;word-break:break-word}
+.skin2 .note2 .ns{margin-top:3px;font-size:9.5px;font-family:'Mali','Sukhumvit Set',sans-serif}
+.skin2 .note2.isdone{background:#FFFCF5!important;opacity:.93}
+.skin2 .note2.isdone .nt{color:#85858E;text-decoration:line-through;font-weight:600}
+.skin2 .pin2{position:absolute;left:50%;top:-6px;margin-left:-6px;width:12px;height:12px;border-radius:50%;box-shadow:0 2px 3px rgba(0,0,0,.28)}
+.skin2 .nchk{position:absolute;right:4px;bottom:4px;width:34px;height:34px;border:0;border-radius:10px;background:rgba(196,84,126,.14);color:#C4547E;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1;touch-action:manipulation}
+.skin2 .nchk:before{content:'';position:absolute;left:-6px;top:-6px;right:-6px;bottom:-6px} /* ขยายพื้นที่กดถึง 46px ตามกติกา --tap */
+.skin2 .lanehi2{position:absolute;border-radius:10px;background:rgba(232,119,155,.16);border:2px dashed rgba(196,84,126,.5);display:none;pointer-events:none;z-index:1}
+.skin2 .wksign{position:relative;margin:2px auto 14px;width:fit-content;max-width:92%;background:#C99A66;border:2.5px solid #A87A4F;border-radius:10px;padding:8px 18px;transform:rotate(-1deg);box-shadow:0 5px 10px rgba(120,60,80,.2);text-align:center}
+.skin2 .wktabs{display:flex;gap:8px;justify-content:center;margin:0 0 10px}
+.skin2 .wktab{font-size:12.5px;font-weight:700;color:#8A4560;background:#FFFCF5;border:0;border-radius:9px 9px 3px 3px;padding:10px 16px;box-shadow:0 3px 7px rgba(120,60,80,.14);border-bottom:2.5px solid #E8C0CE;cursor:pointer;font-family:'Mali','Sukhumvit Set',sans-serif;min-height:var(--tap)}
+.skin2 .wktab.on{background:#C4547E;color:#FFF6EE;border-bottom-color:#8A2E4E}
+.skin2 .hintpill2{display:block;width:fit-content;margin:10px auto 0;background:rgba(90,50,65,.88);color:#FFF3F7;font-size:11.5px;font-weight:600;border-radius:999px;padding:7px 16px;box-shadow:0 4px 10px rgba(90,50,65,.35);font-family:'Mali','Sukhumvit Set',sans-serif}
+.skin2 .plrow{display:flex;gap:8px;align-items:flex-start;margin-top:9px}
+.skin2 .pltime{font-size:10.5px;color:#B9AEB6;width:40px;padding-top:7px;font-family:'Mali','Sukhumvit Set',sans-serif;flex:none}
+.skin2 .plblock{flex:1;position:relative;border-radius:4px 9px 8px 4px;padding:8px 11px;box-shadow:0 3px 7px rgba(120,60,80,.12);background:#FDE7EF;border-left:3px solid #E8779B;color:#3A3A3C} /* พื้นชมพูสว่างตายตัว → ตัวหนังสือต้องตายตัวด้วย ห้าม inherit โทเคนมืด */
+.skin2 .holes2{display:flex;justify-content:space-around;padding:0 26px 7px}
+.skin2 .holes2 i{width:11px;height:11px;border-radius:50%;background:var(--bg);box-shadow:0 1.5px 2px rgba(120,60,80,.35) inset}
+@media (prefers-reduced-motion:reduce){.skin2 .note2{transition:none}}
 </style></head><body>
 <div id="app"><div class="ldr"><img src="img/p11-running.webp" alt=""><div class="ldrsh"></div><div class="ldrbar"><i></i></div><div class="ldrtx">เลขากำลังวิ่งไปเตรียมข้อมูลของบอส...</div></div></div>
 <div id="healroom">
@@ -317,6 +363,8 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <script>
 var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0,SRC="";
+/* 🏠 SKIN2 = โฉม "บ้านบอสซี่" (ห้อง+บอร์ดลาก+แพลนวัน) — ปิดสวิตช์เดียวกลับโฉมเดิมทั้งหน้า (บอสเคาะ 4 ก.ย. 69) */
+var SKIN2=true;if(SKIN2){try{document.body.className="skin2"}catch(_e){document.addEventListener("DOMContentLoaded",function(){document.body.className="skin2"})}}
 var ICONS={
 pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
 life:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M19.1 4.9l-4.2 4.2M9.1 14.9l-4.2 4.2"/>',
@@ -520,7 +568,7 @@ async function boot(){
       if(secQ==="files"){setTimeout(function(){var el=document.getElementById("st_files");if(el){el.scrollIntoView({behavior:"smooth"})}},700)}
       /* 219: ปุ่ม "บันทึกใจวันนี้" ท้ายรายงานเย็น -> เปิดห้อง+เข้าเช็คใจเลย (openHealRoom รอ login เองถ้ายังไม่พร้อม) */
       if(secQ==="checkin"){setTimeout(function(){if(window.openHealRoom)openHealRoom("checkin")},900)}
-      if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier"].indexOf(tb)>=0){TAB=tb}
+      if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier","board","plan"].indexOf(tb)>=0){TAB=tb}
       /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
       var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
       if(sl==="1"&&TAB==="todo"){TSEL=new Set()}
@@ -564,19 +612,21 @@ async function boot(){
 function draw(){
   var _y=window.scrollY||document.documentElement.scrollTop||0;
   if(TAB==="dossier"&&!(DATA&&DATA.newux))TAB="me"; /* 🆕 คนเก่ายังไม่มีแฟ้ม เปิดลิงก์ตรงๆ ให้ตกกลับหน้าโปรไฟล์ */
+  if(!SKIN2&&(TAB==="board"||TAB==="plan"))TAB="home"; /* 🏠 ปิดสวิตช์โฉมใหม่ = ลิงก์ board/plan ตกกลับหน้าแรก (กันหน้าไร้ CSS ที่ยังกดปิดงานจริงได้) */
   if(TAB==="start"){$("#app").innerHTML=vStart();wzPersist()}
   else{
     var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal()
-      :TAB==="help"?vHelp():TAB==="trash"?vTrash():TAB==="dossier"?vDossier():vMe();
+      :TAB==="help"?vHelp():TAB==="trash"?vTrash():TAB==="dossier"?vDossier():TAB==="board"?vBoard():TAB==="plan"?vPlan():vMe();
     $("#app").innerHTML=v+nav();
   }
+  if(TAB==="board"&&window.bindBoard)bindBoard(); /* 🏠 บอร์ดโพสต์อิทต้องจัดเลย์เอาต์+ผูกลากหลัง innerHTML ทุกครั้ง */
   if(_y)window.scrollTo(0,_y);
 }
 function nav(){
   // help/trash/dossier เข้าจากลิงก์ในแชต + ปุ่มในหน้าโปรไฟล์ (ไม่กินช่องแถบล่าง — 6 ช่องเต็มแล้ว)
   // แท็บที่ไม่มีในแถบ ให้ไฮไลต์ "โปรไฟล์" ไว้ คนจะได้ไม่งงว่าตัวเองหลุดไปอยู่ไหน
   var it=[["home",icn("home",21),"หน้าหลัก"],["todo",icn("check",21),"วันนี้+งาน"],["money",icn("banknote",21),"เงิน"],["story",icn("book",21),"เรื่องราว"],["heal",icn("heart",21),"ฮีลใจ"],["me",icn("user",21),"โปรไฟล์"]];
-  var cur=(TAB==="help"||TAB==="trash"||TAB==="dossier")?"me":TAB;
+  var cur=(TAB==="help"||TAB==="trash"||TAB==="dossier")?"me":(TAB==="board"||TAB==="plan")?"todo":TAB;
   // role=tablist + aria-selected: เดิมทั้งหน้าไม่มี aria สักตัว screen reader อ่านเป็นปุ่มลอยๆ 6 ปุ่ม ไม่รู้ว่าอยู่แท็บไหน
   var h='<nav class="nav" role="tablist" aria-label="เมนูหลัก">';
   for(var i=0;i<it.length;i++){var on=cur===it[i][0];
@@ -1078,13 +1128,20 @@ function vHome(){
   /* หน้าแรกใช้แค่จำนวน — nFacts/nFiles มาจาก me.get (เนื้อหาเต็มโหลดตอนกดแท็บ) · ||length = เผื่อโหลดเนื้อหาแล้ว */
   var st0=DATA.story||{},nFacts=(st0.nFacts!=null?st0.nFacts:(st0.facts||[]).length),nFiles=(st0.nFiles!=null?st0.nFiles:(st0.files||[]).length);
   var lastMood=DATA.mood&&DATA.mood[0];
-  var h='<div style="position:relative"><button type="button" class="plan" style="cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</button><span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div>'+(founder?'<div style="margin-top:11px;background:linear-gradient(135deg,#FFF7E6,#FDEBC8);border:1px solid #F0D089;border-radius:14px;padding:11px 13px;font-size:12.5px;color:#7A5B12;font-weight:600;line-height:1.55">🎖️ บอสคือ <b>ผู้ก่อตั้งรุ่นแรก</b> — ขอบคุณที่เชื่อในเลขาคนนี้ตั้งแต่วันแรกค่ะ 🤍 ทุกฟีเจอร์ปลดล็อกครบ + ล็อกราคานี้ตลอด</div>':'')+'<img src="https://app.yesboss.club/img/liff/bossy-hello.png" alt="" style="position:absolute;right:2px;top:34px;height:88px;pointer-events:none" onerror="this.remove()"></div>';
+  var founderBn=(founder?'<div style="margin-top:11px;background:linear-gradient(135deg,#FFF7E6,#FDEBC8);border:1px solid #F0D089;border-radius:14px;padding:11px 13px;font-size:12.5px;color:#7A5B12;font-weight:600;line-height:1.55">🎖️ บอสคือ <b>ผู้ก่อตั้งรุ่นแรก</b> — ขอบคุณที่เชื่อในเลขาคนนี้ตั้งแต่วันแรกค่ะ 🤍 ทุกฟีเจอร์ปลดล็อกครบ + ล็อกราคานี้ตลอด</div>':'');
+  var h="";
+  if(SKIN2){
+    /* 🏠 โฉมบ้านบอสซี่: ซีนห้องแทน header+stat tiles เดิม (ตัวเลขชุดเดียวกันย้ายไปอยู่บนกระดานดำ/ป้ายลอย) */
+    h=roomHero(nm,esc(plan),founder,todayN,openT.length,nFacts,nFiles)+founderBn;
+  }else{
+  h='<div style="position:relative"><button type="button" class="plan" style="cursor:pointer;margin-left:7px" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</button><span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+esc(plan)+'</span><h1>สวัสดี'+pt()+' '+nm+' 👋</h1><div class="sub">ภาพรวมวันนี้ · '+thToday()+'</div>'+founderBn+'<img src="https://app.yesboss.club/img/liff/bossy-hello.png" alt="" style="position:absolute;right:2px;top:34px;height:88px;pointer-events:none" onerror="this.remove()"></div>';
   h+='<div class="stats">';
   h+=stat("#FBE9F0",icn("clock",22),"#E0466E",todayN,"นัดวันนี้","todo");
   h+=stat("#FBE9F0",icn("check",22),"#E0466E",openT.length,"งานค้าง","todo");
   h+=stat("#FBE9F0",icn("bulb",22),"#E0466E",nFacts,"ความจำ","story");
   h+=stat("#FBE9F0",icn("folder",22),"#E0466E",nFiles,"ไฟล์","story");
   h+='</div>';
+  }
   if(lastMood&&lastMood.is_safety){h+=safetyCard()}
   /* ลำดับตามบอสสั่ง 2026-07-04: งานที่ต้องทำ -> ปฏิทิน -> รายรับรายจ่าย */
   var taskCard='<div class="card"><div class="ct">'+icn("check",16)+' งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
@@ -1093,7 +1150,7 @@ function vHome(){
   for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
     taskCard+='<div class="task"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t.task_text)+'" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
   if(openT.length>lim){taskCard+='<button type="button" class="gh" style="width:100%;text-align:center;background:none;border:0;font-family:inherit;cursor:pointer;margin:8px 0 2px;min-height:44px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</button>'}
-  taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div></div>';
+  taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div>'+(SKIN2?'<button type="button" class="btn ghost" style="width:100%;margin-top:9px" onclick="go(\'board\')">เปิดบอร์ดงาน — ลากโพสต์อิทจัดสถานะได้ ›</button>':'')+'</div>';
   var sel=SELISO||today;
   var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
   var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<button type="button" class="more" style="background:none;border:0;font-family:inherit;cursor:pointer;min-height:32px" onclick="go(\'money\')">ดูทั้งหมด ›</button></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
@@ -1112,6 +1169,148 @@ function vHome(){
 }
 function safetyCard(){
   return '<div class="safety">🤍 ถ้าตอนนี้รู้สึกหนักมากจนแบกไม่ไหว คุณไม่ได้อยู่คนเดียวนะ ลองโทรคุยกับ <a href="tel:1323">สายด่วนสุขภาพจิต 1323</a> (กรมสุขภาพจิต ฟรี 24 ชม.) เราอยู่ตรงนี้ด้วยเสมอ</div>';
+}
+/* ═══ 🏠 SKIN2 "บ้านบอสซี่" — ซีนห้อง (hero หน้าแรก) + บอร์ดโพสต์อิทลากได้ + แพลนวัน (บอสเคาะจากเดโมพรูฟ 3-4 ก.ย. 69)
+   หลักที่ล็อกกับบอส: ของทุกชิ้นในห้อง = ปุ่มจริง · เลขบนกระดานใหญ่อ่านใน 3 วิ · ลาก=ทางลัด ทุกอย่างแตะได้ · ปุ่ม ≥44px ═══ */
+function roomHero(nm,planLb,founder,nAppt,nOpen,nFacts,nFiles){
+  var today=todayBKK();
+  var doneT=((DATA.tasks&&DATA.tasks.done)||[]).filter(function(t){return t.done_at&&bkkYMD(t.done_at)===today}).length;
+  /* me.get ส่ง done มาแค่ 15 แถวล่าสุด — วันที่ปิดเกิน 15 งาน ต้องบอกตามจริงว่า "15+" ไม่ใช่โกหกว่า 15 */
+  var dCap=((DATA.tasks&&DATA.tasks.done)||[]).length>=15&&doneT>=15;
+  var doneLb=doneT+(dCap?'+':'');
+  var allT=doneT+nOpen,pct=allT?Math.round(doneT*100/allT):0;
+  var rems=((DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===today})).sort(function(a,b){return new Date(a.remind_at)-new Date(b.remind_at)});
+  var nx=null;for(var i=0;i<rems.length;i++){if(new Date(rems[i].remind_at).getTime()>=Date.now()-60000){nx=rems[i];break}}
+  if(!nx&&rems.length)nx=rems[rems.length-1];
+  var nxLb=nx?((nx.all_day?'ทั้งวัน':ftime(nx.remind_at))+' '+esc(String(nx.text||nx.reminder_text||'นัดวันนี้').slice(0,40))):'วันนี้ยังไม่มีนัด'+pt();
+  var h='<div class="wall2" style="height:472px">';
+  h+='<div style="position:absolute;right:10px;top:10px;z-index:6"><button type="button" class="plan" style="cursor:pointer" onclick="refreshAll()">'+icn("refresh",12)+' รีเฟรช</button> <span class="plan"'+(founder?' style="background:linear-gradient(135deg,#F6D365,#E8A93E);color:#5A3E00;font-weight:800;border:none"':'')+'>'+planLb+'</span></div>';
+  h+='<svg width="190" height="26" viewBox="0 0 190 26" style="position:absolute;left:12px;top:0" aria-hidden="true"><path d="M28 26 L52 2 M162 26 L138 2" stroke="#A87A4F" stroke-width="2.5" fill="none"/></svg>';
+  h+='<div class="woodg" style="position:absolute;left:12px;top:22px;background:#C99A66;border:2.5px solid #A87A4F;border-radius:10px;padding:7px 12px 8px;transform:rotate(-1.6deg);box-shadow:0 5px 10px rgba(120,60,80,.2);z-index:2;max-width:56%"><div class="hd2" style="font-size:15.5px;font-weight:700;color:#4E3520">สวัสดี'+pt()+' '+nm+' 👋</div><div class="hd2" style="font-size:10.5px;color:#6E4E33;margin-top:1px">'+thToday()+'</div></div>';
+  h+='<div class="board2 hotspot" role="button" tabindex="0" aria-label="เปิดแพลนวันนี้" onclick="go(\'plan\')" style="right:14px;top:58px;width:202px;height:272px;z-index:2">'
+    +'<div style="padding:10px 11px 0"><div class="hd2 chalk2" style="font-size:14px;font-weight:700">บอร์ดวันนี้</div>'
+    +'<svg width="78" height="7" viewBox="0 0 88 7" aria-hidden="true"><path d="M2 4 C 24 1, 56 6, 86 3" fill="none" stroke="#F5F0E3" stroke-width="2" stroke-linecap="round" opacity=".85"/></svg>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px"><span class="hd2 chalk2" style="font-size:11.5px">นัดวันนี้</span><span class="hd2 chalkpink" style="font-size:23px;font-weight:700">'+nAppt+'</span></div>'
+    +'<div style="position:relative;background:#FFF9EE;border-radius:3px;padding:5px 7px 5px 9px;transform:rotate(-1.6deg);box-shadow:0 3px 6px rgba(0,0,0,.3);margin-top:3px"><span style="position:absolute;left:50%;top:-4px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#E0466E"></span><div style="font-size:10px;font-weight:700;color:#4A4438;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nxLb+'</div><div style="font-size:9px;color:#85858E">แตะดูตารางทั้งวัน</div></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><span class="hd2 chalk2" style="font-size:11.5px">งานค้าง</span><span class="hd2 chalkgold" style="font-size:23px;font-weight:700">'+nOpen+'</span></div>'
+    +'<div style="margin-top:8px;text-align:right"><span class="hd2 chalk2" style="font-size:10.5px">เสร็จวันนี้ '+doneLb+'/'+allT+'</span><div style="width:108px;height:8px;border:1.6px solid rgba(245,240,227,.75);border-radius:99px;margin:3px 0 0 auto"><div style="width:'+pct+'%;height:100%;background:#F9C8D5;border-radius:99px;opacity:.9"></div></div></div></div>'
+    +'<div class="woodg" style="position:absolute;left:8px;right:8px;bottom:-13px;height:11px;background:#B98A5E;border-radius:4px;box-shadow:0 3px 5px rgba(120,60,80,.25)"></div></div>';
+  h+='<div class="woodg" style="position:absolute;left:14px;top:246px;width:124px;height:10px;background:#B98A5E;border-radius:4px;box-shadow:0 4px 8px rgba(120,60,80,.22);z-index:2"></div>';
+  h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดหน้าเงิน" onclick="go(\'money\')" width="46" height="52" viewBox="0 0 46 52" style="position:absolute;left:20px;top:196px;z-index:3"><rect x="12" y="2" width="22" height="7" rx="2.5" fill="#C99A66"/><path d="M9 11 h28 v30 a9 9 0 0 1 -9 9 h-10 a9 9 0 0 1 -9 -9 z" fill="#DCEBF4" opacity=".85" stroke="#B9CFDE" stroke-width="1.5"/><circle cx="18" cy="40" r="5" fill="#E9B84B"/><circle cx="27" cy="42" r="5" fill="#E9B84B"/><circle cx="23" cy="34" r="5" fill="#F2CB66"/><text x="23" y="24" text-anchor="middle" font-size="8.5" font-weight="800" fill="#8A4560">เงิน</text></svg>';
+  h+='<svg width="34" height="52" viewBox="0 0 34 52" style="position:absolute;left:68px;top:196px;z-index:3" aria-hidden="true"><path d="M11 20 C 9 12, 12 6, 16 4 C 20 6, 23 12, 21 20 z" fill="#E8779B"/><path d="M5 24 C 3 18, 5 13, 8 11 C 11 13, 12 18, 11 24 z" fill="#F4A9C0"/><path d="M22 24 C 21 18, 23 13, 26 11 C 29 13, 30 18, 28 24 z" fill="#F4A9C0"/><path d="M16 20 v10" stroke="#C97F84" stroke-width="1.6" fill="none"/><path d="M8 30 h18 l-2.5 20 h-13 z" fill="#C4547E"/></svg>';
+  h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดห้องพักใจ" onclick="go(\'heal\')" width="40" height="46" viewBox="0 0 34 40" style="position:absolute;left:98px;top:204px;z-index:3;padding:2px"><rect x="2" y="2" width="30" height="36" rx="4" fill="#C99A66" stroke="#A87A4F" stroke-width="2"/><rect x="7" y="7" width="20" height="26" rx="2" fill="#FFF6EE"/><path d="M17 27 C 12.5 23.5, 11.5 20.8, 13 19 C 14.3 17.6, 16.2 18, 17 19.5 c .8-1.5 2.7-1.9 4-.5 C 22.5 20.8, 21.5 23.5, 17 27 z" fill="#E8779B"/></svg>';
+  h+='<button type="button" class="tip2 hd2" onclick="go(\'money\')" style="left:16px;top:164px">กระเป๋าเงิน</button>';
+  h+='<div style="position:absolute;left:0;right:0;top:376px;height:20px;background:linear-gradient(180deg,#D9AC78 0%,#C99A66 40%);box-shadow:0 6px 12px rgba(120,60,80,.22);z-index:4"></div>';
+  h+='<div class="woodg" style="position:absolute;left:10px;right:10px;top:396px;height:76px;background:#B9895C;border-radius:0 0 10px 10px;z-index:3"><div style="position:absolute;left:16px;top:12px;width:110px;height:34px;background:#A87A4F;border-radius:8px"><span style="position:absolute;left:50%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#6E4E33"></span></div><div class="hd2" style="position:absolute;right:20px;top:14px;background:#E8779B;color:#FFF6EE;font-size:10.5px;font-weight:700;border-radius:8px;padding:3px 11px;transform:rotate(-2deg)">YES, BOSS!</div></div>';
+  h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดคลังความจำและไฟล์" onclick="go(\'story\')" width="92" height="70" viewBox="0 0 100 74" style="position:absolute;left:8px;top:312px;z-index:5"><rect x="6" y="58" width="88" height="12" rx="3" fill="#F3E3D0" stroke="#DCC5A6" stroke-width="1.5"/><rect x="10" y="44" width="80" height="14" rx="3" fill="#FFF6EE" stroke="#DCC5A6" stroke-width="1.5"/><rect x="8" y="12" width="84" height="32" rx="6" fill="#E8779B"/><rect x="8" y="12" width="12" height="32" rx="4" fill="#C4547E"/><rect x="70" y="12" width="8" height="46" rx="2" fill="#F0A868"/><path d="M70 58 h8 l-4 -6 z" fill="#D98D4A"/><text x="48" y="33" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF6EE">ไดอารี่</text></svg>';
+  h+='<img src="img/p07-desk-work.webp" alt="" style="position:absolute;left:50%;margin-left:-72px;top:252px;width:140px;z-index:5;filter:drop-shadow(0 6px 8px rgba(120,60,80,.25));pointer-events:none" onerror="this.remove()">';
+  h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดบอร์ดงาน" onclick="go(\'board\')" width="82" height="66" viewBox="0 0 86 70" style="position:absolute;right:12px;top:316px;z-index:5"><path d="M10 66 h66 l-6 -34 h-54 z" fill="#A87A4F"/><rect x="16" y="14" width="54" height="46" rx="3" fill="#8FA3BE" transform="rotate(-4 43 37)"/><rect x="18" y="10" width="54" height="50" rx="3" fill="#F3E3D0" transform="rotate(-1 45 35)"/><rect x="20" y="6" width="54" height="54" rx="3" fill="#F0A868"/><rect x="20" y="6" width="20" height="9" rx="3" fill="#D98D4A"/><text x="47" y="38" text-anchor="middle" font-size="11" font-weight="700" fill="#7A4A1E">งาน</text></svg>';
+  h+='<button type="button" class="tip2 hd2" onclick="go(\'story\')" style="left:10px;top:282px">ความจำ '+nFacts+' · ไฟล์ '+nFiles+'</button>';
+  h+='<button type="button" class="tip2 hd2" onclick="go(\'board\')" style="right:6px;top:286px;box-shadow:0 3px 8px rgba(120,60,80,.22),0 0 12px rgba(232,119,155,.55)">แตะเปิดบอร์ดงาน ›</button>';
+  h+='</div>';
+  return h;
+}
+function wkTabs(cur){
+  function tb(k,lb){return '<button type="button" class="wktab'+(cur===k?' on':'')+'" onclick="go(\''+k+'\')">'+lb+'</button>'}
+  return '<div class="wktabs">'+tb('todo','รายการงาน')+tb('board','บอร์ด')+tb('plan','แพลนวัน')+'</div>';
+}
+/* 🗂️ บอร์ดโพสต์อิท 2 ช่อง ตามสถานะจริงของระบบ (เปิด/ปิด ผ่าน task.toggle ตาม id เท่านั้น)
+   "กำลังทำ" ยังไม่มีใน backend (lifecycle_status ว่างทั้งตาราง) — ห้ามโชว์ช่องหลอก ไว้เฟสต่อไป */
+function vBoard(){
+  var open=(DATA.tasks&&DATA.tasks.open)||[],doneA=(DATA.tasks&&DATA.tasks.done)||[];
+  var showO=open.slice(0,8),showD=doneA.slice(0,6),today=todayBKK();
+  var h=wkTabs('board');
+  h+='<div class="wksign woodg"><div class="hd2" style="font-size:17px;font-weight:700;color:#4E3520">บอร์ดงานของบอส</div><div class="hd2" style="font-size:10px;color:#6E4E33">ลากโพสต์อิทข้ามช่อง หรือแตะปุ่มมุมโน้ตก็ได้'+pt()+'</div></div>';
+  h+='<div class="cork2" id="corkbox" style="min-height:240px">';
+  h+='<div class="lanehd2" style="left:4%;top:10px;width:42%;background:rgba(244,169,192,.9);color:#8A2E4E;transform:rotate(-1.6deg)">ต้องทำ <span style="background:rgba(255,255,255,.85);border-radius:99px;padding:0 6px;font-size:10px">'+open.length+'</span></div>';
+  h+='<div class="lanehd2" style="right:4%;top:10px;width:42%;background:rgba(255,252,245,.95);color:#8A4560;transform:rotate(1.2deg)">เสร็จแล้ว <span style="background:rgba(196,84,126,.12);border-radius:99px;padding:0 6px;font-size:10px">'+doneA.length+'</span></div>';
+  h+='<div style="position:absolute;left:50%;top:12px;bottom:12px;width:0;border-left:2px dashed rgba(140,95,50,.4)"></div>';
+  var rots=['-1.6','1.2','-0.8','1.5','-1.1','0.9','-1.4','0.7'];
+  for(var i=0;i<showO.length;i++){var t=showO[i];var due=t.due_date?(''+t.due_date).slice(0,10):'';
+    var late=due&&due<today,tdY=due===today;
+    var pc=late?'#E0466E':(tdY?'#F0A868':'#8FA3BE');
+    var sub=late?'<div class="ns" style="font-weight:700;color:#C92A5E">เลยกำหนดแล้ว'+pt()+'!</div>':(tdY?'<div class="ns" style="color:#9A7314">ครบกำหนดวันนี้</div>':(due?'<div class="ns" style="color:#85858E">กำหนด '+fdateOnly(due)+'</div>':''));
+    h+='<div class="note2" data-tid="'+t.id+'" data-lane="0" style="--rot:'+rots[i%8]+'deg;background:'+(late?'#FDE7EF':(i%2?'#FFF6D9':'#FDF1E3'))+'"><span class="pin2" style="background:'+pc+'"></span><div class="nt">'+esc(t.task_text)+'</div>'+sub+'<button type="button" class="nchk" aria-label="ทำเสร็จแล้ว" onclick="tgTask(\''+t.id+'\',true)">✓</button></div>';}
+  for(var j=0;j<showD.length;j++){var d=showD[j];
+    h+='<div class="note2 isdone" data-tid="'+d.id+'" data-lane="1" style="--rot:'+rots[(j+3)%8]+'deg;background:#FFFCF5"><span class="pin2" style="background:#B9AEB6"></span><div class="nt">'+esc(d.task_text)+'</div><button type="button" class="nchk" aria-label="เอากลับมาทำใหม่" onclick="tgTask(\''+d.id+'\',false)">↩</button></div>';}
+  h+='</div>';
+  if(open.length>showO.length||doneA.length>showD.length){h+='<div class="foot" style="margin-top:8px">บอร์ดโชว์ค้าง '+showO.length+'/'+open.length+' · เสร็จล่าสุด '+showD.length+' ใบ — ครบทุกงานอยู่ในแท็บ "รายการงาน"</div>'}
+  if(!open.length&&!doneA.length){h+='<div class="empty">บอร์ดยังว่าง — เพิ่มงานแรกด้านล่างได้เลย'+pt()+'</div>'}
+  h+='<div class="card" style="margin-top:12px"><div class="task" style="border:0"><input id="btask" placeholder="แปะงานใหม่ลงบอร์ด..." style="margin:0"><button class="btn sm" onclick="addTaskB()">เพิ่ม</button></div></div>';
+  h+='<span class="hintpill2">✦ กดค้างที่โน้ต แล้วลากข้ามช่องได้เลย'+pt()+'</span>';
+  h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
+  return h;
+}
+async function addTaskB(){var el=document.getElementById('btask');var tx=(el&&el.value||'').trim();if(!tx)return;await act('task.add',{text:tx},'แปะงานลงบอร์ดแล้ว')}
+function bindBoard(){
+  var cork=document.getElementById('corkbox');if(!cork)return;
+  var notes=[].slice.call(cork.querySelectorAll('.note2'));
+  var lanes=[[],[]];notes.forEach(function(n){lanes[+n.getAttribute('data-lane')].push(n)});
+  var his=[0,1].map(function(i2){var dv=document.createElement('div');dv.className='lanehi2';dv.style.left=(i2*50+2)+'%';dv.style.width='46%';dv.style.top='42px';cork.appendChild(dv);return dv});
+  function layout(){var W=cork.clientWidth;if(!W)return;var laneW=W/2;var ys=[46,46];
+    lanes.forEach(function(arr,li){arr.forEach(function(n){n.style.width=Math.round(laneW-20)+'px';n.style.left=Math.round(li*laneW+10)+'px';n.style.top=ys[li]+'px';ys[li]+=n.offsetHeight+12})});
+    var hh=Math.max(ys[0],ys[1],200)+14;cork.style.height=hh+'px';
+    his.forEach(function(x){x.style.height=(hh-58)+'px'});
+  }
+  function laneAt(cx){var r=cork.getBoundingClientRect();return (cx-r.left)>r.width/2?1:0}
+  /* ท่าลากที่แก้ตามรีวิว 4 ก.ย.: แตะเฉยๆ/ปัดขึ้นลง = สกรอลปกติ (touch-action:pan-y)
+     จะเป็น "ลาก" ก็ต่อเมื่อขยับแนวนอนชัดเจนก่อน · ยืนยันย้ายเมื่อปล่อยนิ้ว (pointerup) เกินระยะตั้งใจเท่านั้น
+     pointercancel (ระบบแย่ง gesture/สลับแอป) = คืนโน้ตที่เดิม ห้ามยิง API เด็ดขาด */
+  notes.forEach(function(nel){var sx=0,sy=0,down=false,dragging=false,decided=false;
+    function revert(){down=false;dragging=false;decided=false;nel.classList.remove('lift');nel.style.transform='';his.forEach(function(x){x.style.display='none'})}
+    nel.addEventListener('pointerdown',function(ev){if(ev.target&&ev.target.classList&&ev.target.classList.contains('nchk'))return;down=true;dragging=false;decided=false;sx=ev.clientX;sy=ev.clientY});
+    nel.addEventListener('pointermove',function(ev){if(!down)return;var dx=ev.clientX-sx,dy=ev.clientY-sy;
+      if(!decided){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;decided=true;
+        if(Math.abs(dy)>Math.abs(dx)){down=false;return} /* ตั้งใจสกรอล — ปล่อยให้เบราว์เซอร์จัดการ */
+        dragging=true;nel.classList.add('lift');try{nel.setPointerCapture(ev.pointerId)}catch(_e){}}
+      if(!dragging)return;ev.preventDefault();
+      nel.style.transform='translate('+dx+'px,'+dy+'px) rotate(3deg)';
+      var li=laneAt(ev.clientX);his.forEach(function(x,i3){x.style.display=(i3===li&&i3!==+nel.getAttribute('data-lane'))?'block':'none'})});
+    nel.addEventListener('pointerup',function(ev){if(!down&&!dragging){return}
+      var wasDrag=dragging,dx=Math.abs(ev.clientX-sx);revert();
+      if(!wasDrag)return;
+      var from=+nel.getAttribute('data-lane'),li=laneAt(ev.clientX);
+      /* ต้องข้ามช่องจริง + ระยะลากถึงขั้น "ตั้งใจ" (กันสะบัดนิ้วเฉียงแล้วปิดงานโดยไม่รู้ตัว) */
+      if(li!==from&&dx>Math.max(60,cork.clientWidth*0.22)){var id=nel.getAttribute('data-tid');
+        lanes[from].splice(lanes[from].indexOf(nel),1);lanes[li].push(nel);nel.setAttribute('data-lane',''+li);nel.classList.toggle('isdone',li===1);layout();
+        api('task.toggle',{id:id,done:li===1}).then(function(r){if(r&&r.ok===false){toast('สลับไม่สำเร็จ ลองอีกครั้งนะ'+pt());}else{toast(li===1?'เยี่ยม เสร็จอีกงาน! 🎉':'เปิดงานกลับมาแล้ว'+pt())}return reload()}).catch(function(_e){toast('สลับไม่สำเร็จ ลองอีกครั้งนะ'+pt());reload()});
+      }else{layout()}});
+    nel.addEventListener('pointercancel',function(_ev){revert();layout()});
+  });
+  layout();window.__bbLayout=layout;
+  if(!window.__bbRs){window.__bbRs=true;window.addEventListener('resize',function(){if(TAB==='board'&&window.__bbLayout)window.__bbLayout()});
+    /* Mali โหลดทีหลังทำความสูงโน้ตขยับ — ฟอนต์มาแล้วจัดเลย์เอาต์ซ้ำหนึ่งรอบ */
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(TAB==='board'&&window.__bbLayout)window.__bbLayout()})}
+}
+/* 📔 แพลนวัน — หน้าไดอารี่รายวันจากข้อมูลจริง: นัดวันนี้ + งานครบกำหนดวันนี้ + เช็กลิสต์งานค้าง */
+function vPlan(){
+  var today=todayBKK();
+  var rems=((DATA.reminders||[]).filter(function(r){return bkkYMD(r.remind_at)===today})).sort(function(a,b){return new Date(a.remind_at)-new Date(b.remind_at)});
+  var open=(DATA.tasks&&DATA.tasks.open)||[];
+  var dueT=open.filter(function(t){return t.due_date&&(''+t.due_date).slice(0,10)===today});
+  var rest=open.filter(function(t){return !(t.due_date&&(''+t.due_date).slice(0,10)===today)}).slice(0,8);
+  var doneT=((DATA.tasks&&DATA.tasks.done)||[]).filter(function(t){return t.done_at&&bkkYMD(t.done_at)===today}).length;
+  var dCapP=((DATA.tasks&&DATA.tasks.done)||[]).length>=15&&doneT>=15;
+  var h=wkTabs('plan');
+  h+='<div class="wksign woodg"><div class="hd2" style="font-size:17px;font-weight:700;color:#4E3520">แพลนวันนี้</div><div class="hd2" style="font-size:10px;color:#6E4E33">'+thToday()+'</div></div>';
+  h+='<div class="card"><div class="holes2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ct">'+icn("clock",16)+' ตารางวัน</div>';
+  if(!rems.length&&!dueT.length){h+='<div class="empty">วันนี้ตารางว่าง — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 10 โมงประชุม"</div>'}
+  for(var i=0;i<rems.length;i++){var r=rems[i];
+    h+='<div class="plrow"><span class="pltime">'+(r.all_day?'ทั้งวัน':ftime(r.remind_at))+'</span><div class="plblock"><div style="font-size:12.5px;font-weight:700">'+esc(r.text||r.reminder_text||'นัด')+'</div><div class="hd2" style="font-size:9px;color:#8A4560">'+(r.all_day?'นัดทั้งวัน · เลขาเตือนในแชต':'เลขาจะเตือนตามเวลาในแชต')+'</div></div></div>';}
+  for(var j=0;j<dueT.length;j++){var t2=dueT[j];
+    h+='<div class="plrow"><span class="pltime">วันนี้</span><div class="plblock" style="background:#FFF6D9;border-left-color:#E9B84B"><div style="font-size:12.5px;font-weight:700">'+esc(t2.task_text)+'</div><div class="hd2" style="font-size:9px;color:#9A7314">งานครบกำหนดวันนี้ · ติ๊กได้ในเช็กลิสต์ด้านล่าง</div></div></div>';}
+  h+='</div>';
+  h+='<div class="card"><div class="ct">'+icn("check",16)+' เช็กลิสต์วันนี้<span class="more">เหลือ '+open.length+' งาน</span></div>';
+  var cl=dueT.concat(rest).slice(0,8);
+  if(!cl.length){h+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
+  for(var k=0;k<cl.length;k++){var t3=cl[k];
+    h+='<div class="task"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t3.task_text)+'" onclick="tgTask(\''+t3.id+'\',true)"></button><div class="tx">'+esc(t3.task_text)+'</div></div>';}
+  if(open.length>cl.length){h+='<button type="button" class="gh" style="width:100%;text-align:center;background:none;border:0;font-family:inherit;cursor:pointer;margin:8px 0 2px;min-height:44px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+open.length+') ›</button>'}
+  h+='</div>';
+  var allP=doneT+open.length,pctP=allP?Math.round(doneT*100/allP):0;
+  h+='<div class="card"><div class="hd2" style="font-size:13px;font-weight:700;color:var(--brand-ink)">วันนี้เสร็จแล้ว '+doneT+(dCapP?'+':'')+' งาน'+(open.length?' · เหลืออีก '+open.length:' — เก่งมาก'+pt()+'!')+'</div><div style="width:100%;height:11px;border:1.8px solid #E8A0B8;border-radius:99px;margin-top:7px"><div style="width:'+pctP+'%;height:100%;background:#E8779B;border-radius:99px"></div></div></div>';
+  h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
+  return h;
 }
 
 /* ═══ 📅 วันนี้ / ถัดไป — รวมงานกับนัดไว้ที่เดียว แต่แยกความหมายให้ชัด ═══
