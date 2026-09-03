@@ -328,6 +328,13 @@ body.skin2{background:#F4E6DE}
 .skin2 .plb2{background:#E3EEF8;border-left-color:#8FA3BE}
 .skin2 .plb3{background:#FFF6D9;border-left-color:#E9B84B}
 .skin2 .bubble2{position:relative;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 12px;font-size:11.5px;font-weight:700;color:#8A4560;box-shadow:0 4px 10px rgba(120,60,80,.2);font-family:'Mali','Sukhumvit Set',sans-serif}
+/* แถบล่างแบบแท็บกระดาษ (ตามเดโม) — ล็อกโทเคนสว่างในสโคปเหมือนการ์ด กันโหมดมืดตัวหนังสือจม */
+.skin2 .nav{--ink:#26262E;--muted:#6F6F73;--brand-ink:#C92A5E;--surface:#FFFCF5;--line:#F0DCE4;background:#FFFCF5;border-top:1.5px dashed #E8D6C4;box-shadow:0 -4px 14px rgba(120,60,80,.1)}
+.skin2 .nav button{color:#A0968E;font-family:'Mali','Sukhumvit Set','Noto Sans Thai',sans-serif}
+.skin2 .nav button.on{color:#C4547E;background:#FBE9F0;border-radius:10px 10px 0 0;transform:translateY(-6px);box-shadow:0 -2px 6px rgba(120,60,80,.08)}
+.skin2 .polar2{position:relative;background:#fff;padding:6px 6px 5px;box-shadow:0 6px 14px rgba(120,60,80,.22);transform:rotate(-3deg)}
+.skin2 .polar2 i{position:absolute;width:48px;height:16px;left:50%;top:-7px;transform:translateX(-50%) rotate(-3deg);background:rgba(244,169,192,.6);border-left:1px dashed rgba(255,255,255,.8);border-right:1px dashed rgba(255,255,255,.8)}
+.skin2 .dream2{position:relative;border-radius:3px 8px 6px 4px;box-shadow:0 4px 8px rgba(120,60,80,.16);padding:9px 10px;font-size:11.5px;font-weight:700;color:#3A3A3C}
 @media (prefers-reduced-motion:reduce){.skin2 .note2{transition:none}}
 </style></head><body>
 <div id="app"><div class="ldr"><img src="img/p11-running.webp" alt=""><div class="ldrsh"></div><div class="ldrbar"><i></i></div><div class="ldrtx">เลขากำลังวิ่งไปเตรียมข้อมูลของบอส...</div></div></div>
@@ -599,7 +606,7 @@ async function boot(){
       if(secQ==="files"){setTimeout(function(){var el=document.getElementById("st_files");if(el){el.scrollIntoView({behavior:"smooth"})}},700)}
       /* 219: ปุ่ม "บันทึกใจวันนี้" ท้ายรายงานเย็น -> เปิดห้อง+เข้าเช็คใจเลย (openHealRoom รอ login เองถ้ายังไม่พร้อม) */
       if(secQ==="checkin"){setTimeout(function(){if(window.openHealRoom)openHealRoom("checkin")},900)}
-      if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier","board","plan"].indexOf(tb)>=0){TAB=tb}
+      if(tb&&["home","todo","money","story","heal","me","start","help","trash","dossier","board","plan","goal"].indexOf(tb)>=0){TAB=tb}
       /* ☑️ ?sel=1 จากการ์ดในแชต -> เปิดแท็บงานพร้อมโหมดติ๊กหลายรายการเลย */
       var sl=qp.get("sel");if(!sl){var lsS=qp.get("liff.state");if(lsS){sl=new URLSearchParams(lsS.charAt(0)==="?"?lsS.slice(1):lsS).get("sel")}}
       if(sl==="1"&&TAB==="todo"){TSEL=new Set()}
@@ -643,11 +650,11 @@ async function boot(){
 function draw(){
   var _y=window.scrollY||document.documentElement.scrollTop||0;
   if(TAB==="dossier"&&!(DATA&&DATA.newux))TAB="me"; /* 🆕 คนเก่ายังไม่มีแฟ้ม เปิดลิงก์ตรงๆ ให้ตกกลับหน้าโปรไฟล์ */
-  if(!SKIN2&&(TAB==="board"||TAB==="plan"))TAB="home"; /* 🏠 ปิดสวิตช์โฉมใหม่ = ลิงก์ board/plan ตกกลับหน้าแรก (กันหน้าไร้ CSS ที่ยังกดปิดงานจริงได้) */
+  if(!SKIN2&&(TAB==="board"||TAB==="plan"||TAB==="goal"))TAB="home"; /* 🏠 ปิดสวิตช์โฉมใหม่ = ลิงก์แท็บใหม่ตกกลับหน้าแรก (กันหน้าไร้ CSS ที่ยังกดปิดงานจริงได้) */
   if(TAB==="start"){$("#app").innerHTML=vStart();wzPersist()}
   else{
     var v=TAB==="home"?vHome():TAB==="todo"?vTodo():TAB==="money"?vMoney():TAB==="story"?vStory():TAB==="heal"?vHeal()
-      :TAB==="help"?vHelp():TAB==="trash"?vTrash():TAB==="dossier"?vDossier():TAB==="board"?vBoard():TAB==="plan"?vPlan():vMe();
+      :TAB==="help"?vHelp():TAB==="trash"?vTrash():TAB==="dossier"?vDossier():TAB==="board"?vBoard():TAB==="plan"?vPlan():TAB==="goal"?vGoal():vMe();
     $("#app").innerHTML=v+nav();
   }
   if(TAB==="board"&&window.bindBoard)bindBoard(); /* 🏠 บอร์ดโพสต์อิทต้องจัดเลย์เอาต์+ผูกลากหลัง innerHTML ทุกครั้ง */
@@ -657,14 +664,14 @@ function nav(){
   // help/trash/dossier เข้าจากลิงก์ในแชต + ปุ่มในหน้าโปรไฟล์ (ไม่กินช่องแถบล่าง — 6 ช่องเต็มแล้ว)
   // แท็บที่ไม่มีในแถบ ให้ไฮไลต์ "โปรไฟล์" ไว้ คนจะได้ไม่งงว่าตัวเองหลุดไปอยู่ไหน
   var it=[["home",icn("home",21),"หน้าหลัก"],["todo",icn("check",21),"วันนี้+งาน"],["money",icn("banknote",21),"เงิน"],["story",icn("book",21),"เรื่องราว"],["heal",icn("heart",21),"ฮีลใจ"],["me",icn("user",21),"โปรไฟล์"]];
-  var cur=(TAB==="help"||TAB==="trash"||TAB==="dossier")?"me":(TAB==="board"||TAB==="plan")?"todo":TAB;
+  var cur=(TAB==="help"||TAB==="trash"||TAB==="dossier")?"me":(TAB==="board"||TAB==="plan"||TAB==="goal")?"todo":TAB;
   // role=tablist + aria-selected: เดิมทั้งหน้าไม่มี aria สักตัว screen reader อ่านเป็นปุ่มลอยๆ 6 ปุ่ม ไม่รู้ว่าอยู่แท็บไหน
   var h='<nav class="nav" role="tablist" aria-label="เมนูหลัก">';
   for(var i=0;i<it.length;i++){var on=cur===it[i][0];
     h+='<button role="tab" type="button" aria-selected="'+(on?"true":"false")+'" class="'+(on?"on":"")+'" onclick="go(\''+it[i][0]+'\')"><span class="ne" aria-hidden="true">'+it[i][1]+'</span>'+it[i][2]+'</button>'}
   return h+'</nav>';
 }
-function go(t){if(TAB==="start"&&t!=="start")wzClear();TAB=t;MSEL=null;TSEL=null;draw();window.scrollTo(0,0);if(t==="story")ensureStory();if(t==="help")ensureHelp();if(t==="trash")ensureTrash()}
+function go(t){if(TAB==="start"&&t!=="start")wzClear();TAB=t;MSEL=null;TSEL=null;draw();window.scrollTo(0,0);if(t==="story"||t==="goal")ensureStory();if(t==="help")ensureHelp();if(t==="trash")ensureTrash()}
 /* 📖 โหลดเนื้อหาแท็บเรื่องราวตอนกดครั้งแรก — me.get ส่งมาแค่จำนวน หน้าแรกจะได้เปิดเร็ว (แก้ 25 ก.ค. รอบ 2) */
 async function ensureStory(){
   var s=DATA.story||{};
@@ -674,7 +681,7 @@ async function ensureStory(){
     var r=await api("me.story");
     DATA.story={facts:r.facts||[],files:r.files||[],folders:r.folders||[],nFacts:(r.facts||[]).length,nFiles:(r.files||[]).length,loaded:true};
   }catch(e){if(DATA.story)DATA.story.loaded=false}  /* พลาด = กดเข้าใหม่แล้วลองอีกได้ */
-  if(TAB==="story")draw();
+  if(TAB==="story"||TAB==="goal")draw();
 }
 function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
 
@@ -1185,7 +1192,7 @@ function vHome(){
   if(openT.length>lim){taskCard+='<button type="button" class="gh" style="width:100%;text-align:center;background:none;border:0;font-family:inherit;cursor:pointer;margin:8px 0 2px;min-height:44px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</button>'}
   taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div>'+(SKIN2?'<button type="button" class="btn" style="display:block;margin:12px auto 2px;width:auto;font-family:Mali,\'Sukhumvit Set\',sans-serif" onclick="go(\'board\')">เปิดบอร์ดงาน — ลากโพสต์อิทจัดสถานะ ›</button>':'')+'</div>';
   var sel=SELISO||today;
-  var calCard='<div class="card">'+(SKIN2?'<div class="holes2" style="padding-top:2px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>':'')+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
+  var calCard='<div class="card">'+(SKIN2?'<div class="holes2" style="padding-top:2px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>':'')+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+(SKIN2?'<div class="hd2" style="display:flex;align-items:center;gap:6px;margin-top:9px;font-size:10px;color:#A0968E"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C4547E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 9 a6 6 0 0 0 -12 0 c0 6 -2.5 7.5 -2.5 7.5 h17 c0 0 -2.5 -1.5 -2.5 -7.5 M10 20.5 a2 2 0 0 0 4 0"/></svg>ถึงเวลานัด บอสซี่เด้งเตือนในแชต LINE ให้เอง · เตือนซ้ำจนกว่าจะกดรับ</div>':'')+'</div>';
   var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<button type="button" class="more" style="background:none;border:0;font-family:inherit;cursor:pointer;min-height:32px" onclick="go(\'money\')">ดูทั้งหมด ›</button></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
     +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
     +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
@@ -1248,7 +1255,36 @@ function roomHero(nm,planLb,founder,nAppt,nOpen,nFacts,nFiles){
 }
 function wkTabs(cur){
   function tb(k,lb){return '<button type="button" class="wktab'+(cur===k?' on':'')+'" onclick="go(\''+k+'\')">'+lb+'</button>'}
-  return '<div class="wktabs">'+tb('todo','รายการงาน')+tb('board','บอร์ด')+tb('plan','แพลนวัน')+'</div>';
+  return '<div class="wktabs">'+tb('todo','รายการ')+tb('board','บอร์ด')+tb('plan','แพลนวัน')+tb('goal','เป้าหมาย')+'</div>';
+}
+/* 🎯 วิชั่นบอร์ด "เป้าหมาย" — ทุกช่องมาจากข้อมูลจริงเท่านั้น (เงินเดือนนี้จาก me.get · งานเสร็จจาก done ล่าสุด ·
+   ความฝัน/สิ่งที่ชอบ = ความจำ fact_type=preference ที่เลขาจำจากแชต) — ไม่มีตัวเลขหลอกแม้แต่ช่องเดียว */
+function vGoal(){
+  var mth=(DATA.money&&DATA.money.month)||{},inc=mth.income||0,exp=mth.expense||0;
+  var today=todayBKK(),mm=today.slice(0,7);
+  var doneM=((DATA.tasks&&DATA.tasks.done)||[]).filter(function(t){return t.done_at&&bkkYMD(t.done_at).slice(0,7)===mm}).length;
+  var dCapG=((DATA.tasks&&DATA.tasks.done)||[]).length>=15;
+  var st=DATA.story||{},facts=(st.facts||[]).filter(function(f){return f.fact_type==="preference"}).slice(0,4);
+  var pctG=inc>0?Math.min(100,Math.round(exp*100/inc)):0;
+  var h=wkTabs('goal');
+  h+='<div style="text-align:center;margin:2px 0 10px"><span class="hd2" style="display:inline-block;background:rgba(244,169,192,.88);color:#7A2844;font-size:13.5px;font-weight:700;padding:6px 18px;border-left:2px dashed rgba(255,255,255,.85);border-right:2px dashed rgba(255,255,255,.85);transform:rotate(-1.2deg);box-shadow:0 3px 8px rgba(120,60,80,.18)">วิชั่นบอร์ดของบอส</span></div>';
+  h+='<div class="cork2" style="padding:16px 14px 14px;min-height:430px">';
+  h+='<div class="card torn2" style="position:relative;padding:24px 15px 13px;margin:0 6px"><svg width="26" height="30" viewBox="0 0 30 34" style="position:absolute;top:4px;left:50%;margin-left:-13px" aria-hidden="true"><ellipse cx="15" cy="24" rx="3" ry="7" fill="#8A3448"/><circle cx="15" cy="11" r="9" fill="#E0466E"/><circle cx="11.5" cy="8" r="3" fill="#F4A9C0"/></svg>'
+    +'<div class="hd2" style="text-align:center;font-size:13px;font-weight:700;color:#8A4560">เป้าเดือนนี้ · คุมรายจ่ายไม่เกินรายรับ</div>'
+    +(inc>0?'<div class="hd2" style="text-align:center;font-size:19px;font-weight:700;color:var(--brand-ink);margin-top:2px">ใช้ไป ฿'+num(exp)+' จากรายรับ ฿'+num(inc)+'</div><div style="width:86%;height:10px;border:1.6px solid #E8A0B8;border-radius:99px;margin:7px auto 0"><div style="width:'+pctG+'%;height:100%;background:'+(pctG>=90?'#C62828':'#E8779B')+';border-radius:99px"></div></div><div class="hd2" style="text-align:center;font-size:10px;color:#A0968E;margin-top:3px">'+(pctG>=100?'เกินรายรับแล้ว'+pt()+' ลองดูหมวดที่บวมในแท็บเงินนะ':'ไปแล้ว '+pctG+'% ของรายรับเดือนนี้')+'</div>'
+      :'<div class="hd2" style="text-align:center;font-size:12px;color:#6E6E73;margin-top:4px">เดือนนี้ยังไม่มีรายรับในสมุด — จดรายรับแรกในแชตหรือแท็บเงินได้เลย'+pt()+'</div>')
+    +'<button type="button" class="btn ghost" style="display:block;margin:10px auto 0;font-family:Mali,\'Sukhumvit Set\',sans-serif" onclick="go(\'money\')">ตั้งงบ/ดูรายละเอียดในแท็บเงิน ›</button></div>';
+  h+='<div style="display:flex;gap:12px;margin:16px 4px 0;align-items:flex-start">'
+    +'<div class="polar2" style="flex:none"><i></i><img src="img/p04-cheer-jump.webp" alt="" style="width:86px;display:block;background:#FBE9F0" onerror="this.remove()"><div class="hd2" style="font-size:9.5px;text-align:center;color:#8A4560;margin-top:3px">เดือนนี้เสร็จแล้ว '+doneM+(dCapG?'+':'')+' งาน</div></div>'
+    +'<div style="flex:1;display:flex;flex-direction:column;gap:9px">';
+  if(facts.length){for(var i=0;i<facts.length;i++){h+='<div class="dream2" style="background:'+(i%2?'#FFF6D9':'#FDE7EF')+';transform:rotate('+(i%2?'1.2':'-1.2')+'deg)"><span class="pin2" style="background:'+(i%2?'#E9B84B':'#E8779B')+'"></span>'+esc(String(facts[i].fact_text||'').slice(0,70))+'</div>'}}
+  else{h+='<div class="dream2" style="background:#FFF6D9;transform:rotate(1deg)"><span class="pin2" style="background:#E9B84B"></span><span class="hd2" style="font-weight:700;color:#8A6A2E">บอร์ดยังว่าง — เล่าความฝัน/สิ่งที่อยากได้ให้บอสซี่ฟังในแชต เดี๋ยวหนูจำแล้วเอามาปักไว้ให้'+pt()+'</span></div>'}
+  h+='</div></div>';
+  h+='<div class="hd2" style="margin:16px auto 0;width:fit-content;background:#FFFCF5;border-radius:3px;padding:8px 14px;box-shadow:0 4px 9px rgba(120,60,80,.16);transform:rotate(1deg);font-size:13px;font-weight:700;color:#C4547E">ทำวันนี้ให้ดีที่สุด <svg width="13" height="13" viewBox="0 0 24 24" style="vertical-align:-2px" aria-hidden="true"><path d="M12 3 c1.5 3.5, 4 5, 8 5 c-3 2.5, -3.8 5, -3 9 c-3-1.5-6-1.5-9 0 c.8-4, 0-6.5-3-9 c4 0, 5.5-1.5, 7-5 z" fill="#F4A9C0"/></svg></div>';
+  h+='</div>';
+  h+='<span class="hintpill2">✦ เป้าใหญ่อยู่บน ความฝันที่เลขาจำได้ปักรอบ ๆ</span>';
+  h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
+  return h;
 }
 /* 🗂️ บอร์ดโพสต์อิท 2 ช่อง ตามสถานะจริงของระบบ (เปิด/ปิด ผ่าน task.toggle ตาม id เท่านั้น)
    "กำลังทำ" ยังไม่มีใน backend (lifecycle_status ว่างทั้งตาราง) — ห้ามโชว์ช่องหลอก ไว้เฟสต่อไป */
@@ -1269,6 +1305,7 @@ function vBoard(){
     h+='<div class="note2" data-tid="'+t.id+'" data-lane="0" style="--rot:'+rots[i%8]+'deg;background:'+(late?'#FDE7EF':(i%2?'#FFF6D9':'#FDF1E3'))+'"><span class="pin2" style="background:'+pc+'"></span><div class="nt">'+esc(t.task_text)+'</div>'+sub+'<button type="button" class="nchk" aria-label="ทำเสร็จแล้ว" onclick="tgTask(\''+t.id+'\',true)">✓</button></div>';}
   for(var j=0;j<showD.length;j++){var d=showD[j];
     h+='<div class="note2 isdone" data-tid="'+d.id+'" data-lane="1" style="--rot:'+rots[(j+3)%8]+'deg;background:#FFFCF5"><span class="pin2" style="background:#B9AEB6"></span><div class="nt">'+esc(d.task_text)+'</div><button type="button" class="nchk" aria-label="เอากลับมาทำใหม่" onclick="tgTask(\''+d.id+'\',false)">↩</button></div>';}
+  h+='<div class="hd2" style="position:absolute;left:14px;bottom:12px;font-size:10.5px;color:#7A5230;transform:rotate(-1deg)">งานเลยกำหนด = หมุดแดง</div>';
   h+='</div>';
   h+='<div style="display:flex;align-items:flex-end;gap:4px;margin-top:8px"><img src="img/p04-cheer-jump.webp" alt="" style="width:88px;filter:drop-shadow(0 5px 8px rgba(120,60,80,.25))" onerror="this.remove()"><div class="bubble2" style="margin-bottom:16px">'+(open.length?'ลากไปช่อง "เสร็จแล้ว" ได้เลย'+pt()+'!':'เคลียร์หมดแล้ว เก่งมาก'+pt()+'!')+'</div></div>';
   if(open.length>showO.length||doneA.length>showD.length){h+='<div class="foot" style="margin-top:4px">บอร์ดโชว์ค้าง '+showO.length+'/'+open.length+' · เสร็จล่าสุด '+showD.length+' ใบ — ครบทุกงานอยู่ในแท็บ "รายการงาน"</div>'}
@@ -1286,8 +1323,8 @@ function bindBoard(){
   var his=[0,1].map(function(i2){var dv=document.createElement('div');dv.className='lanehi2';dv.style.left=(i2*50+2)+'%';dv.style.width='46%';dv.style.top='42px';cork.appendChild(dv);return dv});
   function layout(){var W=cork.clientWidth;if(!W)return;var laneW=W/2;var ys=[46,46];
     lanes.forEach(function(arr,li){arr.forEach(function(n){n.style.width=Math.round(laneW-20)+'px';n.style.left=Math.round(li*laneW+10)+'px';n.style.top=ys[li]+'px';ys[li]+=n.offsetHeight+12})});
-    var hh=Math.max(ys[0],ys[1],200)+14;cork.style.height=hh+'px';
-    his.forEach(function(x){x.style.height=(hh-58)+'px'});
+    var hh=Math.max(ys[0],ys[1],200)+36;cork.style.height=hh+'px'; /* +36 เผื่อป้ายชอล์กล่างบอร์ด */
+    his.forEach(function(x){x.style.height=(hh-80)+'px'});
   }
   function laneAt(cx){var r=cork.getBoundingClientRect();return (cx-r.left)>r.width/2?1:0}
   /* ท่าลากที่แก้ตามรีวิว 4 ก.ย.: แตะเฉยๆ/ปัดขึ้นลง = สกรอลปกติ (touch-action:pan-y)
@@ -1347,6 +1384,7 @@ function vPlan(){
   h+='</div>';
   var allP=doneT+open.length,pctP=allP?Math.round(doneT*100/allP):0;
   h+='<div class="card"><div class="hd2" style="font-size:13px;font-weight:700;color:var(--brand-ink)">วันนี้เสร็จแล้ว '+doneT+(dCapP?'+':'')+' งาน'+(open.length?' · เหลืออีก '+open.length:' — เก่งมาก'+pt()+'!')+'</div><div style="width:100%;height:11px;border:1.8px solid #E8A0B8;border-radius:99px;margin-top:7px"><div style="width:'+pctP+'%;height:100%;background:#E8779B;border-radius:99px"></div></div></div>';
+  h+='<span class="hintpill2">✦ หน้าไดอารี่รายวัน · ติ๊กในเช็กลิสต์ได้เลย</span>';
   h+='<div class="foot">🔒 ข้อมูลนี้เห็นได้เฉพาะคุณเท่านั้น</div>';
   return h;
 }
@@ -1787,6 +1825,7 @@ function vStory(){
   }
   var facts=s.facts||[],files=s.files||[],folders=s.folders||[];
   var h='<h1>'+icn("book",22)+' เรื่องราวของบอส</h1><div class="sub">ทุกอย่างที่เลขาจดจำไว้ให้ · เห็นเฉพาะคุณ 🔒</div>';
+  if(SKIN2){h+='<div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;background:#FFFCF5;border-radius:999px;padding:11px 15px;box-shadow:0 4px 9px rgba(120,60,80,.12)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4547E" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 L21 21"/></svg><span class="hd2" style="font-size:12px;color:#B9AEB6">หาความจำ/ไฟล์ — พิมพ์ในแชตได้เลย เช่น "หาไฟล์ใบเสนอราคา"</span></div>'}
   if(facts.length||files.length){h+='<div class="gh">🧠 เลขาจำไว้ '+facts.length+' เรื่อง'+(files.length?' · 📁 '+files.length+' ไฟล์':'')+' — ยิ่งเล่า ยิ่งจำ ยิ่งดูแลถูกจุด 💗</div>'}
   /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
   var pf=DATA.profile||{};
@@ -2451,6 +2490,15 @@ function vMe(){
   var pr=DATA.profile||{};
   var pct=Number(DATA.profile_pct||0);
   var h='<h1>โปรไฟล์ & เลขา</h1>';
+  if(SKIN2){
+    /* 🖼️ หัวโพลารอยด์แบบเดโม — วันนับจากวันลงทะเบียนจริง (onboarded_at) ไม่มีเลขปั้น */
+    var _ob=pr.onboarded_at?Math.max(1,Math.floor((Date.now()-new Date(pr.onboarded_at).getTime())/86400000)+1):0;
+    h+='<div style="display:flex;align-items:center;gap:14px;margin:14px 2px 4px">'
+      +'<div class="polar2" style="flex:none"><i></i><img src="img/p01-clipboard-hello.webp" alt="" style="width:72px;display:block;background:#FBE9F0" onerror="this.remove()"></div>'
+      +'<div><div style="display:flex;align-items:center;gap:8px"><span class="hd2" style="font-size:19px;font-weight:700">'+(pr.display_name?'คุณ'+esc(pr.display_name):'บอส')+'</span></div>'
+      +(_ob?'<div class="hd2" style="font-size:11.5px;color:#8A4560;margin-top:2px">อยู่กับเลขามาแล้ว <b>'+_ob+' วัน</b></div>':'')
+      +'<svg width="110" height="7" viewBox="0 0 110 7" style="margin-top:3px" aria-hidden="true"><path d="M2 4 C 28 1, 64 6, 108 3" fill="none" stroke="#E8779B" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>';
+  }
   /* 📁 ทางเข้าแฟ้มเจ้านาย — วางบนสุดของหน้าโปรไฟล์ (ที่เดียวที่คนเข้ามาหา "ตั้งค่าตัวเอง") */
   /* 🆕 ทางเข้าแฟ้ม — ลูกค้าเก่ายังไม่เห็น จนกว่าจะถึงวันเปิดให้ทุกคน (ศุกร์ 7 ส.ค.) */
   if(DATA.newux){
