@@ -297,6 +297,37 @@ body.skin2{background:#F4E6DE}
 .skin2 .plblock{flex:1;position:relative;border-radius:4px 9px 8px 4px;padding:8px 11px;box-shadow:0 3px 7px rgba(120,60,80,.12);background:#FDE7EF;border-left:3px solid #E8779B;color:#3A3A3C} /* พื้นชมพูสว่างตายตัว → ตัวหนังสือต้องตายตัวด้วย ห้าม inherit โทเคนมืด */
 .skin2 .holes2{display:flex;justify-content:space-around;padding:0 26px 7px}
 .skin2 .holes2 i{width:11px;height:11px;border-radius:50%;background:var(--bg);box-shadow:0 1.5px 2px rgba(120,60,80,.35) inset}
+/* ── รอบเก็บผิว 4 ก.ย. (บอส: "ทำให้เหมือนเดโม") — การ์ดทุกใบ=กระดาษ, หัวข้อ=ป้ายวอชิ, ปฏิทิน=วงปากกา ──
+   เคล็ดสำคัญ: การ์ดกระดาษถูกล็อกสว่างเสมอ → ต้องล็อก "โทเคนทั้งชุด" ในสโคปการ์ดด้วย ไม่งั้นโหมดมืดตัวหนังสือหาย */
+.skin2 .card,.skin2 .c,.skin2 .st{
+  --bg:#FAF3F6;--surface:#FFFCF5;--line:#F0DCE4;--line2:#F3E3EA;--ink:#26262E;--ink-strong:#23232B;--muted:#6F6F78;
+  --brand:#ED6885;--brand-ink:#C92A5E;--brand-soft:#FCE0EA;--brand-line:#F0C9D8;--field:#FBF6F8;
+  --pos:#177E37;--neg:#C62828;--pill-bg:#F6E9EE;--shadow:rgba(120,60,80,.12);--paper1:#F2E0D6;--paper2:#E9D2C6;
+  background:#FFFCF5;color:var(--ink)}
+.skin2 .card{border-radius:8px;box-shadow:0 3px 0 rgba(120,60,80,.06),0 8px 16px rgba(120,60,80,.13)}
+.skin2 h1{display:inline-block;font-size:17px;background:rgba(244,169,192,.88);color:#7A2844;padding:8px 20px;border-left:2px dashed rgba(255,255,255,.85);border-right:2px dashed rgba(255,255,255,.85);transform:rotate(-1.2deg);box-shadow:0 3px 8px rgba(120,60,80,.18);letter-spacing:0;border-radius:2px}
+.skin2 .sub{margin-top:9px}
+.skin2 .ct{font-size:16.5px}
+.skin2 .rowitem{background:#FBF3E8;border-radius:3px;border:0;border-bottom:1.5px dashed #E8D6C4;margin-bottom:7px;padding:10px 11px}
+.skin2 .task{background:#FBF3E8;border-radius:3px;border-bottom:1.5px dashed #E8D6C4;margin-top:7px;padding:6px 9px}
+.skin2 .badge{border-radius:3px;transform:rotate(-1.2deg);font-family:'Mali','Sukhumvit Set',sans-serif;font-weight:700}
+.skin2 .btn{background:#C4547E;border-radius:999px;box-shadow:0 5px 12px rgba(196,84,126,.35);border:0}
+.skin2 .btn.ghost{background:#fff;color:#C4547E;border:1.5px solid #F0C9D8;box-shadow:0 3px 8px rgba(196,84,126,.14)}
+.skin2 .seg{background:transparent;gap:8px;border:0}
+.skin2 .seg button{background:#fff;border:1.5px solid #F0C9D8;border-radius:999px;color:#8A4560;font-weight:700}
+.skin2 .seg button.on{background:#C4547E;border-color:#C4547E;color:#FFF6EE}
+.skin2 .cal .d.today{background:none;border:2.2px solid #C92A5E;border-radius:52% 46% 55% 47%/49% 54% 45% 53%;color:#C92A5E;font-weight:800} /* วงปากกาล้อมวันนี้ (ขอบเบี้ยวแบบมือวาด) */
+.skin2 .cal .d.sel{background:#FBE9F0}
+.skin2 .calhead{font-family:'Mali','Sukhumvit Set',sans-serif;font-weight:700}
+.skin2 .plan{border-radius:999px}
+.skin2 .foot{font-family:'Mali','Sukhumvit Set',sans-serif}
+.skin2 .gh{font-family:'Mali','Sukhumvit Set',sans-serif;color:#8A4560}
+.skin2 .don .leg b{font-family:inherit}
+.skin2 input,.skin2 select,.skin2 textarea{border-radius:12px}
+.skin2 .plb1{background:#FDE7EF;border-left-color:#E8779B}
+.skin2 .plb2{background:#E3EEF8;border-left-color:#8FA3BE}
+.skin2 .plb3{background:#FFF6D9;border-left-color:#E9B84B}
+.skin2 .bubble2{position:relative;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 12px;font-size:11.5px;font-weight:700;color:#8A4560;box-shadow:0 4px 10px rgba(120,60,80,.2);font-family:'Mali','Sukhumvit Set',sans-serif}
 @media (prefers-reduced-motion:reduce){.skin2 .note2{transition:none}}
 </style></head><body>
 <div id="app"><div class="ldr"><img src="img/p11-running.webp" alt=""><div class="ldrsh"></div><div class="ldrbar"><i></i></div><div class="ldrtx">เลขากำลังวิ่งไปเตรียมข้อมูลของบอส...</div></div></div>
@@ -1144,15 +1175,17 @@ function vHome(){
   }
   if(lastMood&&lastMood.is_safety){h+=safetyCard()}
   /* ลำดับตามบอสสั่ง 2026-07-04: งานที่ต้องทำ -> ปฏิทิน -> รายรับรายจ่าย */
-  var taskCard='<div class="card"><div class="ct">'+icn("check",16)+' งานที่ต้องทำ<span class="more">เหลือ '+openT.length+' งาน</span></div>';
+  var taskCard='<div class="card'+(SKIN2?' torn2':'')+'"'+(SKIN2?' style="padding-top:26px;position:relative;overflow:visible"':'')+'>'
+    +(SKIN2?'<svg width="26" height="30" viewBox="0 0 30 34" style="position:absolute;top:5px;left:50%;margin-left:-13px" aria-hidden="true"><ellipse cx="15" cy="24" rx="3" ry="7" fill="#8A3448"/><circle cx="15" cy="11" r="9" fill="#E0466E"/><circle cx="11.5" cy="8" r="3" fill="#F4A9C0"/></svg>':'')
+    +'<div class="ct">'+icn("check",16)+' งานที่ต้องทำ<span class="more"'+(SKIN2?' style="color:#E0466E;font-family:Mali,\'Sukhumvit Set\',sans-serif;font-weight:700"':'')+'>เหลือ '+openT.length+' งาน</span></div>';
   if(!openT.length){taskCard+='<div class="empty">ไม่มีงานค้าง เยี่ยมไปเลย 🎉</div>'}
   var lim=Math.min(openT.length,6);
   for(var i=0;i<lim;i++){var t=openT[i];var due=t.due_date?(""+t.due_date).slice(0,10):"";var bd=due&&due<today?'<span class="badge b-late">เลยกำหนด</span>':(due===today?'<span class="badge b-todo">วันนี้</span>':'');
     taskCard+='<div class="task"><button class="chk" aria-label="ทำเสร็จแล้ว: '+esc(t.task_text)+'" onclick="tgTask(\''+t.id+'\',true)"></button><div class="tx">'+esc(t.task_text)+'</div>'+bd+'</div>';}
   if(openT.length>lim){taskCard+='<button type="button" class="gh" style="width:100%;text-align:center;background:none;border:0;font-family:inherit;cursor:pointer;margin:8px 0 2px;min-height:44px" onclick="go(\'todo\')">ดูงานทั้งหมด ('+openT.length+') ›</button>'}
-  taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div>'+(SKIN2?'<button type="button" class="btn ghost" style="width:100%;margin-top:9px" onclick="go(\'board\')">เปิดบอร์ดงาน — ลากโพสต์อิทจัดสถานะได้ ›</button>':'')+'</div>';
+  taskCard+='<div class="task"><input id="htask" placeholder="เพิ่มงานใหม่..." style="margin:0"><button class="btn sm" onclick="addTaskH()">เพิ่ม</button></div>'+(SKIN2?'<button type="button" class="btn" style="display:block;margin:12px auto 2px;width:auto;font-family:Mali,\'Sukhumvit Set\',sans-serif" onclick="go(\'board\')">เปิดบอร์ดงาน — ลากโพสต์อิทจัดสถานะ ›</button>':'')+'</div>';
   var sel=SELISO||today;
-  var calCard='<div class="card">'+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
+  var calCard='<div class="card">'+(SKIN2?'<div class="holes2" style="padding-top:2px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>':'')+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+'</div>';
   var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<button type="button" class="more" style="background:none;border:0;font-family:inherit;cursor:pointer;min-height:32px" onclick="go(\'money\')">ดูทั้งหมด ›</button></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
     +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
     +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
@@ -1201,7 +1234,10 @@ function roomHero(nm,planLb,founder,nAppt,nOpen,nFacts,nFiles){
   h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดห้องพักใจ" onclick="go(\'heal\')" width="40" height="46" viewBox="0 0 34 40" style="position:absolute;left:98px;top:204px;z-index:3;padding:2px"><rect x="2" y="2" width="30" height="36" rx="4" fill="#C99A66" stroke="#A87A4F" stroke-width="2"/><rect x="7" y="7" width="20" height="26" rx="2" fill="#FFF6EE"/><path d="M17 27 C 12.5 23.5, 11.5 20.8, 13 19 C 14.3 17.6, 16.2 18, 17 19.5 c .8-1.5 2.7-1.9 4-.5 C 22.5 20.8, 21.5 23.5, 17 27 z" fill="#E8779B"/></svg>';
   h+='<button type="button" class="tip2 hd2" onclick="go(\'money\')" style="left:16px;top:164px">กระเป๋าเงิน</button>';
   h+='<div style="position:absolute;left:0;right:0;top:376px;height:20px;background:linear-gradient(180deg,#D9AC78 0%,#C99A66 40%);box-shadow:0 6px 12px rgba(120,60,80,.22);z-index:4"></div>';
-  h+='<div class="woodg" style="position:absolute;left:10px;right:10px;top:396px;height:76px;background:#B9895C;border-radius:0 0 10px 10px;z-index:3"><div style="position:absolute;left:16px;top:12px;width:110px;height:34px;background:#A87A4F;border-radius:8px"><span style="position:absolute;left:50%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#6E4E33"></span></div><div class="hd2" style="position:absolute;right:20px;top:14px;background:#E8779B;color:#FFF6EE;font-size:10.5px;font-weight:700;border-radius:8px;padding:3px 11px;transform:rotate(-2deg)">YES, BOSS!</div></div>';
+  h+='<div class="woodg" style="position:absolute;left:10px;right:10px;top:396px;height:76px;background:#B9895C;border-radius:0 0 10px 10px;z-index:3"><div style="position:absolute;left:16px;top:12px;width:110px;height:34px;background:#A87A4F;border-radius:8px"><span style="position:absolute;left:50%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#6E4E33"></span></div><div class="hd2" style="position:absolute;right:20px;top:14px;background:#E8779B;color:#FFF6EE;font-size:10.5px;font-weight:700;border-radius:8px;padding:3px 11px;transform:rotate(-2deg)">YES, BOSS!</div><svg width="22" height="20" viewBox="0 0 24 24" style="position:absolute;right:88px;top:44px;transform:rotate(8deg)" aria-hidden="true"><path d="M12 20 C 5.5 15.5, 4 11.5, 6.3 9 C 8.2 7, 10.8 7.5, 12 9.6 c 1.2-2.1 3.8-2.6 5.7-.6 C 20 11.5, 18.5 15.5, 12 20 z" fill="#F4A9C0"/></svg></div>';
+  h+='<svg width="26" height="26" viewBox="0 0 30 30" style="position:absolute;left:50%;margin-left:74px;top:356px;z-index:6" aria-hidden="true"><path d="M6 3 c1.5 2, 1.5 4, 0 6 M12 1.5 c1.5 2, 1.5 4, 0 6" stroke="#B9AEB6" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".8"/><rect x="3" y="11" width="17" height="16" rx="3.5" fill="#E8779B"/><path d="M20 14 h3.5 a3.5 3.5 0 0 1 0 8 H20" fill="none" stroke="#C4547E" stroke-width="2.6"/></svg>';
+  h+='<svg width="16" height="16" viewBox="0 0 20 20" style="position:absolute;left:96px;top:298px;z-index:6" aria-hidden="true"><path d="M10 1 L12 8 L19 10 L12 12 L10 19 L8 12 L1 10 L8 8 Z" fill="#F4C84B"/></svg>';
+  h+='<svg width="12" height="12" viewBox="0 0 20 20" style="position:absolute;right:100px;top:296px;z-index:6" aria-hidden="true"><path d="M10 1 L12 8 L19 10 L12 12 L10 19 L8 12 L1 10 L8 8 Z" fill="#F4A9C0"/></svg>';
   h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดคลังความจำและไฟล์" onclick="go(\'story\')" width="92" height="70" viewBox="0 0 100 74" style="position:absolute;left:8px;top:312px;z-index:5"><rect x="6" y="58" width="88" height="12" rx="3" fill="#F3E3D0" stroke="#DCC5A6" stroke-width="1.5"/><rect x="10" y="44" width="80" height="14" rx="3" fill="#FFF6EE" stroke="#DCC5A6" stroke-width="1.5"/><rect x="8" y="12" width="84" height="32" rx="6" fill="#E8779B"/><rect x="8" y="12" width="12" height="32" rx="4" fill="#C4547E"/><rect x="70" y="12" width="8" height="46" rx="2" fill="#F0A868"/><path d="M70 58 h8 l-4 -6 z" fill="#D98D4A"/><text x="48" y="33" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF6EE">ไดอารี่</text></svg>';
   h+='<img src="img/p07-desk-work.webp" alt="" style="position:absolute;left:50%;margin-left:-72px;top:252px;width:140px;z-index:5;filter:drop-shadow(0 6px 8px rgba(120,60,80,.25));pointer-events:none" onerror="this.remove()">';
   h+='<svg class="hotspot" role="button" tabindex="0" aria-label="เปิดบอร์ดงาน" onclick="go(\'board\')" width="82" height="66" viewBox="0 0 86 70" style="position:absolute;right:12px;top:316px;z-index:5"><path d="M10 66 h66 l-6 -34 h-54 z" fill="#A87A4F"/><rect x="16" y="14" width="54" height="46" rx="3" fill="#8FA3BE" transform="rotate(-4 43 37)"/><rect x="18" y="10" width="54" height="50" rx="3" fill="#F3E3D0" transform="rotate(-1 45 35)"/><rect x="20" y="6" width="54" height="54" rx="3" fill="#F0A868"/><rect x="20" y="6" width="20" height="9" rx="3" fill="#D98D4A"/><text x="47" y="38" text-anchor="middle" font-size="11" font-weight="700" fill="#7A4A1E">งาน</text></svg>';
@@ -1234,7 +1270,8 @@ function vBoard(){
   for(var j=0;j<showD.length;j++){var d=showD[j];
     h+='<div class="note2 isdone" data-tid="'+d.id+'" data-lane="1" style="--rot:'+rots[(j+3)%8]+'deg;background:#FFFCF5"><span class="pin2" style="background:#B9AEB6"></span><div class="nt">'+esc(d.task_text)+'</div><button type="button" class="nchk" aria-label="เอากลับมาทำใหม่" onclick="tgTask(\''+d.id+'\',false)">↩</button></div>';}
   h+='</div>';
-  if(open.length>showO.length||doneA.length>showD.length){h+='<div class="foot" style="margin-top:8px">บอร์ดโชว์ค้าง '+showO.length+'/'+open.length+' · เสร็จล่าสุด '+showD.length+' ใบ — ครบทุกงานอยู่ในแท็บ "รายการงาน"</div>'}
+  h+='<div style="display:flex;align-items:flex-end;gap:4px;margin-top:8px"><img src="img/p04-cheer-jump.webp" alt="" style="width:88px;filter:drop-shadow(0 5px 8px rgba(120,60,80,.25))" onerror="this.remove()"><div class="bubble2" style="margin-bottom:16px">'+(open.length?'ลากไปช่อง "เสร็จแล้ว" ได้เลย'+pt()+'!':'เคลียร์หมดแล้ว เก่งมาก'+pt()+'!')+'</div></div>';
+  if(open.length>showO.length||doneA.length>showD.length){h+='<div class="foot" style="margin-top:4px">บอร์ดโชว์ค้าง '+showO.length+'/'+open.length+' · เสร็จล่าสุด '+showD.length+' ใบ — ครบทุกงานอยู่ในแท็บ "รายการงาน"</div>'}
   if(!open.length&&!doneA.length){h+='<div class="empty">บอร์ดยังว่าง — เพิ่มงานแรกด้านล่างได้เลย'+pt()+'</div>'}
   h+='<div class="card" style="margin-top:12px"><div class="task" style="border:0"><input id="btask" placeholder="แปะงานใหม่ลงบอร์ด..." style="margin:0"><button class="btn sm" onclick="addTaskB()">เพิ่ม</button></div></div>';
   h+='<span class="hintpill2">✦ กดค้างที่โน้ต แล้วลากข้ามช่องได้เลย'+pt()+'</span>';
@@ -1292,13 +1329,14 @@ function vPlan(){
   var doneT=((DATA.tasks&&DATA.tasks.done)||[]).filter(function(t){return t.done_at&&bkkYMD(t.done_at)===today}).length;
   var dCapP=((DATA.tasks&&DATA.tasks.done)||[]).length>=15&&doneT>=15;
   var h=wkTabs('plan');
-  h+='<div class="wksign woodg"><div class="hd2" style="font-size:17px;font-weight:700;color:#4E3520">แพลนวันนี้</div><div class="hd2" style="font-size:10px;color:#6E4E33">'+thToday()+'</div></div>';
+  h+='<div style="text-align:center;margin:2px 0 6px"><span class="hd2" style="display:inline-block;background:rgba(244,169,192,.88);color:#7A2844;font-size:13.5px;font-weight:700;padding:6px 18px;border-left:2px dashed rgba(255,255,255,.85);border-right:2px dashed rgba(255,255,255,.85);transform:rotate(-1.2deg);box-shadow:0 3px 8px rgba(120,60,80,.18)">แพลนวันนี้</span></div>';
+  h+='<div class="hd2" style="text-align:center;font-size:19px;font-weight:700;color:#8A4560;margin-bottom:10px">'+thToday()+' <svg width="24" height="24" viewBox="0 0 24 24" style="vertical-align:-5px" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#F7DE8B"/><path d="M12 2 v3 M12 19 v3 M2 12 h3 M19 12 h3 M4.9 4.9 l2.1 2.1 M17 17 l2.1 2.1 M19.1 4.9 L17 7 M7 17 l-2.1 2.1" stroke="#E9B84B" stroke-width="2" stroke-linecap="round"/></svg></div>';
   h+='<div class="card"><div class="holes2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ct">'+icn("clock",16)+' ตารางวัน</div>';
   if(!rems.length&&!dueT.length){h+='<div class="empty">วันนี้ตารางว่าง — พิมพ์บอกเลขาในแชตได้เลย เช่น "พรุ่งนี้ 10 โมงประชุม"</div>'}
   for(var i=0;i<rems.length;i++){var r=rems[i];
-    h+='<div class="plrow"><span class="pltime">'+(r.all_day?'ทั้งวัน':ftime(r.remind_at))+'</span><div class="plblock"><div style="font-size:12.5px;font-weight:700">'+esc(r.text||r.reminder_text||'นัด')+'</div><div class="hd2" style="font-size:9px;color:#8A4560">'+(r.all_day?'นัดทั้งวัน · เลขาเตือนในแชต':'เลขาจะเตือนตามเวลาในแชต')+'</div></div></div>';}
+    h+='<div class="plrow"><span class="pltime">'+(r.all_day?'ทั้งวัน':ftime(r.remind_at))+'</span><div class="plblock plb'+((i%2)+1)+'"><div style="font-size:12.5px;font-weight:700">'+esc(r.text||r.reminder_text||'นัด')+'</div><div class="hd2" style="font-size:9px;color:#8A4560">'+(r.all_day?'นัดทั้งวัน · เลขาเตือนในแชต':'เลขาจะเตือนตามเวลาในแชต')+'</div></div></div>';}
   for(var j=0;j<dueT.length;j++){var t2=dueT[j];
-    h+='<div class="plrow"><span class="pltime">วันนี้</span><div class="plblock" style="background:#FFF6D9;border-left-color:#E9B84B"><div style="font-size:12.5px;font-weight:700">'+esc(t2.task_text)+'</div><div class="hd2" style="font-size:9px;color:#9A7314">งานครบกำหนดวันนี้ · ติ๊กได้ในเช็กลิสต์ด้านล่าง</div></div></div>';}
+    h+='<div class="plrow"><span class="pltime">วันนี้</span><div class="plblock plb3"><div style="font-size:12.5px;font-weight:700">'+esc(t2.task_text)+'</div><div class="hd2" style="font-size:9px;color:#9A7314">งานครบกำหนดวันนี้ · ติ๊กได้ในเช็กลิสต์ด้านล่าง</div></div></div>';}
   h+='</div>';
   h+='<div class="card"><div class="ct">'+icn("check",16)+' เช็กลิสต์วันนี้<span class="more">เหลือ '+open.length+' งาน</span></div>';
   var cl=dueT.concat(rest).slice(0,8);
