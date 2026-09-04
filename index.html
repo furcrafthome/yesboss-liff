@@ -413,6 +413,7 @@ body.skin2{background:#F4E6DE}
 var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0,SRC="";
 /* 🏠 SKIN2 = โฉม "บ้านบอสซี่" (ห้อง+บอร์ดลาก+แพลนวัน) — ปิดสวิตช์เดียวกลับโฉมเดิมทั้งหน้า (บอสเคาะ 4 ก.ย. 69) */
 var SKIN2=true;if(SKIN2){try{document.body.className="skin2"}catch(_e){document.addEventListener("DOMContentLoaded",function(){document.body.className="skin2"})}}
+function dspName(n){return String(n||"").replace(/^\s*คุณ\s*/,"")} /* กัน "คุณคุณบีม" — ชื่อที่เก็บอาจมีคำว่า คุณ ติดมาแล้ว */
 var ICONS={
 pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
 life:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M19.1 4.9l-4.2 4.2M9.1 14.9l-4.2 4.2"/>',
@@ -1179,7 +1180,7 @@ async function saveAppt(iso){
 }
 async function refreshAll(){try{MCACHE={};DATA=await api("me.get");LSYNC=Date.now();draw();if(TAB==="story")ensureStory();toast("อัปเดตล่าสุดแล้ว ✨")}catch(e){toast("โหลดไม่สำเร็จ ลองใหม่นะ")}}
 function vHome(){
-  var pr=DATA.profile||{},nm=pr.display_name?"คุณ"+esc(pr.display_name):"บอส";
+  var pr=DATA.profile||{},nm=pr.display_name?"คุณ"+esc(dspName(pr.display_name)):"บอส";
   var founder=(pr.supporter_badge==="supporter"||pr.supporter_badge==="business");
   var plan=founder?"🎖️ ผู้ก่อตั้ง":((pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี");
   var today=todayBKK(),mth=DATA.money.month||{};
@@ -1935,7 +1936,7 @@ function vStory(){
   /* 🪪 ข้อมูลของบอสที่เลขาจดไว้ — โชว์ให้เห็นชัดว่าเลขาจำอะไรอยู่ (แก้ได้ที่โปรไฟล์) */
   var pf=DATA.profile||{};
   h+='<div class="card" style="margin-bottom:12px"><div class="ct">'+icn("user",16)+' ข้อมูลของบอส<span class="more" onclick="go(\'me\')">แก้ไข ›</span></div>';
-  h+='<div class="rowitem"><div style="color:#E0466E">'+icn("user",22)+'</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(pf.display_name):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">'+icn("phone",12)+' '+(pf.phone?phMask(pf.phone):'ยังไม่บันทึกเบอร์')+' · '+icn("gift",12)+' '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
+  h+='<div class="rowitem"><div style="color:#E0466E">'+icn("user",22)+'</div><div class="grow"><div class="t">'+(pf.display_name?'คุณ'+esc(dspName(pf.display_name)):'ยังไม่ได้บอกชื่อ')+(pf.secretary_name?' · เลขาชื่อ "'+esc(pf.secretary_name)+'"':'')+'</div><div class="m">'+icn("phone",12)+' '+(pf.phone?phMask(pf.phone):'ยังไม่บันทึกเบอร์')+' · '+icn("gift",12)+' '+(pf.birth_date?thDate(pf.birth_date):'ยังไม่บันทึกวันเกิด')+'</div></div></div>';
   h+='</div>';
   /* ลิสต์เรื่องราวทั้งหมดที่เลขาเก็บให้: ความจำ / ไฟล์ / ปฏิทินนัด — กดกระโดดไปดูได้เลย */
   h+='<div class="grid">';
@@ -2638,7 +2639,7 @@ function vMe(){
     var _ob=pr.onboarded_at?Math.max(1,Math.floor((Date.now()-new Date(pr.onboarded_at).getTime())/86400000)+1):0;
     h+='<div style="display:flex;align-items:center;gap:14px;margin:14px 2px 4px">'
       +'<div class="polar2" style="flex:none"><i></i><img src="img/p01-clipboard-hello.webp" alt="" style="width:72px;display:block;background:#FBE9F0" onerror="this.remove()"></div>'
-      +'<div><div style="display:flex;align-items:center;gap:8px"><span class="hd2" style="font-size:19px;font-weight:700">'+(pr.display_name?'คุณ'+esc(pr.display_name):'บอส')+'</span></div>'
+      +'<div><div style="display:flex;align-items:center;gap:8px"><span class="hd2" style="font-size:19px;font-weight:700">'+(pr.display_name?'คุณ'+esc(dspName(pr.display_name)):'บอส')+'</span></div>'
       +(_ob?'<div class="hd2" style="font-size:11.5px;color:#8A4560;margin-top:2px">อยู่กับเลขามาแล้ว <b>'+_ob+' วัน</b></div>':'')
       +'<svg width="110" height="7" viewBox="0 0 110 7" style="margin-top:3px" aria-hidden="true"><path d="M2 4 C 28 1, 64 6, 108 3" fill="none" stroke="#E8779B" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>';
   }
