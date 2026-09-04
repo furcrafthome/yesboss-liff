@@ -332,6 +332,9 @@ body.skin2{background:#F4E6DE}
 .skin2 .nav{--ink:#26262E;--muted:#6F6F73;--brand-ink:#C92A5E;--surface:#FFFCF5;--line:#F0DCE4;background:#FFFCF5;border-top:1.5px dashed #E8D6C4;box-shadow:0 -4px 14px rgba(120,60,80,.1)}
 .skin2 .nav button{color:#A0968E;font-family:'Mali','Sukhumvit Set','Noto Sans Thai',sans-serif}
 .skin2 .nav button.on{color:#C4547E;background:#FBE9F0;border-radius:10px 10px 0 0;transform:translateY(-6px);box-shadow:0 -2px 6px rgba(120,60,80,.08)}
+/* ช่องติ๊กตามเดโม = กรอบชมพู (ของเดิมเขียว --pos ทั้งแอป) + ตัวเลขเงินฝั่งรับเป็นน้ำเงินแบบเดโม ห้ามเขียว */
+.skin2 .chk{color:#C4547E}
+.skin2 .chk:before{border-color:#C98FA6;background:#fff}
 .skin2 .polar2{position:relative;background:#fff;padding:6px 6px 5px;box-shadow:0 6px 14px rgba(120,60,80,.22);transform:rotate(-3deg)}
 .skin2 .polar2 i{position:absolute;width:48px;height:16px;left:50%;top:-7px;transform:translateX(-50%) rotate(-3deg);background:rgba(244,169,192,.6);border-left:1px dashed rgba(255,255,255,.8);border-right:1px dashed rgba(255,255,255,.8)}
 .skin2 .dream2{position:relative;border-radius:3px 8px 6px 4px;box-shadow:0 4px 8px rgba(120,60,80,.16);padding:9px 10px;font-size:11.5px;font-weight:700;color:#3A3A3C}
@@ -1103,8 +1106,9 @@ function donutSvg(income,expense){
   var tot=(income||0)+(expense||0),c=327,inc=tot>0?income/tot*c:0,exp=tot>0?expense/tot*c:0;
   var s='<svg width="122" height="122" viewBox="0 0 126 126" style="flex:none">';
   s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#EDEDF2" stroke-width="16"/>';
+  var IC=SKIN2?"#3E6285":"#22C55E"; /* โฉมบ้านบอสซี่: รายรับ=น้ำเงินตามเดโม (แบรนด์ห้ามเขียว) */
   if(tot>0){
-    s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#22C55E" stroke-width="16" stroke-dasharray="'+inc+' '+(c-inc)+'" transform="rotate(-90 63 63)"/>';
+    s+='<circle cx="63" cy="63" r="52" fill="none" stroke="'+IC+'" stroke-width="16" stroke-dasharray="'+inc+' '+(c-inc)+'" transform="rotate(-90 63 63)"/>';
     s+='<circle cx="63" cy="63" r="52" fill="none" stroke="#FB7185" stroke-width="16" stroke-dasharray="'+exp+' '+(c-exp)+'" stroke-dashoffset="'+(-inc)+'" transform="rotate(-90 63 63)"/>';
   }
   s+='<text x="63" y="58" text-anchor="middle" font-size="11" fill="#6F6F78">สุทธิ</text>';
@@ -1194,7 +1198,7 @@ function vHome(){
   var sel=SELISO||today;
   var calCard='<div class="card">'+(SKIN2?'<div class="holes2" style="padding-top:2px"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>':'')+calMonth()+'<div class="gh" style="margin:14px 0 0">'+icn("calendar",14)+' นัด '+thDate(sel)+'</div>'+apptsList(sel)+apptAdd(sel)+(SKIN2?'<div class="hd2" style="display:flex;align-items:center;gap:6px;margin-top:9px;font-size:10px;color:#A0968E"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C4547E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 9 a6 6 0 0 0 -12 0 c0 6 -2.5 7.5 -2.5 7.5 h17 c0 0 -2.5 -1.5 -2.5 -7.5 M10 20.5 a2 2 0 0 0 4 0"/></svg>ถึงเวลานัด บอสซี่เด้งเตือนในแชต LINE ให้เอง · เตือนซ้ำจนกว่าจะกดรับ</div>':'')+'</div>';
   var moneyCard='<div class="card"><div class="ct">'+icn("banknote",16)+' การเงิน · '+thMonth(0)+'<button type="button" class="more" style="background:none;border:0;font-family:inherit;cursor:pointer;min-height:32px" onclick="go(\'money\')">ดูทั้งหมด ›</button></div><div class="don">'+donutSvg(mth.income||0,mth.expense||0)+'<div class="leg">'
-    +'<div><span class="dot" style="background:#22C55E"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
+    +'<div><span class="dot" style="background:'+(SKIN2?'#3E6285':'#22C55E')+'"></span>รายรับ<b>฿'+num(mth.income)+'</b></div>'
     +'<div><span class="dot" style="background:#FB7185"></span>รายจ่าย<b>฿'+num(mth.expense)+'</b></div>'
     +'<div style="border-top:1px solid #EDEDF2;padding-top:7px;margin-top:1px"><span class="dot" style="background:#E0466E"></span>VAT/WHT<b>฿'+num((mth.vat||0)+(mth.wht||0))+'</b></div>'
     +'</div></div></div>';
@@ -1455,7 +1459,7 @@ function agSection(title,items,emptyMsg,cls){
 }
 function vTodo(){
   var B=agenda();
-  var h='<h1>วันนี้</h1><div class="sub">📌 นัด = มีเวลาแน่นอน · ✅ งาน = ทำให้เสร็จ</div>';
+  var h=(SKIN2?wkTabs('todo'):'')+'<h1>วันนี้</h1><div class="sub">📌 นัด = มีเวลาแน่นอน · ✅ งาน = ทำให้เสร็จ</div>';
   /* 🔥 เลยกำหนดต้องอยู่บนสุดเสมอ — เดิมโผล่แค่เป็น badge เล็กๆ ปนอยู่กลางลิสต์ */
   if(B.late.length){
     h+='<h2 style="color:var(--neg)">🔥 เลยกำหนดแล้ว ('+B.late.length+')</h2>';
@@ -1658,12 +1662,27 @@ function vMoney(){
     if(r.kind==="income")inc+=a;else{exp+=a;var c=r.category||r.note||"อื่นๆ";cats[c]=(cats[c]||0)+a}
     if(r.scope&&scp[r.scope]!==undefined)scp[r.scope]+=a;
     vat+=Number(r.vat||0);wht+=Number(r.wht||0)}
+  if(SKIN2){
+    /* 🧾 สรุปเดือนแบบเดโม: การ์ดกระดาษฉีกใบเดียว + โหลเหรียญ + แถบใช้จ่ายเทียบรายรับ (เลขชุดเดียวกับการ์ด 4 ใบเดิม) */
+    var _pm=inc>0?Math.min(100,Math.round(exp*100/inc)):0;
+    h+='<div class="card torn2" style="position:relative;padding:26px 15px 13px">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div style="flex:1">'
+      +'<div class="hd2" style="font-size:15px;font-weight:700">เดือน'+thMonth(MOFF)+'</div>'
+      +'<div style="display:flex;gap:18px;margin-top:8px">'
+      +'<div><div class="hd2" style="font-size:10px;color:var(--muted)">รายรับ</div><div style="font-size:16px;font-weight:800;color:#3E6285">+'+num(inc)+'</div></div>'
+      +'<div><div class="hd2" style="font-size:10px;color:var(--muted)">รายจ่าย</div><div style="font-size:16px;font-weight:800;color:#C92A5E">−'+num(exp)+'</div></div></div>'
+      +'<div class="hd2" style="font-size:11.5px;color:#8A4560;margin-top:8px">เหลือ <b style="font-size:18px;color:var(--brand-ink)">฿'+num(inc-exp)+'</b>'+((vat||wht)?' · VAT '+num(vat)+' · WHT '+num(wht):'')+'</div></div>'
+      +'<svg width="64" height="74" viewBox="0 0 46 52" aria-hidden="true"><rect x="12" y="2" width="22" height="7" rx="2.5" fill="#C99A66"/><path d="M9 11 h28 v30 a9 9 0 0 1 -9 9 h-10 a9 9 0 0 1 -9 -9 z" fill="#DCEBF4" opacity=".85" stroke="#B9CFDE" stroke-width="1.5"/><circle cx="18" cy="40" r="5" fill="#E9B84B"/><circle cx="27" cy="42" r="5" fill="#E9B84B"/><circle cx="23" cy="34" r="5" fill="#F2CB66"/></svg></div>'
+      +(inc>0?'<div style="width:100%;height:10px;border:1.6px solid #E8A0B8;border-radius:99px;margin-top:8px"><div style="width:'+_pm+'%;height:100%;background:'+(_pm>=90?'#C62828':'#E8779B')+';border-radius:99px"></div></div><div class="hd2" style="font-size:9.5px;color:var(--muted);margin-top:3px">ใช้ไปแล้ว '+_pm+'% ของรายรับเดือนนี้ · เลขาเฝ้าดูให้ทุกวัน'+pt()+'</div>':'')
+      +'</div>';
+  }else{
   h+='<div class="grid">';
   h+=card('<span style="color:#3fb950">'+num(inc)+'</span>',icn("up",13)+" รายรับ (บาท)");
   h+=card('<span style="color:#f85149">'+num(exp)+'</span>',icn("down",13)+" รายจ่าย (บาท)");
   h+=card(num(inc-exp)+" ฿",icn("banknote",13)+" รับ−จ่าย (สุทธิ)");
   h+=card("VAT "+num(vat)+" · WHT "+num(wht),icn("receipt",13)+" ภาษี (บาท)");
   h+='</div>';
+  }
   if(MOFF===0&&MSC==="all"){var d=DATA.money.day;h+='<div class="gh">วันนี้: รับ '+num(d.income)+' · จ่าย '+num(d.expense)+' · สุทธิ '+num(d.net)+'</div>'}
   /* 🎯 แถบงบ (เฉพาะมุมมองรวมทุกกระเป๋า — rows ถึงครบพอคำนวณ) */
   if(MSC==="all"&&MBUD.length){
