@@ -1975,6 +1975,7 @@ function vStory(){
     }
     var none=byF["_none"]||[];
     if(none.length){h+='<div class="gh">📎 ยังไม่เข้าโฟลเดอร์</div>';for(var n=0;n<none.length;n++){h+=fileRow(none[n])}}
+    h+='<div style="text-align:center;margin:10px 0 2px"><button class="btn sm" onclick="vaultExport()">📦 ส่งไฟล์ทั้งหมดเข้าแชต (zip)</button></div>';
   }
   if(SKIN2){h+='<div style="display:flex;align-items:flex-end;gap:4px;margin-top:14px"><img src="img/p08-clipboard-write.webp" alt="" style="width:84px;filter:drop-shadow(0 4px 6px rgba(120,60,80,.22))" onerror="this.remove()"><div class="bubble2" style="margin-bottom:16px">ส่งไฟล์หรือบอกอะไรมาในแชต เดี๋ยวเก็บเข้าคลังให้เอง'+pt()+'</div></div>'}
   h+='<div class="foot">🔒 เรื่องราวทั้งหมดนี้เห็นได้เฉพาะคุณเท่านั้น · จัดโฟลเดอร์เพิ่มได้ในแชต</div>';
@@ -1984,6 +1985,9 @@ function fileRow(d){var nm=d.title||d.file_name||"ไฟล์";
   return '<div class="rowitem"><div style="font-size:20px">'+docIcon(d.doc_type)+'</div><div class="grow"><div class="t">'+esc(nm)+'</div><div class="m">'+(d.doc_date?esc(d.doc_date)+' · ':'')+fdate(d.created_at)+'</div></div><button class="btn sm" onclick="openFile(\''+d.id+'\')">เปิด</button><button class="ic" aria-label="ย้ายโฟลเดอร์" onclick="moveFile(\''+d.id+'\')">'+icn("folder",15)+'</button><button class="ic danger" aria-label="ลบไฟล์นี้" onclick="delFile(\''+d.id+'\')">'+icn("trash",15)+'</button></div>';
 }
 function toggleFolder(id){var e=$("#fld_"+id),a=$("#fa_"+id);if(!e){return}var op=e.style.display==="none";e.style.display=op?"block":"none";if(a){a.textContent=op?"▾":"▸"}}
+/* 📦 รวมไฟล์ทั้งคลังเป็น zip ส่งปุ่มดาวน์โหลดเข้าแชต (บอสสั่ง 4 ก.ย.) — ฟรีทุกแพ็ก ฝั่ง server คือ vault.export */
+var VXBUSY=false;
+async function vaultExport(){if(VXBUSY){return}VXBUSY=true;toast("กำลังรวมไฟล์ทั้งคลัง... แป๊บนึง");try{var r=await api("vault.export",{});toast("ส่งปุ่มดาวน์โหลดเข้าแชตเลขาแล้ว 📦 ("+(r.count||0)+" ไฟล์)")}catch(e){toast(e.message==="no_files"?"ยังไม่มีไฟล์ในคลังเลย":"รวมไฟล์ไม่สำเร็จ ลองใหม่อีกครั้ง")}finally{VXBUSY=false}}
 /* 🗂 จัดการโฟลเดอร์ (บอสสั่ง 26 ส.ค.) */
 function askText(title,ph,val){return new Promise(function(res){
   var w=document.createElement("div");w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");
