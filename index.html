@@ -3208,8 +3208,8 @@ boot();
 .pdwall{position:relative;overflow:hidden;background:#F1E7DA;background-image:radial-gradient(rgba(255,255,255,.6) 1.6px,transparent 1.6px);background-size:26px 26px;border-radius:18px;height:390px;box-shadow:0 2px 10px rgba(122,64,84,.16)}
 /* ⚡ 6 ก.ย. ค่ำ (บอสเจอบนเครื่องจริง): มือถือเฟรมตกตอนซูม → เลเยอร์โปร่งแสงสองอันค้างซ้อนกัน ตัวหนังสือเลยดูทับกัน
    แก้: สเกลเบาลง+สั้นลง · จางฉากให้ "จบก่อน" ค่อยโชว์แป้นกด · JS ปิด visibility จริงหลังจางจบ (pdZoomIn/Out) */
-.pdscene{position:absolute;inset:0;transform-origin:63% 46%;transition:transform .6s cubic-bezier(.55,0,.3,1),opacity .28s ease}
-.pdscene.pdz{transform:scale(2.2);opacity:0;pointer-events:none}
+.pdscene{position:absolute;inset:0;transform-origin:63% 46%;transition:transform .6s cubic-bezier(.6,.05,.8,.6)}
+.pdscene.pdz{transform:scale(2.2);pointer-events:none} /* ซูมอย่างเดียว ไม่เฟด — จบด้วยการตัดจอ (ห้ามใส่ opacity กลับมา: WebKit ghost) */
 .pdfloor{position:absolute;left:0;right:0;bottom:0;height:56px;background:#EFE0CF;border-top:2px dashed #DEC9B2;opacity:.9}
 .pddw{position:absolute;left:50%;bottom:48px;transform:translateX(-38%);width:168px;height:256px;perspective:760px}
 .pdpk{position:absolute;inset:6px;border-radius:80px 80px 8px 8px;overflow:hidden;opacity:0;transition:opacity 1s ease .25s;background:#FFF8EC}
@@ -3265,10 +3265,11 @@ boot();
 @keyframes pdbob{from{transform:translateY(0)}to{transform:translateY(-7px)}}
 @keyframes pdpop{0%{transform:scale(.6)}100%{transform:scale(1)}}
 .pdsh{width:60px;height:9px;border-radius:50%;background:rgba(122,64,84,.16);margin:-4px auto 0}
-.pdcu{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .25s ease;background:#FFF9EE;display:flex;align-items:center;justify-content:center;visibility:hidden}
-.pdcu.pdcuon{transition:opacity .3s ease .3s} /* ขาเข้ารอฉากจางจบก่อน · ขาออกหายทันทีไม่มี delay */
+/* 🔪 6 ก.ย. รอบ 2 (บอสยังเจอ+หนักขึ้น): WebKit ใน LINE iOS ทิ้ง "เงาข้อความเก่า" เวลาเฟด opacity
+   พร้อมกับซูมเลเยอร์ใหญ่ — เลิกครอสเฟดทั้งหมด ใช้ตัดภาพ (display) แทน: สองจอมีพร้อมกันไม่ได้โดยนิยาม */
+.pdcu{position:absolute;inset:0;display:none;background:#FFF9EE;align-items:center;justify-content:center}
 .pdcu:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 31.5%,#F4E7CF 32%,transparent 32.8%),linear-gradient(90deg,transparent 67.5%,#F4E7CF 68%,transparent 68.8%)}
-.pdcu.pdcuon{opacity:1;pointer-events:auto}
+.pdcu.pdcuon{display:flex}
 .pdhd{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:13px;height:96px;border-radius:8px;background:linear-gradient(180deg,#E3BCA0,#C99A72)}
 .pdpb{position:absolute;left:-14px;bottom:-12px;width:88px;transform:rotate(8deg)}
 .pddev{position:relative;width:210px;background:#FFF;border:2px solid #F0C9D8;border-radius:24px;box-shadow:0 8px 22px rgba(122,64,84,.16),inset 0 -3px 0 #F6E3EA;padding:12px 14px;display:flex;flex-direction:column;align-items:center}
@@ -3292,8 +3293,7 @@ boot();
 .pdkeys button:disabled{opacity:.4;cursor:default}
 .pdbr{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;color:#DBAABB;margin-top:8px}
 .pdfg{position:absolute;right:14px;bottom:12px;background:#FFF;border:1.5px solid #F0C9D8;border-radius:99px;color:#C92A5E;font-size:11.5px;font-family:inherit;padding:5px 12px;cursor:pointer;box-shadow:0 2px 5px rgba(122,64,84,.16)}
-.pdtx{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:14.5px;font-weight:600;text-align:center;color:#23232B;min-height:24px;transition:opacity .3s}
-.pdtx.pddim{opacity:0}
+.pdtx{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:14.5px;font-weight:600;text-align:center;color:#23232B;min-height:44px} /* สลับข้อความแบบตัดทันที (ห้ามเฟด — WebKit ghost) · สูงพอ 2 บรรทัด กันจอกระตุก */
 .pdcard{background:#FFFCF5;border:1.5px dashed #F0C9D8;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#26262E}
 .pdcard button{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:14px;font-weight:700;color:#fff;background:#C92A5E;border:none;border-radius:12px;padding:10px;width:100%;margin-top:10px;cursor:pointer}
 .pdcard .pdgh{background:#FFF;color:#C92A5E;border:1.5px solid #F0C9D8}
@@ -3357,11 +3357,16 @@ var RM=false;try{RM=matchMedia("(prefers-reduced-motion: reduce)").matches}catch
 function pg(id){return document.getElementById(id)}
 function pdBuzz(v){try{if(navigator.vibrate)navigator.vibrate(v)}catch(e){}}
 function pdPose(k){pg("pdmw").dataset.p=k}
-var pdTxSeq=0,pdZSeq=0;
-function pdText(t){var el=pg("pdtx");var my=++pdTxSeq;el.classList.add("pddim");setTimeout(function(){if(my!==pdTxSeq)return;el.textContent=t;el.classList.remove("pddim")},RM?0:250)}
-/* ซูมเข้า/ออกต้องปิด visibility ฝั่งที่จางจบแล้วเสมอ — กันเฟรมค้างบนมือถือทำสองเลเยอร์ทับกัน */
-function pdZoomIn(){var my=++pdZSeq;var sc=pg("pdscene"),cu=pg("pdcu");cu.style.visibility="visible";sc.classList.add("pdz");cu.classList.add("pdcuon");setTimeout(function(){if(my===pdZSeq)sc.style.visibility="hidden"},RM?0:700)}
-function pdZoomOut(){var my=++pdZSeq;var sc=pg("pdscene"),cu=pg("pdcu");sc.style.visibility="";sc.classList.remove("pdz");cu.classList.remove("pdcuon");setTimeout(function(){if(my===pdZSeq)cu.style.visibility=""},RM?0:400)}
+var pdZSeq=0;
+function pdText(t){pg("pdtx").textContent=t} /* ตัดทันที — ห้ามใส่เฟดกลับมา (WebKit ghost text บน LINE iOS) */
+/* ตัดสลับจอด้วย display เท่านั้น: ซูมเข้า = ฉากขยาย .55 วิ แล้ว "ตัด" ไปจอแป้นกด · ขาออก = ตัดกลับแล้วรีเซ็ตสเกลแบบไม่มีทรานสิชัน */
+function pdSnapScene(sc){sc.style.transition="none";sc.classList.remove("pdz");void sc.offsetWidth;sc.style.transition=""}
+function pdZoomIn(instant){var my=++pdZSeq;var sc=pg("pdscene"),cu=pg("pdcu");
+  if(instant||RM){sc.style.display="none";sc.classList.add("pdz");cu.classList.add("pdcuon");return}
+  sc.classList.add("pdz");
+  setTimeout(function(){if(my!==pdZSeq)return;sc.style.display="none";cu.classList.add("pdcuon")},550);
+}
+function pdZoomOut(){pdZSeq++;var sc=pg("pdscene"),cu=pg("pdcu");cu.classList.remove("pdcuon");sc.style.display="";pdSnapScene(sc)}
 function pdPaint(){var d=pg("pddots").children;for(var i=0;i<6;i++){d[i].className=i<PD.buf.length?"pddotf":""}}
 function pdKeysOn(on){var b=pg("pdkeys").querySelectorAll("button");for(var i=0;i<b.length;i++){b[i].disabled=!on}}
 async function pinApi(action,payload){
@@ -3402,12 +3407,12 @@ window.pinDoorShow=function(info){
   }
   if(info.reset_at){pg("pdmsg").textContent="มีคำขอรีเซ็ตค้างอยู่ — ครบ 24 ชม. รหัสจะถูกปิดให้ค่ะ"}
   if(RM||window.__PDSEEN){ /* เคยดูโมชั่นแล้ว/ลดโมชั่น = ตัดเข้าแป้นกดเลย */
-    mw.classList.add("pdgo","pdstill");pdPose("hi");pdZoomIn();
+    mw.classList.add("pdgo","pdstill");pdPose("hi");pdZoomIn(true);
     pdText(setup?"ตั้งรหัส 6 หลักที่ door lock เลยค่ะ":"บอสกดรหัสที่ door lock ได้เลยค่ะ");
     return;
   }
   window.__PDSEEN=1;
-  pdZSeq++;sc.style.visibility="";cu.style.visibility="";sc.classList.remove("pdz");cu.classList.remove("pdcuon");mw.classList.remove("pdgo","pdstill");pdPose("run");
+  pdZSeq++;cu.classList.remove("pdcuon");sc.style.display="";pdSnapScene(sc);mw.classList.remove("pdgo","pdstill");pdPose("run");
   pdText(setup?"เลขาพาบอสมาดูประตูห้องค่ะ ตั้งรหัสกันเถอะ":"เลขากำลังวิ่งไปเปิดห้องให้บอส…");
   setTimeout(function(){mw.classList.add("pdgo")},250);
   setTimeout(function(){mw.classList.add("pdstill");pdPose("hi");pdText(setup?"ถึงแล้วค่ะ! ตั้งรหัสประตูกันก่อนนะคะ":"ถึงแล้วค่ะ! เดี๋ยวพาไปกดรหัสที่หน้าประตูนะคะ")},2300);
