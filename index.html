@@ -41,6 +41,9 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:linear-gradient(180deg,var(--bg-top),var(--bg) 260px);color:var(--ink);font-family:-apple-system,'Sukhumvit Set','Noto Sans Thai',sans-serif;padding:16px 14px calc(112px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+/* 🖥️ LINE เดสก์ท็อปเปิด LIFF เป็นหน้าต่างกว้าง — หน้านี้ออกแบบที่ ~430px ปล่อยยืดเต็มจอแล้วเละ (ลูกค้าแจ้ง 5 ก.ย.)
+   จำกัดคอลัมน์เนื้อหาเท่าเพดานเดียวกับ .nav (560px); พื้นหลัง body ยัง propagate เต็ม canvas ตามสเปค CSS */
+@media (min-width:640px){body{max-width:560px;margin:0 auto}}
 /* ⌨️ กรอบโฟกัส: เดิมมี outline:none ในฟอร์มลงทะเบียน เหลือแค่เปลี่ยนสีขอบ 1.5px = แทบมองไม่เห็น */
 :focus-visible{outline:3px solid var(--brand-ink);outline-offset:2px;border-radius:6px}
 /* ♿ เคารพการตั้งค่า "ลดการเคลื่อนไหว" ของเครื่อง (เดิมไม่มีเลย) */
@@ -298,8 +301,9 @@ body.skin2{background:#F4E6DE}
 .skin2 .holes2{display:flex;justify-content:space-around;padding:0 26px 7px}
 .skin2 .holes2 i{width:11px;height:11px;border-radius:50%;background:var(--bg);box-shadow:0 1.5px 2px rgba(120,60,80,.35) inset}
 /* ── รอบเก็บผิว 4 ก.ย. (บอส: "ทำให้เหมือนเดโม") — การ์ดทุกใบ=กระดาษ, หัวข้อ=ป้ายวอชิ, ปฏิทิน=วงปากกา ──
-   เคล็ดสำคัญ: การ์ดกระดาษถูกล็อกสว่างเสมอ → ต้องล็อก "โทเคนทั้งชุด" ในสโคปการ์ดด้วย ไม่งั้นโหมดมืดตัวหนังสือหาย */
-.skin2 .card,.skin2 .c,.skin2 .st{
+   เคล็ดสำคัญ: การ์ดกระดาษถูกล็อกสว่างเสมอ → ต้องล็อก "โทเคนทั้งชุด" ในสโคปการ์ดด้วย ไม่งั้นโหมดมืดตัวหนังสือหาย
+   (5 ก.ย. ลูกค้าแจ้งจริง: rowitem/task/appt/กระดาษแพลนวัน อยู่ "นอกการ์ด" ก็มี — พื้นสว่างตายตัวทุกตัวต้องล็อกด้วย) */
+.skin2 .card,.skin2 .c,.skin2 .st,.skin2 .rowitem,.skin2 .task,.skin2 .appt,.skin2 .plnb{
   --bg:#FAF3F6;--surface:#FFFCF5;--line:#F0DCE4;--line2:#F3E3EA;--ink:#26262E;--ink-strong:#23232B;--muted:#6F6F78;
   --brand:#ED6885;--brand-ink:#C92A5E;--brand-soft:#FCE0EA;--brand-line:#F0C9D8;--field:#FBF6F8;
   --pos:#177E37;--neg:#C62828;--pill-bg:#F6E9EE;--shadow:rgba(120,60,80,.12);--paper1:#F2E0D6;--paper2:#E9D2C6;
@@ -326,6 +330,10 @@ body.skin2{background:#F4E6DE}
 .skin2 .plan{border-radius:999px}
 .skin2 .foot{font-family:'Mali','Sukhumvit Set',sans-serif}
 .skin2 .gh{font-family:'Mali','Sukhumvit Set',sans-serif;color:#8A4560}
+/* หัวกลุ่ม .gh นั่งบนพื้น "หน้า" (ไม่ใช่กระดาษ) — โหมดมืดพื้นหน้าเป็นสีเข้ม ต้องสว่างขึ้น ไม่งั้นจม */
+@media (prefers-color-scheme:dark){.skin2 .gh{color:#D9A8BC}}
+/* ป้ายสถานะในแถวกระดาษ: แถว skin2 สว่างเสมอ → ป้ายต้องเป็นเวอร์ชันสว่างเสมอ (ทับชุดโหมดมืดของโฉมเดิม) */
+.skin2 .b-late{background:#FDE7EA;color:#A5231C}.skin2 .b-todo{background:#E7F6EC;color:#12662C}.skin2 .b-soon{background:#FFF3DC;color:#7A5200}
 .skin2 .don .leg b{font-family:inherit}
 .skin2 input,.skin2 select,.skin2 textarea{border-radius:12px}
 .skin2 .plb1{background:#FDE7EF;border-left-color:#E8779B}
@@ -1441,7 +1449,7 @@ function vPlan(){
   var h=wkTabs('plan');
   /* 📔 หน้าสมุดจริงตามเดโม: ปกชมพู + หน้ากระดาษมีเส้น + รูสันซ้าย + เส้นขอบแดง + 2 คอลัมน์ */
   h+='<div style="background:#F6D9E2;border-radius:14px;padding:10px 8px 12px">'
-    +'<div style="position:relative;background:#FFFDF8;border-radius:6px 14px 14px 6px;box-shadow:0 8px 20px rgba(120,60,80,.18);padding:16px 12px 18px 44px;min-height:540px;background-image:repeating-linear-gradient(180deg,transparent 0 30px,rgba(196,84,126,.10) 30px 31px);overflow:hidden">'
+    +'<div class="plnb" style="position:relative;background:#FFFDF8;border-radius:6px 14px 14px 6px;box-shadow:0 8px 20px rgba(120,60,80,.18);padding:16px 12px 18px 44px;min-height:540px;background-image:repeating-linear-gradient(180deg,transparent 0 30px,rgba(196,84,126,.10) 30px 31px);overflow:hidden">'
     +'<div style="position:absolute;left:11px;top:22px;bottom:22px;display:flex;flex-direction:column;justify-content:space-between"><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i><i class="hole2"></i></div>'
     +'<div style="position:absolute;left:34px;top:0;bottom:0;width:1.6px;background:rgba(224,70,110,.22)"></div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between"><span class="hd2" style="display:inline-block;background:rgba(244,169,192,.88);color:#7A2844;font-size:13px;font-weight:700;padding:5px 15px;border-left:2px dashed rgba(255,255,255,.85);border-right:2px dashed rgba(255,255,255,.85);transform:rotate(-1.4deg);box-shadow:0 3px 8px rgba(120,60,80,.18)">แพลนวันนี้</span>'
