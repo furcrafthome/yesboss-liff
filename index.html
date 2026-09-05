@@ -3212,7 +3212,8 @@ boot();
 .pdscene.pdz{transform:scale(2.2);pointer-events:none} /* ซูมอย่างเดียว ไม่เฟด — จบด้วยการตัดจอ (ห้ามใส่ opacity กลับมา: WebKit ghost) */
 .pdfloor{position:absolute;left:0;right:0;bottom:0;height:56px;background:#EFE0CF;border-top:2px dashed #DEC9B2;opacity:.9}
 .pddw{position:absolute;left:50%;bottom:48px;transform:translateX(-38%);width:168px;height:256px;perspective:760px}
-.pdpk{position:absolute;inset:6px;border-radius:80px 80px 8px 8px;overflow:hidden;opacity:0;transition:opacity 1s ease .25s;background:#FFF8EC}
+/* ห้องสว่างรอหลังบานประตูตลอด (ประตูปิดบังมิดอยู่แล้ว) — ห้ามใช้ opacity fade เปิดไฟ (กติกา WebKit ghost + เคยลืมสั่งเปิดจนห้องว่าง 6 ก.ย.) */
+.pdpk{position:absolute;inset:6px;border-radius:80px 80px 8px 8px;overflow:hidden;background:#FFF8EC}
 .pdpk span{position:absolute}
 .pdpk .pdg{inset:0;background:radial-gradient(ellipse at 50% 26%,rgba(255,238,190,.95),rgba(253,224,234,.25) 72%)}
 .pdpk .pds{left:10px;right:10px;top:46px;border-top:1.5px dashed #E8A9C0}
