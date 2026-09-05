@@ -419,6 +419,8 @@ body.skin2{background:#F4E6DE}
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <script>
 var IDT=null,DATA=null,TAB="home",MSEL=null,TSEL=null,LSYNC=0,SRC="";
+/* 🚪 242: token ปลดล็อกประตูห้อง — จำใน sessionStorage ~10 นาที (server เป็นคนตัดสินหมดอายุจริง) */
+var PINTOK="";try{PINTOK=sessionStorage.getItem("yb_pint")||""}catch(e){}
 /* 🏠 SKIN2 = โฉม "บ้านบอสซี่" (ห้อง+บอร์ดลาก+แพลนวัน) — ปิดสวิตช์เดียวกลับโฉมเดิมทั้งหน้า (บอสเคาะ 4 ก.ย. 69) */
 var SKIN2=true;if(SKIN2){try{document.body.className="skin2"}catch(_e){document.addEventListener("DOMContentLoaded",function(){document.body.className="skin2"})}}
 function dspName(n){return String(n||"").replace(/^\s*คุณ\s*/,"")} /* กัน "คุณคุณบีม" — ชื่อที่เก็บอาจมีคำว่า คุณ ติดมาแล้ว */
@@ -577,8 +579,10 @@ async function affWelcome(code){
    +'<a href="'+location.pathname+'" style="color:#B85C7E;font-size:13px">เปิดหน้าแดชบอร์ด</a></div>';
 }
 async function api(action,payload){
-  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{}})});
+  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
   if(r.status===401){relogin();throw new Error("กำลังต่ออายุการเข้าสู่ระบบ รอแป๊บนึงนะ...")}
+  /* 🚪 423 = ห้องล็อกอยู่ (ตั้ง PIN ไว้ + token หมดอายุ/ไม่มี) → เด้งจอประตูให้กดรหัส แล้วค่อยทำรายการต่อ */
+  if(r.status===423){var pj={};try{pj=await r.json()}catch(e){}if(window.pinDoorShow)pinDoorShow(pj);throw new Error("ใส่รหัสประตูก่อนนะคะ")}
   if(!r.ok){var er="";try{er=(await r.json()).error||""}catch(e){}throw new Error(er||("ผิดพลาด "+r.status))}
   return r.json();
 }
@@ -658,6 +662,8 @@ async function boot(){
     if(TAB==="help")ensureHelp();
     if(TAB==="trash")ensureTrash();
   }catch(e){
+    /* 🚪 ห้องล็อกอยู่ — จอประตูขึ้นแทนแล้ว (pinDoorShow) ห้ามทับด้วยจอ error */
+    if(window.__PINWAIT){return}
     /* นอกแอป LINE (เว็บ/เดสก์ท็อป) init/login พังได้หลายทาง (คุกกี้ third-party, ยกเลิก login) — ต้องมีทางไปต่อ ไม่ใช่ทางตัน */
     var _oc=true;try{_oc=!(liff.isInClient&&liff.isInClient())}catch(_e){}
     $("#app").innerHTML=_oc?loginFailBox(e&&e.message?e.message:"โหลดไม่สำเร็จ"):errBox(e&&e.message?e.message:"โหลดไม่สำเร็จ")}
@@ -2680,6 +2686,18 @@ function vMe(){
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
   h+='<h2>บัญชี</h2><div class="rowitem"><div class="grow"><div class="t">แพลนปัจจุบัน</div>'+(pr.plan_expires_at?'<div class="m">ถึง '+fdate(pr.plan_expires_at)+'</div>':'')+'</div><div class="pill">'+esc(plan)+'</div></div>';
+  /* 🚪 242: รหัสประตูห้อง — ล็อกแดชบอร์ดทั้งหน้า (opt-in, Pro) · เปลี่ยน/ปิดได้เพราะเข้ามาถึงหน้านี้ = ปลดล็อกแล้ว (token 10 นาที) */
+  var pinOn=!!(DATA.pin&&DATA.pin.on);
+  h+='<h2>🚪 รหัสประตูห้อง</h2><div class="card">';
+  if(pinOn){
+    h+='<div class="l">เปิดใช้อยู่ 🔐 — ก่อนเข้าแดชบอร์ดต้องกดรหัส 6 หลักที่หน้าประตู (ปลดล็อกแล้วจำ 10 นาที) · ลืมรหัสกด "ลืมรหัส?" ที่ประตูได้ ระบบจะปิดให้ใน 24 ชม.</div>';
+    h+='<button class="btn ghost" style="width:100%;margin-top:9px" onclick="pinChange()">เปลี่ยนรหัส</button>';
+    h+='<button class="btn warn" style="width:100%;margin-top:9px" onclick="pinOff()">ปิดการล็อกประตู</button>';
+  }else{
+    h+='<div class="l">ตั้งรหัส 6 หลักเป็นด่านก่อนเข้าแดชบอร์ด — ต่อให้ใครหยิบมือถือบอสไป ก็เปิดดูงาน/เงิน/ไฟล์ไม่ได้ (สมาชิก Pro)</div>';
+    h+='<button class="btn" style="width:100%;margin-top:9px" onclick="pinSetup()">ตั้งรหัสประตู 🚪</button>';
+  }
+  h+='</div>';
   // 🎫 ทางเข้าแจ้งปัญหา + ถังขยะ — ต้องหาเจอโดยไม่ต้องรู้ลิงก์ลับ
   h+='<h2>'+icn("life",17)+' ช่วยเหลือ</h2>';
   h+='<div class="rowitem" style="padding:0"><button class="btn ghost" style="width:100%;justify-content:flex-start;text-align:left;box-shadow:none;border-radius:14px" onclick="go(\'help\')">'+icn("life",15)+' แจ้งปัญหา / คุยกับทีมงาน</button></div>';
@@ -3175,5 +3193,287 @@ window.addEventListener('pagehide',function(){v.style.display='flex'});
 })();
 
 boot();
+</script>
+
+<!-- 🚪 242: ประตูห้องของบอส — จอกดรหัสก่อนเข้าแดชบอร์ด (โผล่เฉพาะคนที่ตั้ง PIN ไว้ / ตอนตั้งรหัสจากโปรไฟล์)
+     ดีไซน์ตามเดโมที่บอสเคาะ 6 ก.ย. 69: ธีมสว่างครีม-ไม้ ชมพูเป็นจุดเน้น · ซูมกดที่ตัว door lock บนบานประตู
+     ⚠️ ห้ามมี backslash ในบล็อกนี้ (build-liff คัดลอกดิบ) · class ทั้งหมดขึ้นต้น pd กันชนสไตล์หน้าหลัก -->
+<style>
+#pindoor{position:fixed;inset:0;z-index:9999;background:#F4EBE2;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:12px 14px 24px;font-family:'Noto Sans Thai','Sukhumvit Set',-apple-system,sans-serif;color:#26262E}
+#pindoor[hidden]{display:none}
+#pindoor *{box-sizing:border-box}
+#pindoor img{background:none;border-radius:0;box-shadow:none;padding:0;margin:0}
+.pdwrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:11px}
+.pdback{align-self:flex-start;background:none;border:none;color:#8A8A94;font-family:inherit;font-size:12.5px;padding:4px 2px;cursor:pointer;text-decoration:underline}
+.pdwall{position:relative;overflow:hidden;background:#F1E7DA;background-image:radial-gradient(rgba(255,255,255,.6) 1.6px,transparent 1.6px);background-size:26px 26px;border-radius:18px;height:390px;box-shadow:0 2px 10px rgba(122,64,84,.16)}
+.pdscene{position:absolute;inset:0;transform-origin:63% 46%;transition:transform .75s cubic-bezier(.55,0,.3,1),opacity .55s ease .12s}
+.pdscene.pdz{transform:scale(3);opacity:0;pointer-events:none}
+.pdfloor{position:absolute;left:0;right:0;bottom:0;height:56px;background:#EFE0CF;border-top:2px dashed #DEC9B2;opacity:.9}
+.pddw{position:absolute;left:50%;bottom:48px;transform:translateX(-38%);width:168px;height:256px;perspective:760px}
+.pdpk{position:absolute;inset:6px;border-radius:80px 80px 8px 8px;overflow:hidden;opacity:0;transition:opacity 1s ease .25s;background:#FFF8EC}
+.pdpk span{position:absolute}
+.pdpk .pdg{inset:0;background:radial-gradient(ellipse at 50% 26%,rgba(255,238,190,.95),rgba(253,224,234,.25) 72%)}
+.pdpk .pds{left:10px;right:10px;top:46px;border-top:1.5px dashed #E8A9C0}
+.pdpk .pdfl{left:12px;right:12px;top:47px;display:flex;justify-content:space-between;padding:0 4px}
+.pdpk .pdfl b{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent}
+.pdpk .pdfl b:nth-child(3n+1){border-top:11px solid #EFC7D4}
+.pdpk .pdfl b:nth-child(3n+2){border-top:11px solid #F3E3BC}
+.pdpk .pdfl b:nth-child(3n){border-top:11px solid #D9D2E8}
+.pdpk .pdbd{left:15px;top:76px;width:60px;height:46px;background:#FBE3C4;border:2px solid #EEC894;border-radius:7px}
+.pdpk .pdbd i{position:absolute;width:17px;height:15px;border-radius:2px}
+.pdpk .pdbd i:first-child{background:#FFD9E6;left:7px;top:8px;transform:rotate(-6deg)}
+.pdpk .pdbd i:last-child{background:#E9E2F2;right:7px;top:16px;transform:rotate(5deg)}
+.pdpk .pdck{right:20px;top:78px;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #F0C9D8}
+.pdpk .pdck:before{content:"";position:absolute;left:8px;top:4px;width:2px;height:6px;background:#C92A5E}
+.pdpk .pdck:after{content:"";position:absolute;left:8px;top:8px;width:6px;height:2px;background:#C92A5E}
+.pdpk .pdrg{left:50%;bottom:8px;transform:translateX(-50%);width:112px;height:30px;border-radius:50%;background:#EFDCC4}
+.pdpk .pdpf{left:60px;bottom:42px;width:24px;height:16px;border-radius:10px 10px 4px 4px;background:#F4A9C0}
+.pdpk .pddk{left:38px;bottom:60px;width:96px;height:11px;background:#E9BC93;border-radius:6px}
+.pdpk .pddk:before{content:"";position:absolute;left:9px;top:10px;width:6px;height:31px;background:#DBA87E;border-radius:3px}
+.pdpk .pddk:after{content:"";position:absolute;right:9px;top:10px;width:6px;height:31px;background:#DBA87E;border-radius:3px}
+.pdpk .pdlp{left:54px;bottom:72px;width:26px;height:18px;background:#F9DCE7;border:2px solid #E8A9C0;border-radius:4px 4px 2px 2px;display:flex;align-items:center;justify-content:center;color:#E0466E;font-size:10px}
+.pdpk .pdlp:before{content:"";position:absolute;left:-5px;bottom:-5px;width:32px;height:4px;background:#D98BA6;border-radius:2px}
+.pdpk .pdmg{left:98px;bottom:72px;width:10px;height:10px;background:#fff;border:1.5px solid #E8A9C0;border-radius:2px 2px 4px 4px}
+.pdfr{position:absolute;inset:0;border-radius:84px 84px 10px 10px;border:7px solid #D9AFBE;pointer-events:none;z-index:3}
+.pddoor{position:absolute;inset:6px;border-radius:80px 80px 8px 8px;background:linear-gradient(90deg,transparent 32%,#F6EAD3 32.5%,transparent 33.5%),linear-gradient(90deg,transparent 66%,#F6EAD3 66.5%,transparent 67.5%),#FFF9EE;border:2px solid #F2E2C8;transform-origin:left center;transition:transform 1.2s cubic-bezier(.55,0,.25,1);z-index:2;display:flex;flex-direction:column;align-items:center;backface-visibility:hidden}
+.pddoor.pdopen{transform:rotateY(-74deg);background:linear-gradient(90deg,#FFF9EE 60%,#E3C9A8);box-shadow:6px 0 14px rgba(60,20,35,.22)}
+.pdsign{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:12px;font-weight:700;color:#C92A5E;background:#FCE0EA;border:1.5px solid #F0C9D8;border-radius:8px;padding:2px 11px;margin-top:36px;transform:rotate(-2deg)}
+.pdhw{width:28px;height:26px;margin-top:14px;position:relative;transform:rotate(-45deg)}
+.pdhw:before,.pdhw:after{content:"";position:absolute;background:#FCE0EA;border:1.5px solid #F0C9D8}
+.pdhw:before{width:15px;height:15px;left:0;bottom:0}
+.pdhw:after{width:15px;height:15px;border-radius:50% 50% 0 0;left:0;top:-7.5px;border-bottom:none}
+.pdhw b{position:absolute;width:15px;height:15px;border-radius:0 50% 50% 0;background:#FCE0EA;border:1.5px solid #F0C9D8;border-left:none;left:7.5px;bottom:0}
+.pdknob{position:absolute;right:12px;top:56%;width:12px;height:12px;border-radius:50%;background:#ED6885}
+.pdml{position:absolute;right:8px;top:37%;width:25px;height:40px;border-radius:6px;background:#FFF;border:1.5px solid #F0C9D8;display:flex;flex-direction:column;align-items:center;gap:2.5px;padding-top:4px}
+.pdml i{width:13px;height:3.5px;border-radius:2px;background:#FCE0EA}
+.pdml .pdled{width:6px;height:6px;border-radius:50%;background:#E4CBD6;transition:all .3s}
+.pdml.pdlit .pdled{background:#ED6885;box-shadow:0 0 6px #ED6885}
+.pdmat{position:absolute;left:50%;bottom:28px;transform:translateX(-38%);width:112px;height:18px;border-radius:9px;background:#EAD9C4;border:2px dashed #D6BFA2;z-index:1}
+.pdpic{position:absolute;right:24px;top:98px;width:35px;height:41px;background:#FFF;border:3px solid #D9BC98;border-radius:7px;transform:rotate(2.5deg);display:flex;align-items:center;justify-content:center;color:#ED6885;font-size:15px}
+.pdpic:before{content:"";position:absolute;top:-12px;left:50%;width:1.5px;height:12px;background:#C9AE8C}
+.pdplant{position:absolute;right:34px;bottom:44px;width:22px;height:17px;background:#D9A87E;border-radius:4px 4px 8px 8px}
+.pdplant i{position:absolute;left:50%;bottom:13px;width:10px;height:26px;margin-left:-5px;border-radius:50%;background:#E5CDA8}
+.pdplant:before{content:"";position:absolute;left:-2px;bottom:12px;width:10px;height:21px;border-radius:50%;background:#E8D3AE;transform:rotate(-20deg)}
+.pdplant:after{content:"";position:absolute;right:-2px;bottom:12px;width:10px;height:21px;border-radius:50%;background:#E8D3AE;transform:rotate(20deg)}
+.pdmw{position:absolute;bottom:32px;left:104%;width:100px;z-index:4;transition:left 2s cubic-bezier(.4,.08,.3,1)}
+.pdmw.pdgo{left:3%}
+.pdmw img{width:100%;display:none;animation:pdbob .5s ease-in-out infinite alternate}
+.pdmw[data-p="run"] img.pdimr,.pdmw[data-p="hi"] img.pdimh,.pdmw[data-p="wk"] img.pdimw{display:block}
+.pdmw.pdstill img{animation:pdbob 1.6s ease-in-out infinite alternate}
+@keyframes pdbob{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+@keyframes pdpop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.pdsh{width:60px;height:9px;border-radius:50%;background:rgba(122,64,84,.16);margin:-4px auto 0}
+.pdcu{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s ease .25s;background:#FFF9EE;display:flex;align-items:center;justify-content:center}
+.pdcu:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 31.5%,#F4E7CF 32%,transparent 32.8%),linear-gradient(90deg,transparent 67.5%,#F4E7CF 68%,transparent 68.8%)}
+.pdcu.pdcuon{opacity:1;pointer-events:auto}
+.pdhd{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:13px;height:96px;border-radius:8px;background:linear-gradient(180deg,#E3BCA0,#C99A72)}
+.pdpb{position:absolute;left:-14px;bottom:-12px;width:88px;transform:rotate(8deg)}
+.pddev{position:relative;width:210px;background:#FFF;border:2px solid #F0C9D8;border-radius:24px;box-shadow:0 8px 22px rgba(122,64,84,.16),inset 0 -3px 0 #F6E3EA;padding:12px 14px;display:flex;flex-direction:column;align-items:center}
+.pdcu.pdcuon .pddev{animation:pdpop .5s cubic-bezier(.3,1.5,.5,1)}
+.pddev.pdbad{animation:pdshake .4s!important}
+@keyframes pdshake{0%,100%{transform:none}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pddh{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.pddh .pdled{width:7px;height:7px;border-radius:50%;background:#E4CBD6;transition:all .3s}
+.pddev.pdok .pddh .pdled{background:#ED6885;box-shadow:0 0 8px #ED6885}
+.pddev.pdbad .pddh .pdled{background:#E0466E;box-shadow:0 0 8px #E0466E}
+.pddh .pdttl{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:12px;font-weight:700;color:#C92A5E}
+.pdscr{width:100%;background:#FCE0EA;border:1.5px solid #F0C9D8;border-radius:12px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.pddots{display:flex;gap:10px}
+.pddots i{width:12px;height:12px;border-radius:50%;border:2px solid #E5A8BC;background:#fff;transition:all .15s}
+.pddots i.pddotf{background:#C92A5E;border-color:#C92A5E}
+.pddev.pdok .pddots i.pddotf{background:#ED6885;border-color:#ED6885}
+.pdmsg{min-height:15px;font-size:10.5px;color:#C92A5E;text-align:center;line-height:1.35}
+.pdkeys{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:100%;margin-top:10px}
+.pdkeys button{font-family:inherit;font-size:19px;font-weight:600;color:#C92A5E;background:#FDF1F5;border:1.5px solid #F0C9D8;border-radius:13px;padding:9px 0;cursor:pointer;transition:transform .08s;touch-action:manipulation;box-shadow:0 2px 0 #F0D3DD}
+.pdkeys button:active{transform:translateY(2px);box-shadow:none;background:#FCE0EA}
+.pdkeys button:disabled{opacity:.4;cursor:default}
+.pdbr{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;color:#DBAABB;margin-top:8px}
+.pdfg{position:absolute;right:14px;bottom:12px;background:#FFF;border:1.5px solid #F0C9D8;border-radius:99px;color:#C92A5E;font-size:11.5px;font-family:inherit;padding:5px 12px;cursor:pointer;box-shadow:0 2px 5px rgba(122,64,84,.16)}
+.pdtx{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:14.5px;font-weight:600;text-align:center;color:#23232B;min-height:24px;transition:opacity .3s}
+.pdtx.pddim{opacity:0}
+.pdcard{background:#FFFCF5;border:1.5px dashed #F0C9D8;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#26262E}
+.pdcard button{font-family:'Mali','Sukhumvit Set',sans-serif;font-size:14px;font-weight:700;color:#fff;background:#C92A5E;border:none;border-radius:12px;padding:10px;width:100%;margin-top:10px;cursor:pointer}
+.pdcard .pdgh{background:#FFF;color:#C92A5E;border:1.5px solid #F0C9D8}
+@media (prefers-reduced-motion:reduce){.pdmw,.pddoor,.pdscene,.pdcu{transition:none}.pdmw img{animation:none}.pddev.pdbad,.pdcu.pdcuon .pddev{animation:none!important}}
+</style>
+<div id="pindoor" hidden>
+  <div class="pdwrap">
+    <button type="button" class="pdback" onclick="pdToChat()">← กลับไปแชตเลขา</button>
+    <div class="pdwall">
+      <div class="pdscene" id="pdscene">
+        <div class="pdfloor"></div>
+        <div class="pddw">
+          <div class="pdpk"><span class="pdg"></span><span class="pds"></span><span class="pdfl"><b></b><b></b><b></b><b></b><b></b></span><span class="pdbd"><i></i><i></i></span><span class="pdck"></span><span class="pdrg"></span><span class="pdpf"></span><span class="pddk"></span><span class="pdlp">♥</span><span class="pdmg"></span></div>
+          <div class="pddoor" id="pddoor">
+            <div class="pdsign">ห้องของบอส</div>
+            <div class="pdhw"><b></b></div>
+            <div class="pdml" id="pdml"><i></i><i></i><span class="pdled"></span></div>
+            <div class="pdknob"></div>
+          </div>
+          <div class="pdfr"></div>
+        </div>
+        <div class="pdmat"></div>
+        <div class="pdpic">♥</div>
+        <div class="pdplant"><i></i></div>
+        <div class="pdmw" id="pdmw" data-p="run">
+          <img class="pdimr" src="img/p11-running.webp" alt="">
+          <img class="pdimh" src="img/p01-clipboard-hello.webp" alt="">
+          <img class="pdimw" src="img/p06-ok-wink.webp" alt="">
+          <div class="pdsh"></div>
+        </div>
+      </div>
+      <div class="pdcu" id="pdcu">
+        <div class="pdhd"></div>
+        <div class="pddev" id="pddev">
+          <div class="pddh"><span class="pdled"></span><span class="pdttl" id="pdtt">กดรหัสเข้าห้อง</span><span class="pdled"></span></div>
+          <div class="pdscr">
+            <div class="pddots" id="pddots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="pdmsg" id="pdmsg"></div>
+          </div>
+          <div class="pdkeys" id="pdkeys">
+            <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+            <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+            <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+            <button type="button" data-k="d">⌫</button><button type="button">0</button><button type="button" data-k="x" style="visibility:hidden"></button>
+          </div>
+          <div class="pdbr">YES BOSS</div>
+        </div>
+        <img class="pdpb" src="img/p01-clipboard-hello.webp" alt="">
+        <button type="button" class="pdfg" id="pdfg" onclick="pdForgot()">ลืมรหัส?</button>
+      </div>
+    </div>
+    <div class="pdtx" id="pdtx"></div>
+    <div class="pdcard" id="pdfcard" hidden></div>
+  </div>
+</div>
+<script>
+(function(){
+/* 🚪 ตรรกะประตูห้อง — ปลดล็อก/ตั้งรหัส/เปลี่ยน/ปิด · server เป็นด่านจริง หน้านี้เป็นแค่ UI */
+var PD={mode:"unlock",stage:"pin",buf:"",first:"",busy:false};
+var RM=false;try{RM=matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){}
+function pg(id){return document.getElementById(id)}
+function pdBuzz(v){try{if(navigator.vibrate)navigator.vibrate(v)}catch(e){}}
+function pdPose(k){pg("pdmw").dataset.p=k}
+function pdText(t){var el=pg("pdtx");el.classList.add("pddim");setTimeout(function(){el.textContent=t;el.classList.remove("pddim")},RM?0:250)}
+function pdPaint(){var d=pg("pddots").children;for(var i=0;i<6;i++){d[i].className=i<PD.buf.length?"pddotf":""}}
+function pdKeysOn(on){var b=pg("pdkeys").querySelectorAll("button");for(var i=0;i<b.length;i++){b[i].disabled=!on}}
+async function pinApi(action,payload){
+  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
+  if(r.status===401){relogin();return{error:"relogin",__st:401}}
+  var j={};try{j=await r.json()}catch(e){}
+  j.__st=r.status;return j;
+}
+function pdSaveTok(t){PINTOK=t||"";try{sessionStorage.setItem("yb_pint",PINTOK)}catch(e){}}
+function pdHide(){pg("pindoor").hidden=true;document.body.style.overflow="";window.__PINWAIT=0}
+window.pdToChat=function(){try{if(liff.isInClient&&liff.isInClient()){liff.closeWindow();return}}catch(e){}pdHide()};
+async function pdResume(){
+  window.__PINWAIT=0;
+  var f=window.__PINAFTER;window.__PINAFTER=null;
+  if(f){f();return}
+  try{
+    DATA=await api("me.get");LSYNC=Date.now();draw();
+    if(TAB==="story"||TAB==="goal")ensureStory();if(TAB==="heal")ensureHeal();if(TAB==="help")ensureHelp();if(TAB==="trash")ensureTrash();
+  }catch(e){}
+}
+/* จอประตูหลัก — info: {mode, locked_until, reset_at} · โมชั่นเต็มครั้งแรก รอบถัดไปเข้าแป้นกดเลย (บอสสั่ง: อย่าหน่วง) */
+window.pinDoorShow=function(info){
+  info=info||{};
+  window.__PINWAIT=1;
+  PD.mode=info.mode||"unlock";PD.stage="pin";PD.buf="";PD.first="";PD.busy=false;
+  var setup=(PD.mode==="setup"||PD.mode==="change");
+  pg("pindoor").hidden=false;document.body.style.overflow="hidden";
+  pg("pdfcard").hidden=true;pg("pdfg").hidden=setup;
+  pg("pdtt").textContent=setup?"ตั้งรหัสใหม่":"กดรหัสเข้าห้อง";
+  pg("pdmsg").textContent=setup?"คิดรหัส 6 หลักที่บอสจำง่ายๆ":"รหัส 6 หลัก · เฉพาะบอสเท่านั้น";
+  pdPaint();pdKeysOn(true);
+  var dev=pg("pddev");dev.classList.remove("pdok","pdbad");pg("pdml").classList.remove("pdlit");
+  pg("pddoor").classList.remove("pdopen");
+  var sc=pg("pdscene"),cu=pg("pdcu"),mw=pg("pdmw");
+  if(info.locked_until&&new Date(info.locked_until)>new Date()){
+    var mn=Math.max(1,Math.ceil((new Date(info.locked_until)-Date.now())/60000));
+    pg("pdmsg").textContent="ล็อกอยู่ อีก "+mn+" นาทีลองใหม่ได้นะคะ";pdKeysOn(false);
+  }
+  if(info.reset_at){pg("pdmsg").textContent="มีคำขอรีเซ็ตค้างอยู่ — ครบ 24 ชม. รหัสจะถูกปิดให้ค่ะ"}
+  if(RM||window.__PDSEEN){ /* เคยดูโมชั่นแล้ว/ลดโมชั่น = ตัดเข้าแป้นกดเลย */
+    mw.classList.add("pdgo","pdstill");pdPose("hi");sc.classList.add("pdz");cu.classList.add("pdcuon");
+    pdText(setup?"ตั้งรหัส 6 หลักที่ door lock เลยค่ะ":"บอสกดรหัสที่ door lock ได้เลยค่ะ");
+    return;
+  }
+  window.__PDSEEN=1;
+  sc.classList.remove("pdz");cu.classList.remove("pdcuon");mw.classList.remove("pdgo","pdstill");pdPose("run");
+  pdText(setup?"เลขาพาบอสมาดูประตูห้องค่ะ ตั้งรหัสกันเถอะ":"เลขากำลังวิ่งไปเปิดห้องให้บอส…");
+  setTimeout(function(){mw.classList.add("pdgo")},250);
+  setTimeout(function(){mw.classList.add("pdstill");pdPose("hi");pdText(setup?"ถึงแล้วค่ะ! ตั้งรหัสประตูกันก่อนนะคะ":"ถึงแล้วค่ะ! เดี๋ยวพาไปกดรหัสที่หน้าประตูนะคะ")},2300);
+  setTimeout(function(){sc.classList.add("pdz");cu.classList.add("pdcuon");pdText(setup?"ตั้งรหัส 6 หลักที่ door lock เลยค่ะ":"บอสกดรหัสที่ door lock ได้เลยค่ะ")},4000);
+};
+function pdOpenRoom(midT,endT,done){
+  var dev=pg("pddev");dev.classList.remove("pdbad");dev.classList.add("pdok");pdBuzz(30);
+  setTimeout(function(){pg("pdcu").classList.remove("pdcuon");pg("pdscene").classList.remove("pdz");pg("pdml").classList.add("pdlit");pdText(midT)},RM?100:1100);
+  setTimeout(function(){pg("pddoor").classList.add("pdopen")},RM?120:2050);
+  setTimeout(function(){pdPose("wk");pdText(endT)},RM?150:2850);
+  setTimeout(function(){pdHide();if(done)done()},RM?400:4300);
+}
+function pdWrong(msg){
+  var dev=pg("pddev");dev.classList.remove("pdbad");void dev.offsetWidth;dev.classList.add("pdbad");pdBuzz([40,60,40]);
+  pg("pdmsg").textContent=msg;
+  setTimeout(function(){PD.buf="";pdPaint();dev.classList.remove("pdbad");PD.busy=false},RM?150:450);
+}
+async function pdFull(){
+  var setup=(PD.mode==="setup"||PD.mode==="change");
+  if(setup){
+    if(PD.stage==="pin"){PD.first=PD.buf;PD.stage="confirm";pdBuzz(15);pg("pdmsg").textContent="พิมพ์ซ้ำอีกรอบเพื่อยืนยันค่ะ";setTimeout(function(){PD.buf="";pdPaint();PD.busy=false},RM?100:350);return}
+    if(PD.buf!==PD.first){PD.stage="pin";PD.first="";pdWrong("ไม่ตรงกับรอบแรกนะคะ · เริ่มตั้งใหม่อีกที");return}
+    var j=await pinApi("pin.set",{pin:PD.buf});
+    if(j.ok){pdSaveTok(j.token);pg("pdmsg").textContent="ตั้งรหัสเรียบร้อย ✓";
+      pdOpenRoom("ติ๊งหน่อง! รหัสพร้อมใช้แล้วค่ะ","ยินดีต้อนรับค่ะบอส 💗 ครั้งหน้าใช้รหัสนี้นะคะ",function(){toast("ตั้งรหัสประตูแล้ว 🔐");if(DATA){reload().catch(function(){})}else{pdResume()}});return}
+    if(j.error==="pro_only"){pdHide();toast("ฟีเจอร์นี้อยู่ในแพ็ก Pro นะคะ");return}
+    if(j.__st===423){var md=PD.mode;window.__PINAFTER=function(){pinDoorShow({mode:md})};pinDoorShow({});return}
+    pdWrong("ตั้งไม่สำเร็จ ลองใหม่อีกทีนะคะ");return;
+  }
+  var j2=await pinApi("pin.verify",{pin:PD.buf});
+  if(j2.ok){pdSaveTok(j2.token);pg("pdmsg").textContent="รหัสถูกต้องค่ะ ✓";
+    pdOpenRoom("แก๊ก! เปิดประตูเลยนะคะ","ยินดีต้อนรับกลับค่ะบอส 💗",function(){pdResume()});return}
+  if(j2.error==="pin_wrong"){pdWrong("รหัสไม่ถูกนะคะ · เหลือ "+(j2.left||1)+" ครั้ง");return}
+  if(j2.error==="pin_locked"){var mn=Math.max(1,Math.ceil((new Date(j2.until||Date.now())-Date.now())/60000));pdWrong("ใส่ผิดครบ 5 ครั้ง — ล็อก "+mn+" นาทีนะคะ");pdKeysOn(false);pdText("พักแป๊บนึงแล้วค่อยลองใหม่ หรือกด ลืมรหัส? ได้เลยค่ะ");return}
+  if(j2.error==="no_pin"){pdHide();pdResume();return}
+  pdWrong("มีปัญหานิดหน่อย ลองใหม่อีกทีนะคะ");
+}
+pg("pdkeys").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b||PD.busy||b.disabled)return;
+  if(b.dataset.k==="x")return;
+  if(b.dataset.k==="d"){PD.buf=PD.buf.slice(0,-1);pdPaint();pdBuzz(10);return}
+  if(PD.buf.length>=6)return;
+  PD.buf+=b.textContent;pdPaint();pdBuzz(12);
+  if(PD.buf.length===6){PD.busy=true;setTimeout(pdFull,180)}
+});
+/* "ลืมรหัส?" — การ์ดอธิบาย + ปุ่มยืนยันส่งคำขอ (24 ชม. + การ์ดยกเลิกในแชต ตามมติ 16 ก.ค.) */
+window.pdForgot=function(){
+  var c=pg("pdfcard");c.hidden=false;
+  c.innerHTML='<b>ลืมรหัส ทำยังไง?</b><br>กด "ขอรีเซ็ตรหัส" แล้วเลขาจะส่งการ์ดแจ้งในแชตทันที — ถ้าไม่ใช่บอสเป็นคนขอ กดยกเลิกบนการ์ดได้ตลอด · ครบ 24 ชั่วโมงไม่มีใครยกเลิก รหัสจะถูกปิดให้ แล้วบอสตั้งใหม่ได้เลย (ระหว่างรอ แชตใช้ได้ปกติ)'
+    +'<button type="button" onclick="pdResetReq()">ขอรีเซ็ตรหัส</button>'
+    +'<button type="button" class="pdgh" onclick="document.getElementById(String.fromCharCode(112,100,102,99,97,114,100)).hidden=true">ยังก่อน</button>';
+  c.scrollIntoView({behavior:"smooth"});
+};
+window.pdResetReq=async function(){
+  var c=pg("pdfcard");
+  try{
+    var j=await pinApi("pin.reset.request");
+    if(j.ok){c.innerHTML='<b>ส่งคำขอแล้วค่ะ ✅</b><br>การ์ดยืนยันอยู่ในแชตเลขาแล้ว — ครบ 24 ชั่วโมงรหัสจะถูกปิดให้ แล้วบอสกลับมาตั้งใหม่ได้เลย · ระหว่างนี้แชตกับเลขาใช้ได้ปกตินะคะ'
+      +'<button type="button" onclick="pdToChat()">กลับไปแชตเลขา</button>';return}
+    c.innerHTML='<b>ส่งคำขอไม่สำเร็จ</b><br>ลองใหม่อีกครั้งนะคะ<button type="button" onclick="pdResetReq()">ลองอีกครั้ง</button>';
+  }catch(e){c.innerHTML='<b>ส่งคำขอไม่สำเร็จ</b><br>ลองใหม่อีกครั้งนะคะ<button type="button" onclick="pdResetReq()">ลองอีกครั้ง</button>'}
+};
+/* ปุ่มจากแท็บโปรไฟล์ */
+window.pinSetup=function(){if(typeof mIsPro==="function"&&!mIsPro()){toast("ฟีเจอร์นี้อยู่ในแพ็ก Pro นะคะ");return}pinDoorShow({mode:"setup"})};
+window.pinChange=function(){pinDoorShow({mode:"change"})};
+window.pinOff=async function(){
+  try{
+    var j=await pinApi("pin.disable");
+    if(j.ok){pdSaveTok("");toast("ปิดการล็อกประตูแล้ว");reload().catch(function(){});return}
+    if(j.__st===423){window.__PINAFTER=function(){pinOff()};pinDoorShow({});return}
+    toast("ทำรายการไม่ได้ ลองใหม่นะคะ");
+  }catch(e){toast("ทำรายการไม่ได้ ลองใหม่นะคะ")}
+};
+})();
 </script>
 </body></html>
