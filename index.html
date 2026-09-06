@@ -306,6 +306,7 @@ label.f{display:block;font-size:12px;color:var(--muted);margin-top:13px;font-wei
    สีในซีนห้อง/บอร์ดตั้งใจ hardcode โทนอุ่นสว่าง (แบบเดียวกับ #healroom ที่บอสเคาะ "ห้องต้องสว่าง")
    จึงคงหน้าตาเดิมทั้ง light/dark — ส่วนคอมโพเนนต์เดิมยังใช้โทเคนกลางตามระบบเดิม */
 body.skin2{background:#F4E6DE}
+body.th-black.skin2{background:linear-gradient(180deg,var(--bg-top),var(--bg) 260px)} /* ⚫ ดำสนิท = พื้นมืดแบบโหมดมืด */
 /* โหมดมืด: พื้นแอปตามโทเคนมืดเดิม — ซีนห้อง/โน้ต/ป้ายไม้เป็น "ของสว่างมีไฟ" บนพื้นมืด (แนวเดียวกับ #healroom) */
 @media (prefers-color-scheme:dark){body.skin2{background:linear-gradient(180deg,var(--bg-top),var(--bg) 260px)}}
 .skin2 h1,.skin2 .ct,.skin2 .hd2{font-family:'Mali','Sukhumvit Set','Noto Sans Thai',-apple-system,sans-serif}
@@ -345,10 +346,21 @@ body.skin2{background:#F4E6DE}
    เคล็ดสำคัญ: การ์ดกระดาษถูกล็อกสว่างเสมอ → ต้องล็อก "โทเคนทั้งชุด" ในสโคปการ์ดด้วย ไม่งั้นโหมดมืดตัวหนังสือหาย
    (5 ก.ย. ลูกค้าแจ้งจริง: rowitem/task/appt/กระดาษแพลนวัน อยู่ "นอกการ์ด" ก็มี — พื้นสว่างตายตัวทุกตัวต้องล็อกด้วย) */
 .skin2 .card,.skin2 .c,.skin2 .st,.skin2 .rowitem,.skin2 .task,.skin2 .appt,.skin2 .plnb{
-  --bg:var(--bg);--surface:#FFFCF5;--line:var(--line);--line2:var(--line2);--ink:#26262E;--ink-strong:#23232B;--muted:#6F6F78;
-  --brand:var(--brand);--brand-ink:var(--brand-ink);--brand-soft:var(--brand-soft);--brand-line:var(--brand-line);--field:var(--field);
-  --pos:#177E37;--neg:#C62828;--pill-bg:var(--pill-bg);--shadow:rgba(120,60,80,.12);--paper1:#F2E0D6;--paper2:#E9D2C6;
+  --surface:#FFFCF5;--ink:#26262E;--ink-strong:#23232B;--muted:#6F6F78;
+  --pos:#177E37;--neg:#C62828;--shadow:rgba(120,60,80,.12);--paper1:#F2E0D6;--paper2:#E9D2C6;
   background:#FFFCF5;color:var(--ink)}
+/* 🎨 246: จอสว่าง สำเนียงในการ์ดวิ่งตามธีม (เดิมตรึงโรสไว้ทั้งชุด — ค่าตรง :root อยู่แล้วเลยไม่มีผล พอมีธีมต้องเลิกตรึง)
+   🌙 โหมดมืด ตรึงสำเนียงโรสสว่างในการ์ดครีมเหมือนที่ ship อยู่ (สำเนียงมืดของธีมออกแบบมาบนพื้นมืด วางบนครีมแล้วจม) */
+@media (prefers-color-scheme:dark){
+  .skin2 .card,.skin2 .c,.skin2 .st,.skin2 .rowitem,.skin2 .task,.skin2 .appt,.skin2 .plnb{
+    --bg:#FAF3F6;--line:#F0DCE4;--line2:#F3E3EA;--brand:#ED6885;--brand-ink:#C92A5E;--brand-soft:#FCE0EA;--brand-line:#F0C9D8;--field:#FBF6F8;--pill-bg:#F6E9EE;
+    --deep:#8A4560;--brand-mid:#C4547E;--brand-rose:#E8779B;--brand-hot:#E0466E;--brand-200:#F4A9C0;--brand-faint:#FBE9F0;--brand-faint2:#FDE7EF;--on-brand:#fff;--btn-shadow:rgba(201,42,94,.26)}
+}
+/* ⚫ ดำสนิท: การ์ดมืดทั้งใบตามเดโม่ที่บอสเคาะ (ชนะกฎตรึงด้วย specificity body+class) */
+body.th-black .card,body.th-black .c,body.th-black .st,body.th-black .rowitem,body.th-black .task,body.th-black .appt,body.th-black .plnb{
+  --surface:#1F1F25;--ink:#EDEDF2;--ink-strong:#fff;--muted:#A9A9B6;
+  --pos:#5DD47C;--neg:#FF8A80;--shadow:rgba(0,0,0,.45);--paper1:#0F0F13;--paper2:#0A0A0E;
+  background:var(--surface);color:var(--ink)}
 .skin2 .card{border-radius:8px;box-shadow:0 3px 0 rgba(120,60,80,.06),0 8px 16px rgba(120,60,80,.13)}
 .skin2 h1{display:inline-block;font-size:17px;background:rgba(244,169,192,.88);color:#7A2844;padding:8px 20px;border-left:2px dashed rgba(255,255,255,.85);border-right:2px dashed rgba(255,255,255,.85);transform:rotate(-1.2deg);box-shadow:0 3px 8px rgba(120,60,80,.18);letter-spacing:0;border-radius:2px}
 .skin2 .sub{margin-top:9px}
@@ -382,7 +394,10 @@ body.skin2{background:#F4E6DE}
 .skin2 .plb3{background:#FFF6D9;border-left-color:#E9B84B}
 .skin2 .bubble2{position:relative;background:#fff;border-radius:12px 12px 12px 3px;padding:7px 12px;font-size:11.5px;font-weight:700;color:var(--deep);box-shadow:0 4px 10px rgba(120,60,80,.2);font-family:'Mali','Sukhumvit Set',sans-serif}
 /* แถบล่างแบบแท็บกระดาษ (ตามเดโม) — ล็อกโทเคนสว่างในสโคปเหมือนการ์ด กันโหมดมืดตัวหนังสือจม */
-.skin2 .nav{--ink:#26262E;--muted:#6F6F73;--brand-ink:var(--brand-ink);--surface:#FFFCF5;--line:var(--line);background:#FFFCF5;border-top:1.5px dashed #E8D6C4;box-shadow:0 -4px 14px rgba(120,60,80,.1)}
+.skin2 .nav{--ink:#26262E;--muted:#6F6F73;--surface:#FFFCF5;background:#FFFCF5;border-top:1.5px dashed #E8D6C4;box-shadow:0 -4px 14px rgba(120,60,80,.1)}
+@media (prefers-color-scheme:dark){.skin2 .nav{--brand-ink:#C92A5E;--line:#F0DCE4;--brand-mid:#C4547E;--brand-faint:#FBE9F0}}
+body.th-black .nav{--ink:#EDEDF2;--muted:#A9A9B6;--surface:#1F1F25;background:#1F1F25;border-top-color:#3A3A44;box-shadow:0 -4px 14px rgba(0,0,0,.45)}
+body.th-black .nav button{color:var(--muted)}
 .skin2 .nav button{color:#A0968E;font-family:'Mali','Sukhumvit Set','Noto Sans Thai',sans-serif}
 .skin2 .nav button.on{color:var(--brand-mid);background:var(--brand-faint);border-radius:10px 10px 0 0;transform:translateY(-6px);box-shadow:0 -2px 6px rgba(120,60,80,.08)}
 /* ช่องติ๊กตามเดโม = กรอบชมพู (ของเดิมเขียว --pos ทั้งแอป) + ตัวเลขเงินฝั่งรับเป็นน้ำเงินแบบเดโม ห้ามเขียว */
