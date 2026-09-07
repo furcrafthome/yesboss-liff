@@ -1482,6 +1482,7 @@ function bindBoard(){
   function laneAt(cx){var r=cork.getBoundingClientRect();var li=Math.floor((cx-r.left)/(r.width/3));return Math.max(0,Math.min(2,li))}
   /* ลาก: แนวนอนตั้งใจเท่านั้น (แตะ/ปัดขึ้นลง = สกรอลปกติ) · commit เฉพาะ pointerup · pointercancel = คืนที่เดิม */
   notes.forEach(function(nel){var sx=0,sy=0,down=false,dragging=false,decided=false;
+    function noteCx(){var rc=nel.getBoundingClientRect();return rc.left+rc.width/2}
     function revert(){down=false;dragging=false;decided=false;nel.classList.remove('lift');nel.style.transform='';his.forEach(function(x){x.style.display='none'})}
     nel.addEventListener('pointerdown',function(ev){if(ev.target&&ev.target.classList&&ev.target.classList.contains('nchk'))return;down=true;dragging=false;decided=false;sx=ev.clientX;sy=ev.clientY});
     nel.addEventListener('pointermove',function(ev){if(!down)return;var dx=ev.clientX-sx,dy=ev.clientY-sy;
@@ -1490,12 +1491,17 @@ function bindBoard(){
         dragging=true;nel.classList.add('lift');try{nel.setPointerCapture(ev.pointerId)}catch(_e){}}
       if(!dragging)return;ev.preventDefault();
       nel.style.transform='translate('+dx+'px,'+dy+'px) rotate(3deg)';
-      var li=laneAt(ev.clientX);his.forEach(function(x,i3){x.style.display=(i3===li&&i3!==+nel.getAttribute('data-lane'))?'block':'none'})});
+      var li=laneAt(noteCx());his.forEach(function(x,i3){x.style.display=(i3===li&&i3!==+nel.getAttribute('data-lane'))?'block':'none'})});
     nel.addEventListener('pointerup',function(ev){if(!down&&!dragging)return;
-      var wasDrag=dragging,dx=Math.abs(ev.clientX-sx);revert();
+      /* ตั๋ว 7 ก.ย. (d1c2d733) "ลากงานไปช่องกำลังทำแต่ทำไม่ได้": ของเดิมตัดสินช่องจาก "ปลายนิ้ว"
+         + บังคับระยะลากเกิน 14% ของบอร์ด · จับโน้ตค้างซ้ายแล้วลากจนโน้ตทับช่องกลางแล้ว
+         แต่นิ้วยังไม่ข้ามเส้น = li===from -> เด้งกลับที่เดิมเงียบๆ (ไฮไลต์ก็ไม่ตรงกับที่ปล่อยจริง)
+         แก้: วัดที่ "กึ่งกลางโน้ต" ทั้งตอนไฮไลต์และตอนปล่อย + ตัดด่านระยะทิ้ง
+         (ด่าน dragging บังคับ >10px แนวนอนอยู่แล้ว และ li!==from พิสูจน์ว่าตั้งใจข้ามช่อง) */
+      var wasDrag=dragging,cx=noteCx();revert();
       if(!wasDrag)return;
-      var from=+nel.getAttribute('data-lane'),li=laneAt(ev.clientX);
-      if(li===from||dx<=Math.max(44,cork.clientWidth*0.14)){layout();return}
+      var from=+nel.getAttribute('data-lane'),li=laneAt(cx);
+      if(li===from){layout();return}
       var id=nel.getAttribute('data-tid');
       lanes[from].splice(lanes[from].indexOf(nel),1);lanes[li].push(nel);nel.setAttribute('data-lane',''+li);nel.classList.toggle('isdone',li===2);layout();
       var seq;
