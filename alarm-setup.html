@@ -90,6 +90,25 @@ if (hasTime) {
   document.getElementById("goBtn").textContent = "ทดสอบ: ตั้งปลุก " + TIME;
 }
 
+// 🔙 ผลจริงจากแอปคำสั่งลัด (x-callback-url) — เลิกเดาจาก "หลุดออกจากหน้า" ที่เคยตัดสินผิดจนลูกค้าตัน (5-6 ก.ย.)
+var cb = (P.get("cb") || "").trim();
+var cbMsg = (P.get("errorMessage") || "").slice(0, 120);
+function say(kind, text) {
+  var r = document.getElementById("res");
+  r.className = "res on " + kind;
+  r.textContent = text;
+}
+if (cb === "ok") {
+  try { localStorage.setItem("ybAlarmReady", "1"); } catch (e) {} // ธง auto-fire ตั้งได้ที่เดียว = ตรงนี้ ตอนระบบยืนยันเอง
+  say("ok", "✅ ติดตั้งเรียบร้อย! ตั้งปลุก " + TIME + " ให้แล้ว — เช็คในแอปนาฬิกาได้เลย ครั้งต่อไปกดปุ่มเดียวตลอดค่ะ");
+} else if (cb === "err") {
+  try { localStorage.removeItem("ybAlarmReady"); } catch (e) {}
+  say("bad", "ยังไม่พบทางลัดชื่อ yesboss ค่ะ — กดปุ่มติดตั้งด้านบนอีกครั้ง แล้วเช็คว่าชื่อใต้การ์ดเป็น yesboss เป๊ะ (ห้ามมีเลขต่อท้าย)"
+       + (cbMsg ? " · " + cbMsg : ""));
+} else if (cb === "cancel") {
+  say("bad", "ยกเลิกไปนะคะ — กดปุ่มทดสอบใหม่ได้เลย");
+}
+
 function go() {
   var left = false;
   function onLeave() { left = true; }
@@ -103,9 +122,9 @@ function go() {
     window.removeEventListener('blur', onLeave);
     var r = document.getElementById('res');
     if (left || document.hidden) {
+      // ห้ามปั๊มธงตรงนี้ — "หลุดออกจากหน้า" เกิดตอนเจอ error ในแอปคำสั่งลัดได้เหมือนกัน (แผล 5-6 ก.ย.)
       r.className = 'res on ok';
       r.textContent = 'เด้งออกไปแล้ว — ไปเช็คในแอปนาฬิกาว่ามีปลุก ' + TIME + ' ขึ้นไหม';
-      try { localStorage.setItem('ybAlarmReady', '1'); } catch (e) {}
     } else {
       r.className = 'res on bad';
       r.textContent = 'ไม่มีอะไรเกิดขึ้น — ลองกดติดตั้งด้านบนก่อน หรือทักบอกทีมงานได้เลย';
@@ -113,7 +132,11 @@ function go() {
   }, 1800);
 
   try {
-    window.location.href = 'shortcuts://run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent(TIME);
+    var back = location.origin + location.pathname + '?t=' + encodeURIComponent(raw) + '&msg=' + encodeURIComponent(label) + '&cb=';
+    window.location.href = 'shortcuts://x-callback-url/run-shortcut?name=yesboss&input=text&text=' + encodeURIComponent(TIME) +
+      '&x-success=' + encodeURIComponent(back + 'ok') +
+      '&x-error=' + encodeURIComponent(back + 'err') +
+      '&x-cancel=' + encodeURIComponent(back + 'cancel');
   } catch (e) {}
 }
 </script>

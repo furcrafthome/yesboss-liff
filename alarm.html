@@ -45,12 +45,12 @@
     <div class="how" id="how">
       <span class="stepn">1</span>เปิดแอป <b>นาฬิกา</b> → แถบ <b>ปลุก</b><br>
       <span class="stepn">2</span>กด <b>+</b> → หมุนเวลาเป็น <b id="ht">--:--</b><br>
-      <span class="stepn">3</span>แตะ <b>ป้ายกำกับ</b> → วางชื่อนัด (คัดลอกไว้ให้แล้ว) → <b>บันทึก</b>
+      <span class="stepn">3</span>แตะ <b>ป้ายกำกับ</b> → วางชื่อนัด (กดปุ่มด้านล่างคัดลอกก่อน) → <b>บันทึก</b>
       <button class="alt" id="copyBtn" onclick="copyName()">📋 คัดลอกชื่อนัด</button>
       <div id="diag" style="font-size:10.5px;color:#B9A8AF;margin-top:8px"></div>
     </div>
     <p class="ok" id="okmsg">✅ สั่งตั้งปลุกแล้ว — เช็คในแอปนาฬิกาได้เลย</p>
-    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v17</div>
+    <div id="ver" style="font-size:10px;color:#D9C6CE;margin-top:10px">v18</div>
     <p class="note" id="note"></p>
   </div>
 </div>
@@ -64,6 +64,9 @@
 var P = new URLSearchParams(location.search);
 var raw = (P.get("t") || "").trim();
 var label = (P.get("msg") || "นัดของบอส").slice(0, 60);
+// 🔙 iOS พากลับมาที่หน้านี้เองผ่าน x-callback-url: ok=ทางลัดทำงานจริง · err=ไม่พบ/พัง · cancel=ผู้ใช้ยกเลิก
+var cb = (P.get("cb") || "").trim();
+var cbMsg = (P.get("errorMessage") || "").slice(0, 120);
 var m = raw.replace(":", "").match(/^(\d{1,2})(\d{2})$/);
 var H = m ? parseInt(m[1], 10) : NaN;
 var M = m ? parseInt(m[2], 10) : NaN;
@@ -109,21 +112,42 @@ if (!ok) {
   } else {
     // 🍎 iPhone (มติบอส 28 ส.ค. ตี 1: เอาปุ่มเดียวแบบที่เคยเวิร์กกลับมา):
     //    เครื่องที่เปิดระบบแล้ว (ทางลัด yesboss) = กดปุ่มเดียว/ยิงเองเลย · เครื่องใหม่ = เสนอเปิดระบบครั้งเดียว + วิธีตั้งเอง 15 วิเป็นตาข่าย
+    // 🩹 v18 (แผลจริง 5-6 ก.ย.): เกณฑ์เดิม "หลุดออกจากหน้า = สำเร็จ" ผิดในเคสที่พังพอดี —
+    //    เครื่องไม่มีทางลัดก็หลุดออกไปเจอ "ไม่พบคำสั่งลัด" ในแอปคำสั่งลัดเหมือนกัน → เว็บปั๊มธง ybAlarmReady
+    //    → รอบหน้า auto-fire เข้า error เดิมซ้ำ และปุ่มตัวช่วยไม่มีวันโผล่ = ลูกค้าตันสนิท
+    //    ตอนนี้ยิงผ่าน x-callback-url แทน: ไม่พบทางลัด iOS เด้งกลับมาที่ ?cb=err = รู้ความจริงแน่นอน
+    document.getElementById("setupBtn").style.display = "block"; // ตาข่ายถาวร ห้ามซ่อนอีก — ตรวจพลาดก็ยังมีทางออก
     var readyIOS = false;
     try { readyIOS = localStorage.getItem("ybAlarmReady") === "1"; } catch (e) {}
-    if (readyIOS) {
+    if (cb === "err") {
+      try { localStorage.removeItem("ybAlarmReady"); } catch (e) {} // ล้างธงที่เคยตั้งผิด ไม่งั้นวนเข้า error เดิม
+      document.getElementById("how").style.display = "block";      // ระหว่างนี้ตั้งเองได้เลย ไม่ต้องรอ
+      document.getElementById("mainBtn").textContent = "⏰ ลองตั้งปลุกอีกครั้ง";
+      document.getElementById("setupBtn").textContent = "📲 ติดตั้งทางลัด yesboss (2 แตะ ใช้ได้ตลอด)";
+      document.getElementById("note").textContent = "เครื่องนี้ยังไม่มีทางลัด yesboss ค่ะ ติดตั้งครั้งเดียวจบ แล้วกดปุ่มเดียวได้ตลอดไป";
+      if (cbMsg) document.getElementById("diag").textContent = cbMsg;
+    } else if (cb === "ok") {
+      try { localStorage.setItem("ybAlarmReady", "1"); } catch (e) {} // ยืนยันจากตัวระบบเอง = ธงจริงใบเดียวที่เชื่อได้
+      document.getElementById("setupBtn").style.display = "none"; // สำเร็จแล้วไม่ต้องชวนติดตั้งอะไรอีก
+      fired();
+    } else if (cb === "cancel") {
+      document.getElementById("note").textContent = "ยกเลิกไปนะคะ — กดปุ่มด้านบนใหม่ได้ทุกเมื่อ";
+    } else if (readyIOS) {
       document.getElementById("note").textContent = "กำลังเรียกระบบตั้งปลุก… เห็นแบนเนอร์ด้านบน = สำเร็จ";
       setTimeout(setAlarm, 450);
     } else {
-      document.getElementById("note").textContent = "กดปุ่มเดียว ถ้าเครื่องยังไม่เคยเปิดระบบ เดี๋ยวมีตัวช่วยโผล่มาค่ะ";
+      document.getElementById("note").textContent = "กดปุ่มเดียวจบค่ะ · ถ้าขึ้นว่า \"ไม่พบคำสั่งลัด\" กดปุ่มสีอ่อนด้านล่างติดตั้งก่อนนะคะ";
     }
   }
 }
 
-function fired() {
+function fired() { // ✅ บนจอเท่านั้น — ห้ามตั้งธง auto-fire จากตรงนี้ (ธงตั้งได้ทางเดียวคือ cb=ok ที่ระบบยืนยันเอง)
   document.getElementById("okmsg").style.display = "block";
   document.getElementById("ic").textContent = "✅";
-  if (!isAnd) { try { localStorage.setItem("ybAlarmReady", "1"); } catch (e) {} }
+}
+function cbUrl(kind) { // ปลายทางที่ให้ iOS พากลับมา — ต้องเป็น URL เต็ม + พกเวลา/ชื่อนัดกลับมาด้วย ไม่งั้นหน้าโล่ง
+  return location.origin + location.pathname + "?t=" + encodeURIComponent(raw) +
+         "&msg=" + encodeURIComponent(label) + "&cb=" + kind;
 }
 function goSetup() {
   location.href = "/alarm-setup.html?t=" + encodeURIComponent(raw) + "&msg=" + encodeURIComponent(label);
@@ -159,14 +183,18 @@ function setAlarm(fromTap) {
       document.removeEventListener("visibilitychange", onLeaveI);
       window.removeEventListener("pagehide", onLeaveI);
       window.removeEventListener("blur", onLeaveI);
+      // หลุดออกจากหน้า = "น่าจะ" ยิงออก โชว์ ✅ ได้ แต่ไม่ปั๊มธง — ของจริงรอ cb=ok/cb=err ที่ iOS พากลับมา
       if (leftI || document.hidden) { fired(); }
       else if (fromTap) {
-        // เครื่องนี้ยังไม่มีระบบ → เสนอเปิดครั้งเดียว + กางวิธีตั้งเองคู่กัน ไม่มีทางตัน
-        document.getElementById("setupBtn").style.display = "block";
+        // ไม่ขยับเลย = ทางลัดไม่ทำงาน → กางวิธีตั้งเอง (ปุ่มติดตั้งโผล่อยู่แล้วตั้งแต่โหลดหน้า)
         showHow();
       }
     }, 1500);
-    location.href = "shortcuts://run-shortcut?name=yesboss&input=text&text=" + encodeURIComponent(pad(H) + ":" + pad(M));
+    location.href = "shortcuts://x-callback-url/run-shortcut?name=yesboss&input=text&text=" +
+      encodeURIComponent(pad(H) + ":" + pad(M)) +
+      "&x-success=" + encodeURIComponent(cbUrl("ok")) +
+      "&x-error=" + encodeURIComponent(cbUrl("err")) +
+      "&x-cancel=" + encodeURIComponent(cbUrl("cancel"));
     return;
   }
   // 🤖 ปลายทาง Android (พิสูจน์บน emulator 28 ส.ค.): แอปนาฬิกาไม่มี activity ที่เปิด category BROWSABLE
