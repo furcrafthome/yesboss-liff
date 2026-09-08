@@ -896,6 +896,14 @@ var WZ_MORE=0;
    ของจริง: 3 คนแรกที่ผ่านวิซาร์ดใหม่ มี call_me/city/province/org_name = null ครบทั้ง 3 คน
    ขณะที่ช่องที่มี onchange (ชื่อ/อาชีพ) บันทึกได้ครบทั้ง 3 คน */
 function wzPickWf(v){wzStash();dStash2();var i=F_WFS.indexOf(v);if(i<0)F_WFS.push(v);else F_WFS.splice(i,1);F_WF=F_WFS[0]||"";wzPersist();draw()}
+/* 📣 "รู้จักจากไหน" — คำถามเดียวที่บอกว่าคอนเทนต์ใบไหนได้ผล
+   เก็บได้ 611 คำตอบแล้ว "เงียบสนิทตั้งแต่ 25 ก.ค. 69" เพราะฟอร์มใหม่ (wzForm) ไม่ได้ถามเลยสักช่อง
+   ของเดิมเหลืออยู่แต่ในฟอร์มเก่า (wzFormLegacy) และซ่อนหลังปุ่ม "บอกเพิ่มอีกนิด" ที่แทบไม่มีใครกด
+   -> ระหว่างนั้นคนใหม่เข้ามา 3,672 คนใน 7 วัน (8 ก.ย.) โดยไม่รู้เลยว่ามาจากไหน บอสยิงคอนเทนต์เองแต่วัดผลไม่ได้
+   บทเรียนเดียวกับ wz_bz (ซ่อนแล้วตอบ 7%): ต้องเห็นเลย + กดปุ่มเดียว ไม่ใช่ dropdown ที่คนเลื่อนผ่าน
+   ⚠️ ค่าที่ส่งต้องตรงกับ ACQS ใน onboard.save เป๊ะ ไม่งั้นหลังบ้านทิ้งเงียบ */
+var AC_CARDS=[["facebook","👍","Facebook"],["tiktok","🎵","TikTok"],["friend","💗","เพื่อนแนะนำ"],["instagram","📸","Instagram"],["search","🔍","ค้นเจอเอง"],["other","✨","ที่อื่น"]];
+function wzPickAc(v){wzStash();dStash2();F_AC=(F_AC===v?"":v);wzPersist();draw()}
 function wzMore(){wzStash();WZ_MORE=WZ_MORE?0:1;draw()}
 function wzHours(id,label,cur,hint){
   var s='<label for="'+id+'">'+label+'</label><select id="'+id+'" onchange="wzStash();wzPersist()"><option value="">ไม่บอกก็ได้</option>';
@@ -1028,6 +1036,12 @@ function wzForm(){
       +'<p class="wzsub">เลือกได้หลายข้อ</p><div class="wfgrid">';
     for(var i=0;i<WF_CARDS.length;i++){var c=WF_CARDS[i];var on=F_WFS.indexOf(c[0])>=0;
       h+='<button type="button" class="wfc'+(on?" on":"")+'" aria-pressed="'+(on?"true":"false")+'" onclick="wzPickWf(\''+c[0]+'\')"><span class="e" aria-hidden="true">'+c[1]+'</span>'+c[2]+'</button>';}
+    h+='</div>';
+    /* 📣 ที่มาของลูกค้า — ไม่บังคับ แต่ต้อง "เห็น" ไม่ใช่ซ่อนหลังปุ่มพับ (เหตุผลเต็มอยู่ที่ AC_CARDS) */
+    h+='<div class="wzh1" style="font-size:17px;margin-top:18px">รู้จักเลขาจากไหนคะ <span class="wzopt">(ไม่บังคับ)</span></div>'
+      +'<p class="wzsub">บอกไว้นิดเดียว เลขาจะได้ไปขอบคุณถูกที่ 💕</p><div class="wfgrid">';
+    for(var j=0;j<AC_CARDS.length;j++){var a=AC_CARDS[j];var ao=F_AC===a[0];
+      h+='<button type="button" class="wfc'+(ao?" on":"")+'" aria-pressed="'+(ao?"true":"false")+'" onclick="wzPickAc(\''+a[0]+'\')"><span class="e" aria-hidden="true">'+a[1]+'</span>'+a[2]+'</button>';}
     h+='</div>';
     return h+'</div>'+wzNav("wzStash();WZ=1;draw();window.scrollTo(0,0)","wzNext2()","ไปต่อ ›",false);
   }
