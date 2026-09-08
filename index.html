@@ -909,15 +909,31 @@ function wzHours(id,label,cur,hint){
      ประเทศ    -> ไม่รู้ = เตือนผิดเวลา (คนอยู่ต่างประเทศเจ็บทันที)
      ตื่น/นอน  -> ไม่รู้ = ปลุก 8 โมงเช้าทุกคนเหมือนเดิม
      อยากให้ช่วยเรื่องไหน -> ไม่รู้ = สอนใช้ผิดเรื่องตั้งแต่วันแรก
-   ที่เหลือไม่บังคับ — ข้ามได้ตอนสมัคร แล้วประตูค่อยตามเก็บทีหลัง */
+     กระเป๋าเงินหลัก -> ไม่รู้ = จดเงินเข้ากระเป๋าผิด (และประตูบังคับช่องนี้อยู่แล้ว)
+   ที่เหลือไม่บังคับ — ข้ามได้ตอนสมัคร แล้วเลขาค่อยชวนเล่าเพิ่มในแฟ้มทีหลัง (ไม่ขวางการใช้งาน) */
 /* 🆕 ที่เดียวในหน้าเว็บที่ตอบว่า "คนนี้ได้ของใหม่ไหม" — เซิร์ฟเวอร์ตัดสินมาแล้ว หน้าเว็บไม่คิดเอง */
 function wzNewUx(){return !!(DATA&&DATA.newux)}
-var WZ_REQ_P1=[["wz_nm","ชื่อที่ให้เลขาเรียก"],["wz_oc","บอสทำงานแบบไหน"],["d_ctry","ประเทศที่อยู่"]];
-var WZ_REQ_P2=[["wz_wk","เวลาตื่น"],["wz_sl","เวลาเข้านอน"]];
+/* ⚠️ กฎเหล็ก (บอสสั่ง 8 ก.ย. 69): "ในหน้าลงทะเบียนยังไงก็ต้องกรอกให้จบ แล้วก็ผ่านทันทีเลย"
+   = ทุกช่องใน PROFILE_REQUIRED ต้องเป็นช่องบังคับของจอนี้ ห้ามขาดแม้ช่องเดียว
+   คอลัมน์ที่ 3 = ช่องในประตูที่ข้อนี้ปลดให้ (เทส gate-passable-after-wizard เทียบกับ PROFILE_REQUIRED)
+   id ขึ้นต้นด้วย seg: = ปุ่มเลือก ค่าอยู่ใน DF ไม่ใช่ใน DOM
+   เคสจริงที่ทำให้ต้องเขียนกฎนี้: "กระเป๋าเงินหลัก" ติดป้าย "(ไม่บังคับ)" ในจอนี้ แต่ประตูบังคับ
+   -> 174 คน (3 ส.ค.-8 ก.ย.) กรอกจบทุกข้อที่จอขอ ดูทัวร์จบ พิมพ์ทักเลขาครั้งแรก แล้วโดนการ์ด
+      "เหลืออีก 1 ข้อ" เด้งใส่ = ลูกค้าเข้าใจว่า "ต้องทำครบทุกขั้นตอนถึงจะใช้ได้" */
+var WZ_REQ_P1=[["wz_nm","ชื่อที่ให้เลขาเรียก","display_name"],["wz_oc","บอสทำงานแบบไหน","occupation"],["d_ctry","ประเทศที่อยู่","country"]];
+var WZ_REQ_P2=[["wz_wk","เวลาตื่น","brief_hour"],["wz_sl","เวลาเข้านอน","report_hour,quiet_from"],["seg:default_scope","กระเป๋าเงินหลัก","default_scope"]];
 function wzMissing(page){
   if(!wzNewUx())return []; /* ฟอร์มเดิมไม่เคยบังคับกรอกอะไร */
-  var need=(page===2?WZ_REQ_P1:WZ_REQ_P2),out=[],i,e;
-  for(i=0;i<need.length;i++){e=$("#"+need[i][0]);if(!e||!String(e.value||"").trim())out.push(need[i][1])}
+  var need=(page===2?WZ_REQ_P1:WZ_REQ_P2),out=[],i,id,v,e;
+  for(i=0;i<need.length;i++){
+    id=need[i][0];
+    if(id.indexOf("seg:")===0){ /* ปุ่มเลือก: ไม่มี element ให้อ่าน .value ต้องดูค่าใน DF */
+      v=DF?DF[id.slice(4)]:null;
+      if(v===null||v===undefined||v==="")out.push(need[i][1]);
+      continue;
+    }
+    e=$("#"+id);if(!e||!String(e.value||"").trim())out.push(need[i][1]);
+  }
   if(page===2&&!F_WFS.length)out.push("เรื่องที่อยากให้ช่วย");
   return out;
 }
@@ -1023,11 +1039,14 @@ function wzForm(){
     +'<label style="margin-top:0" for="wz_wk">ปกติตื่นประมาณกี่โมง '+wzReq()+'</label>'+wzHourSel("wz_wk",F_WK)
     +'<label for="wz_sl">เข้านอนประมาณกี่โมง '+wzReq()+'</label>'+wzHourSel("wz_sl",F_SL)
     +'<p class="wzsub" style="margin:6px 0 0">เลขาจะสรุปงานให้ตอนบอสตื่น และไม่ทักช่วงที่บอสหลับ ⏰</p>'
+    /* 💰 ย้ายขึ้นมาอยู่กับข้อบังคับข้ออื่น (เดิมอยู่การ์ดล่างปนกับข้อ "ไม่บังคับ" คนเลยเลื่อนผ่าน)
+       ประตูบังคับช่องนี้ ถ้าจอนี้ไม่บังคับด้วย = กรอกจบแล้วยังโดนการ์ดเด้ง */
+    +'<label>จดเงินเข้ากระเป๋าไหนเป็นหลัก '+wzReq()+'</label>'+dSeg("default_scope",[["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]])
+    +'<p class="wzsub" style="margin:6px 0 0">พิมพ์ "ค่าข้าว 60" ปุ๊บ เลขาจะได้รู้ว่าจดเข้ากระเป๋าไหน — เปลี่ยนทีหลังได้ทุกเมื่อ</p>'
     +'</div>';
   h+='<div class="wzf wzcard">'
     +'<label style="margin-top:0">ชอบให้ตอบแบบไหน <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("reply_style",[["short","สั้น กระชับ"],["detail","อธิบายละเอียด"]])
     +'<label>เตือนซ้ำเมื่อไม่กดรับ <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("renudge",[[true,"จิกจนเสร็จ"],[false,"เตือนครั้งเดียวพอ"]])
-    +'<label>จดเงินเข้ากระเป๋าไหนเป็นหลัก <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("default_scope",[["personal","👤 ส่วนตัว"],["family","🏠 ครอบครัว"],["company","🏢 บริษัท"]])
     +'</div>';
   h+='<div class="wzf wzcard">'
     +'<label style="margin-top:0">สถานะ <span class="wzopt">(ไม่บังคับ)</span></label>'+dSeg("marital_status",[["single","โสด"],["dating","มีแฟน"],["married","แต่งงาน"],["parent","มีลูก"]])
@@ -2881,6 +2900,30 @@ async function revokeDevice(id){
 /* 🔒 ลบทั้งบัญชี (PDPA) — ลบจริงตามกฎหมาย ไม่เข้าถังขยะ กู้ไม่ได้จริงๆ
    เดิมถาม confirm() ซ้อนสองชั้น ซึ่งพิสูจน์แล้วว่าไม่ช่วย: กดรัวสองทีได้พอกัน
    ของใหม่ให้ "พิมพ์คำว่า ลบทั้งหมด" = ต้องอ่านถึงจะผ่าน + บอกจำนวนของจริงที่จะหาย */
+/* กล่องถามเหตุผลตอนเลิกใช้ — คืนค่าเหตุผล หรือ "" ถ้าข้าม (ปิดกล่อง/กด Esc = ข้าม)
+   ตัวเลือกต้องตรงกับ ERASE_REASONS ฝั่งเซิร์ฟเวอร์ ไม่งั้นจะไปลงช่อง "อื่นๆ" หมด */
+function eraseWhy(){
+  return new Promise(function(res){
+    var R=["ไม่ได้ใช้แล้ว","เตือนไม่ตรง/ไม่มา","ราคาแพงไป","ห่วงเรื่องข้อมูล","บอทตอบไม่รู้เรื่อง","ขอไม่บอก"];
+    var w=document.createElement("div");
+    w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");w.setAttribute("aria-label","บอกเหตุผลที่เลิกใช้");
+    w.style.cssText="position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px";
+    var b="";for(var i=0;i<R.length;i++)b+='<button class="btn ghost" style="width:100%;margin-top:7px" data-w="'+esc(R[i])+'">'+esc(R[i])+'</button>';
+    w.innerHTML='<div style="background:var(--surface);color:var(--ink);border-radius:18px;padding:20px;max-width:400px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3)">'
+      +'<div style="font-size:17px;font-weight:800">ขอถามอย่างสุดท้ายนะ 🤍</div>'
+      +'<div style="font-size:14px;line-height:1.65;color:var(--muted);margin-top:9px">ที่เลิกใช้เพราะอะไรเหรอ — ตอบสั้นๆ ก็พอ ช่วยให้เราทำให้ดีขึ้นได้จริงๆ<br><b>ไม่ตอบก็ได้</b> ข้อมูลจะถูกลบเหมือนกันทุกกรณี และคำตอบนี้ไม่ผูกกับตัวบอสเลย</div>'
+      +b+'<div class="eact" style="margin-top:12px"><button class="btn ghost" id="wskip" style="width:100%">ข้ามไป ลบเลย</button></div></div>';
+    document.body.appendChild(w);
+    function close(v){document.body.removeChild(w);document.removeEventListener("keydown",k);res(v)}
+    function k(e){if(e.key==="Escape")close("")}
+    document.addEventListener("keydown",k);
+    var bs=w.querySelectorAll("button[data-w]");
+    for(var j=0;j<bs.length;j++)bs[j].onclick=function(){close(this.getAttribute("data-w"))};
+    w.querySelector("#wskip").onclick=function(){close("")};
+    w.onclick=function(e){if(e.target===w)close("")};
+    setTimeout(function(){w.querySelector("#wskip").focus()},50);
+  });
+}
 async function doErase(){
   var d=DATA||{},nT=((d.tasks&&d.tasks.open)||[]).length+((d.tasks&&d.tasks.done)||[]).length;
   var nR=(d.reminders||[]).length,nF=((d.story&&d.story.facts)||[]).length,nD=((d.story&&d.story.files)||[]).length;
@@ -2889,6 +2932,10 @@ async function doErase(){
       +"<br>• ประวัติแชต บันทึกอารมณ์ รายการเงิน และเรื่องที่แจ้งทีมงานทั้งหมด<br><br>"
       +"<b>ลบจริง กู้คืนไม่ได้</b> — อันนี้ไม่เข้าถังขยะ 30 วันเหมือนการลบทั่วไป เพราะเป็นสิทธิ์ตาม PDPA ที่ต้องลบให้จริง"});
   if(!ok)return;
+  /* 📤 ถามเหตุผล 1 คำถาม (8 ก.ย. 69) — 28 คนหายไปใน 5 วันโดยไม่มีใครรู้เหตุผลสักคน · 24 ใน 28 ลบจากหน้านี้
+     ⚠️ ห้ามขวางสิทธิ์ PDPA: มีปุ่ม "ข้ามไป" และไม่ว่าจะแตะอะไร บรรทัดถัดไปก็ลบเหมือนกันหมด
+     เก็บก่อนลบเพราะตอนนี้บัญชียังอยู่ = ยิง API ผ่านชัวร์ (ลบไปแล้วค่อยถามเสี่ยงยืนยันตัวตนไม่ผ่าน) */
+  try{var why=await eraseWhy();if(why)await api("pdpa.reason",{reason:why})}catch(e){}
   /* 230 (P0-2): บอกตามจริง — queued = บางส่วนระบบกำลังลบต่ออัตโนมัติ ไม่ใช่ "เรียบร้อยแล้ว" ทั้งที่ยังไม่ครบ */
   try{var er=await api("pdpa.erase");$("#app").innerHTML=(er&&er.queued)
     ?'<div class="err">🔒 เริ่มลบข้อมูลของคุณแล้ว — ส่วนใหญ่ลบเสร็จทันที ที่เหลือระบบจะลบให้ครบภายใน 1 ชั่วโมง (อัตโนมัติ)<br>ขอบคุณที่เคยใช้บริการนะ 🤍</div>'
@@ -2911,7 +2958,9 @@ function kbNa(){return P==="ครับ"?"นะครับ":P==="ค่ะ"?"
 function hpose(x){var e=$h("hrbossy");if(e)e.src="img/"+x+".webp"}
 function hbub(h){var e=$h("hrbubble");if(e)e.innerHTML=h}
 function ymdAdd(ymd,days){try{return new Date(Date.parse(ymd+"T00:00:00Z")+days*86400000).toISOString().slice(0,10)}catch(e){return ymd}}
-function hrisky(s){return /ทำร้ายตัวเอง|ไม่อยากมีชีวิต|ไม่อยากอยู่|ฆ่าตัวตาย|อยากตาย|จบชีวิต|สิ้นหวัง|อยู่ไปทำไม/.test(s||"")}
+/* 8 ก.ย. 69: ยิงลิสต์เดียวกับฝั่งเซิร์ฟเวอร์ลงมา (SEVERE_HEART_RE) — ห้ามพิมพ์ลิสต์ซ้ำตรงนี้
+   เดิมเป็นสำเนามือ แล้วมันค่อยๆ ห่างจากตัวจริง จนวันที่ "โดดตึก" มาถึงก็หลุดทั้งสองฝั่งพร้อมกัน */
+function hrisky(s){return /(อยากตาย|ไม่อยากอยู่(แล้ว|ต่อ|บนโลก|ในโลก)|ไม่อยากมีชีวิต|ไม่อยากตื่น(ขึ้น)?มาอีก|ทำร้ายตัวเอง|กรีดข้อมือ|เชือดข้อมือ|จบชีวิต|ฆ่าตัวตาย|ปลิดชีพ|ไม่ไหวแล้วจริงๆ|(กระโดด|โดด)(ตึก|สะพาน)|แขวนคอ|ผูกคอตาย|กินยา(ตาย|เกินขนาด|ฆ่าตัว)|ยาพิษ|ลาโลก|หายไปจากโลก|จบทุกอย่าง(คืนนี้|วันนี้|พรุ่งนี้)|อยู่ไปทำไม|อยู่ไปก็ไม่มีประโยชน์|สิ้นหวัง)/i.test(s||"")}
 
 /* ---------- ของในห้อง: ปลดล็อกตามแสงใจสะสม (ordinal ต้องตรงกับ celebrated ฝั่ง DB) ---------- */
 var ITEMS=[
