@@ -1122,6 +1122,11 @@ async function wzSave(){
       renudge:(DF.renudge===true||DF.renudge==="true")
     });
     if(DATA&&DATA.profile){DATA.profile.display_name=F_NM;DATA.profile.character=CH}
+    /* 🔄 ต้องดึงโปรไฟล์สดหลังบันทึก — onboard.save คำนวณค่าใหม่ฝั่งเซิร์ฟเวอร์ (สรุปเช้า/เย็น/ช่วงเงียบ)
+       ปล่อยให้ DATA เป็นภาพตอนเปิดหน้า = dossInit() เอา null มาเป็นค่าตั้งต้นของ DF
+       แล้ว dPayload() (ส่งทั้งใบทุกครั้ง) ยิง quiet_from:null กลับไปลบของที่เพิ่งคำนวณทิ้ง
+       ของจริง 9 ก.ย.: 20 ใน 85 คนที่ลงทะเบียนหลังแก้เมื่อคืน โดนลบ quiet_from ภายในไม่กี่นาที */
+    try{DATA=await api("me.get",SRC?{src:SRC}:null)}catch(e){}
     DF=null;
     TI=0;WZ=4;draw();window.scrollTo(0,0);
   }catch(e){toast(e.message||"บันทึกไม่สำเร็จ ลองใหม่อีกที");if(btn){btn.disabled=false;btn.textContent="เสร็จแล้ว เริ่มใช้เลย ›"}}
