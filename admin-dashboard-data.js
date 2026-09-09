@@ -1,7 +1,7 @@
 const empty = () => ({
   ts: '', users_total: 0, users_consented: 0, users_onboarded: 0,
   users: [],
-  new_1d: 0, new_7d: 0, new_30d: 0, active_1d: 0, active_7d: 0, active_30d: 0,
+  new_1d: 0, new_7d: 0, new_30d: 0, new_in_range: 0, active_1d: 0, active_7d: 0, active_30d: 0, active_in_range: 0,
   plan_breakdown: [], growth: { daily: [], message_daily: [] },
   revenue: { paid_30d_thb: 0, donations_30d_thb: 0, payment_count_30d: 0, paid_by_plan: [] },
   engagement: { reminders_7d: 0, reminders_sent_7d: 0, tasks_created_7d: 0, tasks_done_7d: 0, expenses_7d: 0, documents_7d: 0, facts_7d: 0, intents: [] },
@@ -77,7 +77,7 @@ export function dashboardRangeParams(start, end) {
 export function demoDashboardPayload() {
   return {
     is_demo: true, ts: 'DEMO · 24 ก.ค. 2026 12:00', users_total: 1010, users_consented: 424, users_onboarded: 800,
-    new_1d: 5, new_7d: 31, new_30d: 120, active_1d: 83, active_7d: 312, active_30d: 995,
+    new_1d: 5, new_7d: 31, new_30d: 120, new_in_range: 120, active_1d: 83, active_7d: 312, active_30d: 995, active_in_range: 995,
     plan_breakdown: [{ plan: 'free', count: 900 }, { plan: 'pro', count: 110 }],
     users: [
       { name: 'มะลิ (ตัวอย่าง)', plan: 'pro', messages_7d: 31, reminders_open: 2, tasks_open: 4, docs_total: 7, facts_active: 12, last_active_at: 'วันนี้ 11:42', acq_channel: 'Facebook', chat_preview: [{ role: 'user', text: 'พรุ่งนี้ 10 โมง เตือนประชุมทีมให้หน่อย', at: '11:42' }, { role: 'bossy', text: 'ได้เลยครับ ตั้งเตือนประชุมทีมพรุ่งนี้ 10:00 ให้แล้วครับ', at: '11:42' }] },
