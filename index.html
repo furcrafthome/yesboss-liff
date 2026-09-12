@@ -1,11 +1,11 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.line-scdn.net https://yeojpaardjgcgbwpmjsg.supabase.co https://app.yesboss.club; frame-src 'self'; connect-src 'self' https://yeojpaardjgcgbwpmjsg.supabase.co https://api.line.me https://access.line.me https://*.line.me">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.line-scdn.net https://yusepskpxtyxkhvcclmt.supabase.co https://app.yesboss.club; frame-src 'self'; connect-src 'self' https://yusepskpxtyxkhvcclmt.supabase.co https://api.line.me https://access.line.me https://*.line.me">
 <meta name="robots" content="noindex, nofollow"><title>My YES BOSS</title>
 <!-- ⚡ เปิดสายรอไว้ล่วงหน้า (แก้ 25 ก.ค. LIFF เปิดช้า): เบราว์เซอร์ทำ DNS+TLS กับ 2 โฮสต์นี้ตั้งแต่อ่าน <head>
      แทนที่จะเริ่มตอนถึงบรรทัด script/fetch — ประหยัดราว 0.2 วิ บนมือถือ · ไม่กระทบ CSP (preconnect ไม่ใช่การโหลด) -->
 <link rel="preconnect" href="https://static.line-scdn.net" crossorigin>
-<link rel="preconnect" href="https://yeojpaardjgcgbwpmjsg.supabase.co">
+<link rel="preconnect" href="https://yusepskpxtyxkhvcclmt.supabase.co">
 <link rel="dns-prefetch" href="https://api.line.me">
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <!-- 🎀 SKIN2 (4 ก.ย. 69): ฟอนต์ลายมือ Mali ใช้เฉพาะหัวข้อ — โหลดแบบไม่ block first paint (media=print แล้วสลับ)
@@ -644,7 +644,7 @@ async function affWelcome(code){
    +'<a href="'+location.pathname+'" style="color:#B85C7E;font-size:13px">เปิดหน้าแดชบอร์ด</a></div>';
 }
 async function api(action,payload){
-  var r=await fetch("https://yeojpaardjgcgbwpmjsg.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
+  var r=await fetch("https://yusepskpxtyxkhvcclmt.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
   if(r.status===401){relogin();throw new Error("กำลังต่ออายุการเข้าสู่ระบบ รอแป๊บนึงนะ...")}
   /* 🚪 423 = ห้องล็อกอยู่ (ตั้ง PIN ไว้ + token หมดอายุ/ไม่มี) → เด้งจอประตูให้กดรหัส แล้วค่อยทำรายการต่อ */
   if(r.status===423){var pj={};try{pj=await r.json()}catch(e){}if(window.pinDoorShow)pinDoorShow(pj);throw new Error("ใส่รหัสประตูก่อนนะคะ")}
@@ -1234,7 +1234,7 @@ function wzPickBtn(act, ic, title, sub, badge, hot){
     + '<span class="ar" aria-hidden="true">›</span></button>';
 }
 /* คู่มือวิดีโอ — ในแอป LINE เปิดด้วย openWindow (external) ไม่งั้นวิดีโอเล่นใน webview ไม่ขึ้นบางเครื่อง */
-var OB_VIDEO="https://yeojpaardjgcgbwpmjsg.supabase.co/storage/v1/object/public/assets/tutorial/howto-line.mp4";
+var OB_VIDEO="https://yusepskpxtyxkhvcclmt.supabase.co/storage/v1/object/public/assets/tutorial/howto-line.mp4";
 function obVideo(){
   try{ if(liff&&liff.openWindow){liff.openWindow({url:OB_VIDEO,external:true});return} }catch(e){}
   window.open(OB_VIDEO,"_blank");
@@ -3602,7 +3602,7 @@ function pdZoomOut(){pdZSeq++;var sc=pg("pdscene"),cu=pg("pdcu");cu.classList.re
 function pdPaint(){var d=pg("pddots").children;for(var i=0;i<6;i++){d[i].className=i<PD.buf.length?"pddotf":""}}
 function pdKeysOn(on){var b=pg("pdkeys").querySelectorAll("button");for(var i=0;i<b.length;i++){b[i].disabled=!on}}
 async function pinApi(action,payload){
-  var r=await fetch("https://yeojpaardjgcgbwpmjsg.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
+  var r=await fetch("https://yusepskpxtyxkhvcclmt.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
   if(r.status===401){relogin();return{error:"relogin",__st:401}}
   var j={};try{j=await r.json()}catch(e){}
   j.__st=r.status;return j;
