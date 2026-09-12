@@ -644,7 +644,7 @@ async function affWelcome(code){
    +'<a href="'+location.pathname+'" style="color:#B85C7E;font-size:13px">เปิดหน้าแดชบอร์ด</a></div>';
 }
 async function api(action,payload){
-  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
+  var r=await fetch("https://yeojpaardjgcgbwpmjsg.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
   if(r.status===401){relogin();throw new Error("กำลังต่ออายุการเข้าสู่ระบบ รอแป๊บนึงนะ...")}
   /* 🚪 423 = ห้องล็อกอยู่ (ตั้ง PIN ไว้ + token หมดอายุ/ไม่มี) → เด้งจอประตูให้กดรหัส แล้วค่อยทำรายการต่อ */
   if(r.status===423){var pj={};try{pj=await r.json()}catch(e){}if(window.pinDoorShow)pinDoorShow(pj);throw new Error("ใส่รหัสประตูก่อนนะคะ")}
@@ -784,10 +784,17 @@ async function ensureStory(){
 function card(v,l){return '<div class="c"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
 /* 💛 โหลดแสงใจ✦/สตรีคจริงให้หัวแท็บฮีลใจ (โฉมบ้านบอสซี่) — โหลดครั้งแรกที่เข้าแท็บ พลาดแล้วเข้าใหม่ลองซ้ำได้ */
 async function ensureHeal(){
-  if(window.HEALST&&window.HEALST!=="ing")return;
+  /* 🔁 ตั๋วคุณบอส 0b258af7 (9 ก.ย. 17:31) "กดบันทึกความรู้สึกแล้วมันขึ้นหน้าโหลดข้อมูลของบอสรัวๆ"
+     ราก: เดิมพลาดแล้วตั้ง HEALST=null ซึ่ง "falsy" -> ด่านกันซ้ำทั้งสองบรรทัดไม่จับ
+     -> ยิง heal.state ใหม่ -> พังอีก -> draw() -> draw เรียก ensureHeal อีก = ลูปไม่รู้จบ
+        (saveMood -> act -> reload -> draw คือทางที่คุณบอสเข้าลูป)
+     ผลคือหน้าโหลดกะพริบรัวๆ + ยิง API ซ้ำไม่หยุดจนกว่าจะปิดหน้า
+     แก้: พลาดแล้วเก็บเป็น "ค่าที่ truthy" ({err:1}) เพื่อให้ด่านกันซ้ำจับได้ = ลองครั้งเดียวจบ
+     (กดสลับแท็บออกแล้วกลับเข้ามาใหม่ยังลองใหม่ได้ ผ่าน go() ที่เรียก ensureHeal ตรงๆ) */
   if(window.HEALST==="ing")return;
+  if(window.HEALST!==undefined&&window.HEALST!==null)return;
   window.HEALST="ing";
-  try{var r=await api("heal.state");window.HEALST=r||{}}catch(e){window.HEALST=null}
+  try{var r=await api("heal.state");window.HEALST=r||{}}catch(e){window.HEALST={err:1}}
   if(TAB==="heal")draw();
 }
 
@@ -1733,24 +1740,45 @@ function edRem(i){
   if(!r||!el)return;
   if(el.innerHTML){el.innerHTML="";return}
   var d=new Date(r.remind_at),lo=isNaN(d.getTime())?"":localInput(r.remind_at);
-  var REP=[["none","ไม่ซ้ำ"],["daily","ทุกวัน"],["weekdays","จ–ศ"],["weekly","ทุกสัปดาห์"],["monthly","ทุกเดือน"],["monthend","สิ้นเดือน"],["yearly","ทุกปี"]];
+  /* 🔁 274 · ตั๋วคุณต่อ: "จะใช้แบบกดเลือกตั้งค่าจากหน้าเมนูจัดการก็ไม่มีให้เลือกแบบตั้งค่าทีเดียวหลายๆวัน"
+     เพิ่มตัวเลือก "เลือกวันเอง" แล้วโชว์ปุ่มวันให้ติ๊ก -> ส่งกลับเป็น days:123456 */
+  var REP=[["none","ไม่ซ้ำ"],["daily","ทุกวัน"],["weekdays","จ–ศ"],["weekly","ทุกสัปดาห์"],["monthly","ทุกเดือน"],["monthend","สิ้นเดือน"],["yearly","ทุกปี"],["days","เลือกวันเอง…"]];
+  var curDays=/^days:[1-7]{1,7}$/.test(r.repeat||"")?String(r.repeat).slice(5):"";
+  var repSel=curDays?"days":(r.repeat||"none");
   var pro=mIsPro(),h='<div class="edit">';
   h+='<label class="f" for="rt'+i+'">ชื่อนัด</label><input id="rt'+i+'" maxlength="300" value="'+esc(r.reminder_text)+'">';
   h+='<label class="f" for="rd'+i+'">วันเวลา</label><input type="datetime-local" id="rd'+i+'" value="'+esc(lo)+'">';
-  h+='<label class="f" for="rr'+i+'">เตือนซ้ำ'+(pro?"":" 🔒 Pro")+'</label><select id="rr'+i+'"'+(pro?"":" disabled")+'>';
-  for(var q=0;q<REP.length;q++){h+='<option value="'+REP[q][0]+'"'+((r.repeat||"none")===REP[q][0]?" selected":"")+'>'+REP[q][1]+'</option>'}
+  h+='<label class="f" for="rr'+i+'">เตือนซ้ำ'+(pro?"":" 🔒 Pro")+'</label><select id="rr'+i+'" onchange="repChg(this,'+i+')"'+(pro?"":" disabled")+'>';
+  for(var q=0;q<REP.length;q++){h+='<option value="'+REP[q][0]+'"'+(repSel===REP[q][0]?" selected":"")+'>'+REP[q][1]+'</option>'}
   h+='</select>';
+  /* ปุ่มวัน: โผล่เมื่อเลือก "เลือกวันเอง" (ISO 1=จันทร์..7=อาทิตย์ ให้ตรงกับฝั่ง DB) */
+  var DW=[[1,"จ"],[2,"อ"],[3,"พ"],[4,"พฤ"],[5,"ศ"],[6,"ส"],[7,"อา"]];
+  h+='<div id="rdw'+i+'" style="'+(repSel==="days"?"":"display:none")+';margin-top:7px">';
+  h+='<div class="l" style="margin-bottom:5px">เลือกวันที่อยากให้เตือน</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  for(var w=0;w<DW.length;w++){var on=curDays.indexOf(String(DW[w][0]))>=0;
+    h+='<button type="button" class="btn sm'+(on?"":" ghost")+'" data-d="'+DW[w][0]+'" aria-pressed="'+(on?"true":"false")+'" onclick="dwTog(this)">'+DW[w][1]+'</button>'}
+  h+='</div></div>';
   if(!pro){h+='<div class="l" style="margin-top:5px">เตือนวนซ้ำอัตโนมัติอยู่ในแพ็ก Pro นะ</div>'}
   h+='<div class="eact"><button class="btn sm" onclick="edRemSave('+i+',\''+r.id+'\')">บันทึก</button>'
     +'<button class="btn sm ghost" onclick="edRem('+i+')">ยกเลิก</button></div></div>';
   el.innerHTML=h;
 }
+function dwTog(b){var on=b.getAttribute("aria-pressed")==="true";b.setAttribute("aria-pressed",on?"false":"true");b.className="btn sm"+(on?" ghost":"")}
+function repChg(sel,i){var box=$("#rdw"+i);if(box)box.style.display=(sel.value==="days")?"":"none"}
 async function edRemSave(i,id){
   var tx=$("#rt"+i).value.trim(),val=$("#rd"+i).value,rp=$("#rr"+i);
   if(!tx){toast("ใส่ชื่อนัดด้วยนะ");return}
   if(!val){toast("เลือกวันเวลาก่อนนะ");return}
   var p={id:id,text:tx,remind_at:wallUtc(val.slice(0,10),val.slice(11,16)).toISOString()};
-  if(rp&&!rp.disabled)p.repeat=rp.value;
+  if(rp&&!rp.disabled){
+    if(rp.value==="days"){
+      var picked=[],bs=document.querySelectorAll("#rdw"+i+" button[aria-pressed='true']");
+      for(var z=0;z<bs.length;z++)picked.push(bs[z].getAttribute("data-d"));
+      picked.sort();
+      if(!picked.length){toast("เลือกวันอย่างน้อย 1 วันนะ");return} /* ไม่เลือกเลย = ไม่มีวันเตือน ห้ามบันทึก */
+      p.repeat="days:"+picked.join("");
+    }else p.repeat=rp.value;
+  }
   try{
     var r=await api("reminder.update",p);
     if(r&&r.ok===false){toast("แก้ไม่ได้ (นัดนี้อาจถูกเตือนไปแล้ว)");return}
@@ -2425,6 +2453,7 @@ function dossInit(){
   /* renudge ใน DB เป็น boolean แต่ปุ่มส่งกลับมาเป็นสตริงเสมอ — แปลงตั้งแต่โหลด
      ไม่งั้นคนที่เคยตั้งไว้เปิดหน้ามาเห็น "ยังไม่ได้เลือก" ทั้งที่ค่าจริงมีอยู่ */
   DF.renudge=(p.renudge===false?"false":"true"); /* ค่าตั้งต้นของระบบคือเปิด — โชว์ให้ตรงกับที่ทำงานอยู่จริง */
+  DF.auto_pre_remind=(p.auto_pre_remind===false?"false":"true"); /* 269 — ท่าเดียวกับ renudge เป๊ะ */
 }
 /* ช่องที่ฝั่ง server บอกว่ายังไม่ได้คำตอบจากลูกค้า — ใช้ไฮไลต์ให้เห็นว่าเหลืออะไร
    ค่า default ที่ระบบใส่ให้ (สรุปเช้า 8 โมง ฯลฯ) นับเป็น "ยังไม่ตอบ" ตามกฎฝั่ง server */
@@ -2517,7 +2546,7 @@ function dGo(n){dStash();DPAGE=n;draw();window.scrollTo(0,0)}
 function dBlanks(page){
   var need=(page===1)
     ?["call_me","birth_date","city","province","country","occupation","org_name","business_story","work_pain","routine_work","work_start","work_end","age_range","language"]
-    :["brief_hour","report_hour","quiet_from","quiet_to","reply_style","renudge","marital_status","goal_work","goal_life","likes","fortune_focus","default_scope","do_not_remember"];
+    :["brief_hour","report_hour","quiet_from","quiet_to","reply_style","renudge","auto_pre_remind","marital_status","goal_work","goal_life","likes","fortune_focus","default_scope","do_not_remember"];
   var n=0,i;
   for(i=0;i<need.length;i++){var v=DF[need[i]];if(v===null||v===undefined||v==="")n++}
   if(page===1&&!(DF.days_off||[]).length)n++;
@@ -2635,6 +2664,9 @@ function vDossier(){
     h+='<div class="l" style="margin-top:4px">ช่วงนี้เลขาจะไม่เสนอเวลานัด/เวลาเตือนให้เลย</div>';
     h+=dLb('reply_style','ชอบให้ตอบแบบไหน')+dSeg("reply_style",[["short","สั้น กระชับ"],["detail","อธิบายละเอียด"]]);
     h+='<label class="f">🔁 เตือนซ้ำเมื่อไม่กดรับ</label>'+dSeg("renudge",[[true,"จิกจนเสร็จ"],[false,"เตือนครั้งเดียวพอ"]]);
+    /* 🔕 269 · ตั๋วเปเล่: เดิมแถมให้ทุกนัดโดยไม่มีทางปิด ลูกค้าหาไม่เจอจนต้องเปิดตั๋ว */
+    h+='<label class="f">🔔 เตือนล่วงหน้า 1 ชม. ก่อนนัด</label>'+dSeg("auto_pre_remind",[[true,"แถมให้อัตโนมัติ"],[false,"ไม่ต้องแถม"]]);
+    h+='<div class="l" style="margin-top:4px">ปิดไว้ก็ยังสั่งเป็นครั้งๆ ได้ เช่น "เตือนล่วงหน้า 30 นาที ก่อนนัด ประชุม"</div>';
     h+='</div>';
 
     /* ── D ส่วนตัว + คนสำคัญ ── */
@@ -2705,6 +2737,7 @@ function dPayload(){
     brief_hour:DF.brief_hour,report_hour:DF.report_hour,quiet_from:DF.quiet_from,quiet_to:DF.quiet_to,
     work_start:DF.work_start,work_end:DF.work_end,
     renudge:(DF.renudge===true||DF.renudge==="true"),
+    auto_pre_remind:(DF.auto_pre_remind===true||DF.auto_pre_remind==="true"),
     /* คำตอบปลายเปิด -> เข้าคลังความจำ (ฝั่ง server สกัดเป็น fact ให้ คนละ attribute จึงไม่ทับกัน) */
     business_story:DF.business_story||"",work_pain:DF.work_pain||"",routine_work:DF.routine_work||"",
     goal_work:DF.goal_work||"",goal_life:DF.goal_life||"",likes:DF.likes||""
@@ -3569,7 +3602,7 @@ function pdZoomOut(){pdZSeq++;var sc=pg("pdscene"),cu=pg("pdcu");cu.classList.re
 function pdPaint(){var d=pg("pddots").children;for(var i=0;i<6;i++){d[i].className=i<PD.buf.length?"pddotf":""}}
 function pdKeysOn(on){var b=pg("pdkeys").querySelectorAll("button");for(var i=0;i<b.length;i++){b[i].disabled=!on}}
 async function pinApi(action,payload){
-  var r=await fetch("https://eeascfxgfmzlqvirjdua.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
+  var r=await fetch("https://yeojpaardjgcgbwpmjsg.supabase.co/functions/v1/webhook?api=1",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idToken:IDT,action:action,payload:payload||{},pinToken:PINTOK||undefined})});
   if(r.status===401){relogin();return{error:"relogin",__st:401}}
   var j={};try{j=await r.json()}catch(e){}
   j.__st=r.status;return j;
