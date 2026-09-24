@@ -1292,10 +1292,27 @@ async function fortune(){
     else{toast("เปิดในแอป LINE เพื่อดูดวงนะ")}
   }catch(e){try{liff.closeWindow()}catch(_e){toast("พิมพ์ \"ดูดวงวันนี้\" ในแชตได้เลย")}}
 }
+/* 🌙 กันเวลากลางดึกที่มาจากการกดผิดครึ่งวัน — ตั๋ว ffb1fb08 (คุณแนน 22 ก.ย. 69): ลงนัดเป็น "ตี 1 ครึ่ง"
+   แทน "บ่ายโมงครึ่ง" แล้วหาทางแก้ไม่เจอ สุดท้ายโดนปลุกตอนตี 1 ครึ่งจริง
+   ไม่ใช้ confirm() (คนกดผ่านโดยไม่อ่าน — บทเรียนเดียวกับปุ่มลบ) แค่ขึ้นบรรทัดบอกตรงๆ ว่าที่เลือกคือกลางดึก
+   พร้อมบอกเวลาที่น่าจะหมายถึง ให้ตัดสินใจเองก่อนกดบันทึก */
+function nightHint(hm){
+  var h=parseInt(String(hm||"").slice(0,2),10),mm=String(hm||"").slice(3,5);
+  if(isNaN(h)||h>=5||!/^\d{2}$/.test(mm))return "";
+  var alt=h+12;
+  return '⚠️ '+(h===0?"เที่ยงคืน":"ตี "+h)+(mm!=="00"?" "+mm+" นาที":"")+' (กลางดึก) — ถ้าหมายถึงตอนบ่าย เลือก '+(alt<10?"0":"")+alt+':'+mm+' นะ';
+}
+function nightWarn(inputId,boxId,pick){
+  var i=$("#"+inputId),b=$("#"+boxId);if(!i||!b)return;
+  var t=pick?pick(i.value):i.value;
+  var msg=nightHint(t);
+  b.textContent=msg;b.style.display=msg?"block":"none";
+}
 function apptAdd(iso){
   var h='<button class="btn ghost sm" style="width:100%;margin-top:10px" onclick="toggleAppt()">➕ เพิ่มนัด '+thDate(iso)+'</button>';
   h+='<div id="apform" style="display:none;margin-top:9px"><input id="ap_txt" placeholder="นัดอะไร เช่น เจอลูกค้าสมชาย" style="margin:0 0 8px" maxlength="200">';
-  h+='<div style="display:flex;gap:8px;align-items:center"><input id="ap_time" type="time" value="09:00" style="margin:0;flex:1"><button class="btn sm" onclick="saveAppt(\''+iso+'\')">บันทึก</button></div></div>';
+  h+='<div style="display:flex;gap:8px;align-items:center"><input id="ap_time" type="time" value="09:00" style="margin:0;flex:1" onchange="nightWarn(\'ap_time\',\'ap_warn\')" oninput="nightWarn(\'ap_time\',\'ap_warn\')"><button class="btn sm" onclick="saveAppt(\''+iso+'\')">บันทึก</button></div>';
+  h+='<div id="ap_warn" class="l" style="display:none;margin-top:6px;color:var(--brand-ink);font-weight:700"></div></div>';
   return h;
 }
 function toggleAppt(){var f=$("#apform");if(f){f.style.display=f.style.display==="none"?"block":"none";var t=$("#ap_txt");if(t&&f.style.display==="block"){t.focus()}}}
@@ -1747,7 +1764,8 @@ function edRem(i){
   var repSel=curDays?"days":(r.repeat||"none");
   var pro=mIsPro(),h='<div class="edit">';
   h+='<label class="f" for="rt'+i+'">ชื่อนัด</label><input id="rt'+i+'" maxlength="300" value="'+esc(r.reminder_text)+'">';
-  h+='<label class="f" for="rd'+i+'">วันเวลา</label><input type="datetime-local" id="rd'+i+'" value="'+esc(lo)+'">';
+  h+='<label class="f" for="rd'+i+'">วันเวลา</label><input type="datetime-local" id="rd'+i+'" value="'+esc(lo)+'" onchange="nightWarn(\'rd'+i+'\',\'rw'+i+'\',function(v){return String(v).slice(11,16)})" oninput="nightWarn(\'rd'+i+'\',\'rw'+i+'\',function(v){return String(v).slice(11,16)})">';
+  h+='<div id="rw'+i+'" class="l" style="display:none;margin-top:4px;color:var(--brand-ink);font-weight:700"></div>';
   h+='<label class="f" for="rr'+i+'">เตือนซ้ำ'+(pro?"":" 🔒 Pro")+'</label><select id="rr'+i+'" onchange="repChg(this,'+i+')"'+(pro?"":" disabled")+'>';
   for(var q=0;q<REP.length;q++){h+='<option value="'+REP[q][0]+'"'+(repSel===REP[q][0]?" selected":"")+'>'+REP[q][1]+'</option>'}
   h+='</select>';
