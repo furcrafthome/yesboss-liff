@@ -2828,7 +2828,7 @@ function vMe(){
   h+='<label class="f">🔁 เตือนซ้ำเมื่อไม่กดรับ</label><div class="seg" id="pf_rn">';
   h+='<button class="'+(pr.renudge!==false?"on":"")+'" onclick="pickRn(this,true)">เปิด (แนะนำ)</button>';
   h+='<button class="'+(pr.renudge===false?"on":"")+'" onclick="pickRn(this,false)">ปิด</button></div>';
-  h+='<div class="l" style="margin-top:4px">ถึงเวลานัดแล้วยังไม่กด "เสร็จแล้ว ✓" เลขาจะเตือนซ้ำให้ที่ +5 และ +15 นาที</div>';
+  h+='<div class="l" style="margin-top:4px">ถึงเวลานัดแล้วยังไม่กด "เสร็จแล้ว ✓" เลขาจะเตือนซ้ำให้ (แพ็กฟรี 1 รอบที่ +15 นาที · Pro ตามที่ +5 / +15 / +30 นาทีจนกว่าจะกดรับ)</div>';
   h+='<button class="btn" style="width:100%;margin-top:16px" onclick="saveProfile()">บันทึกโปรไฟล์</button>';
   h+='</div>';
   var plan=(pr.plan&&pr.plan!=="free")?pr.plan.toUpperCase():"ฟรี";
