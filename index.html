@@ -824,7 +824,7 @@ var TOUR=[
   {img:"img/p07-desk-work.webp",t:"📁 คลังไฟล์ส่วนตัว",s:"ส่งมาเก็บ เรียกคืนได้ทุกเมื่อ ไม่มีวันหาย",u:"ขอใบเสนอราคาร้าน A หน่อย",b:"นี่เลย 👇<br>📄 ใบเสนอราคา-ร้านA.pdf",x:"มีไฟล์อะไรบ้าง",pts:["ส่งไฟล์ รูป เอกสาร มาเก็บได้เลยในแชต","ขอคืนด้วยชื่อไฟล์ เลขาหาให้ทันที","จัดเป็นโฟลเดอร์ได้ เหมือนมีตู้เอกสาร"]},
   {img:"img/p02-giggle-hearts.webp",t:"🔮 ดูดวง ไพ่ เบอร์มงคล",s:"เรื่องดวงยกให้เลขาดูแล",u:"ดูดวง",b:"วันนี้การงานเด่นมาก 💼✨<br>สีมงคล: ชมพู เลขนำโชค: 9",x:"ดูดวง",pts:["ดวงราศีรายวัน อัปเดตทุกเช้า","เปิดไพ่ทาโรต์ ถามเรื่องที่ค้างคาใจ","เช็คเบอร์มงคลตามวันเกิดของบอส"]},
   {img:"img/p10-heart.webp",t:"💛 ฮีลใจยามเหนื่อย",s:"เหนื่อยมาระบายได้ เลขาอยู่ตรงนี้เสมอ",u:"วันนี้เหนื่อยมากเลย",b:"เหนื่อยมากเลยเนอะ 🤍<br>เล่าให้ฟังได้นะ อยู่ตรงนี้แล้ว",x:"ขอกำลังใจหน่อย",pts:["ระบายได้ทุกเวลา ไม่ตัดสิน ไม่สั่งสอน","มี “ห้องพักใจ” เกมชาร์จพลังใจในแอป","เรื่องที่ระบายไม่ถูกเก็บบันทึกไว้"]},
-  {img:"img/p13-sofa-relax.webp",t:"🌙 สรุปให้ทุกเช้า-เย็น",s:"ไม่ต้องถามก็ได้ เลขาสรุปมาให้เอง",u:"สรุปวันนี้",b:"วันนี้: นัด 2 · งานค้าง 3<br>ใช้ไป 240.- เคลียร์ต่อพรุ่งนี้ 💪",x:"สรุปวันนี้",pts:["เช้าบรีฟงานวันนี้ เย็นสรุป + งานพรุ่งนี้","เลือกเวลาส่งที่บอสสะดวกได้","งาน นัด เงิน ครบจบในข้อความเดียว"]},
+  {img:"img/p13-sofa-relax.webp",t:"🌙 สรุปเช้า-เย็น",s:"ส่งเองอัตโนมัติ = Pro · แพ็กฟรีพิมพ์ \"สรุปวันนี้\" ขอเองได้ทุกวัน",u:"สรุปวันนี้",b:"วันนี้: นัด 2 · งานค้าง 3<br>ใช้ไป 240.- เคลียร์ต่อพรุ่งนี้ 💪",x:"สรุปวันนี้",pts:["เช้าบรีฟงานวันนี้ เย็นสรุป + งานพรุ่งนี้","เลือกเวลาส่งที่บอสสะดวกได้","งาน นัด เงิน ครบจบในข้อความเดียว"]},
   {img:"img/p05-megaphone.webp",t:"👥 เลขาในกลุ่ม LINE",s:"เตือนทั้งทีม/ครอบครัว พร้อมกันทั้งกลุ่ม",u:"บอส เตือนพรุ่งนี้ 9 โมง ประชุมทีม",b:"รับทราบ! 📌 พรุ่งนี้ 09:00<br>เตือนทุกคนในกลุ่มแน่นอน",x:"บอส เตือนพรุ่งนี้ 9 โมง ประชุมทีม",pts:["① แอดเลขาเป็นเพื่อน (บอสทำแล้ว ✓)","② เปิดกลุ่ม → เมนู ≡ → สมาชิก → เชิญ → เลือก YES, BOSS!","③ พิมพ์ “บอส เตือน...” ในกลุ่ม — เตือนครั้งเดียว/ประกาศ ฟรี","⚠️ กลุ่มต้องไม่มีบอทตัวอื่นอยู่ (กฎของ LINE: บอทอยู่ได้กลุ่มละ 1 ตัว)"]}
 ];
 /* ทางเดินใหม่ 3 จอ: ยินยอม -> เลือกเลขา -> ชื่อ+อยากลองอะไร -> (จอ 4) สำเร็จจริง
@@ -2460,7 +2460,7 @@ var DOW_OPTS=[[0,"อา"],[1,"จ"],[2,"อ"],[3,"พ"],[4,"พฤ"],[5,"ศ"],
 function dossInit(){
   var p=DATA.profile||{},k,i;
   DF={};
-  var keys=["call_me","city","province","country","age_range","language","birth_date","occupation","org_name",
+  var keys=["call_me","group_call_me","city","province","country","age_range","language","birth_date","occupation","org_name",
             "reply_style","marital_status","default_scope","fortune_focus","do_not_remember",
             "brief_hour","report_hour","quiet_from","quiet_to","work_start","work_end"];
   for(i=0;i<keys.length;i++){k=keys[i];DF[k]=(p[k]===undefined?null:p[k])}
@@ -2547,7 +2547,7 @@ var DPAGE=1;
 /* ช่องพิมพ์ทั้งหมด: id ในหน้า -> คีย์ใน DF · ใช้ทั้งตอนสลับหน้าและตอนบันทึก
    ⚠️ สลับหน้า = DOM ชุดเดิมถูกทิ้ง ต้องกวาดค่าลง DF ก่อนทุกครั้ง ไม่งั้นที่พิมพ์ไว้หายเกลี้ยง */
 var DTXT={
-  1:{d_call:"call_me",d_birth:"birth_date",d_city:"city",d_prov:"province",d_ctry:"country",
+  1:{d_call:"call_me",d_gcall:"group_call_me",d_birth:"birth_date",d_city:"city",d_prov:"province",d_ctry:"country",
      d_oc:"occupation",d_org:"org_name",d_bz:"business_story",d_pain:"work_pain",d_rout:"routine_work"},
   2:{d_gw:"goal_work",d_gl:"goal_life",d_like:"likes",d_ff:"fortune_focus",d_no:"do_not_remember"}
 };
@@ -2646,6 +2646,9 @@ function vDossier(){
     h+='<div class="dsec">🧑 บอสเป็นใคร</div><div class="dwhy">เรียกให้ถูกปาก และรู้ว่าบอสอยู่ที่ไหน</div>';
     h+='<div class="card">';
     h+=dLb('call_me','อยากให้เลขาเรียกว่าอะไร')+'<input id="d_call" maxlength="30" value="'+esc(DF.call_me||"")+'" placeholder="เช่น พี่บีม, เฮีย, คุณหมอ">';
+    h+='<div class="l" style="margin-top:4px">คำนี้ใช้คุยกันสองคนเท่านั้น ไม่เอาไปพูดในกลุ่ม</div>';
+    h+=dLb('group_call_me','ชื่อที่ให้เลขาเรียกตอนอยู่ในกลุ่ม')+'<input id="d_gcall" maxlength="30" value="'+esc(DF.group_call_me||"")+'" placeholder="เช่น พี่บีม (คนในกลุ่มเห็น)">';
+    h+='<div class="l" style="margin-top:4px">ตั้งไว้แล้ว ครั้งแรกที่มีคนเรียกเลขาในกลุ่มที่คุณพาเข้าไป เลขาจะแนะนำตัวว่า "เป็นเลขาของ___" ให้ครั้งเดียว</div>';
     h+=dLb('birth_date','วันเกิด')+'<input id="d_birth" type="date" value="'+esc(DF.birth_date||pr.birth_date||"")+'">';
     h+='<div class="l" style="margin-top:4px">ไว้อวยพร + ดูดวง/เลขมงคล</div>';
     h+=dLb('city','เมือง / อำเภอ')+'<input id="d_city" maxlength="40" value="'+esc(DF.city||"")+'" placeholder="เช่น หางดง">';
@@ -2745,7 +2748,7 @@ function dValN(id){var e=$(id);return(e&&e.value!=="")?Number(e.value):null}
    ต้องอ่านจาก DF ล้วน ไม่แตะ DOM — เพราะตอนบันทึก ช่องของหน้า 1 ไม่อยู่บนจอแล้ว */
 function dPayload(){
   return {
-    call_me:DF.call_me||"",occupation:DF.occupation||"",org_name:DF.org_name||"",
+    call_me:DF.call_me||"",group_call_me:DF.group_call_me||"",occupation:DF.occupation||"",org_name:DF.org_name||"",
     city:DF.city||"",province:DF.province||"",country:DF.country||"",
     fortune_focus:DF.fortune_focus||"",do_not_remember:DF.do_not_remember||"",
     birth_date:DF.birth_date||"",
